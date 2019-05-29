@@ -2,7 +2,6 @@
 node_modules
 /dist
 
-embed.user.js
 embed.min.js
 # local env files
 .env.local
