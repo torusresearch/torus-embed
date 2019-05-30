@@ -26,14 +26,14 @@ Torus has been designed for gradual adoption from the start. You can use Torus a
   - use torus only if user agrees to (selecting from a choice of providers)
   - use torus as default if no other web3 providers are present
 
-  Please refer to examples folder for details on usage using dynamic import
+  Please refer to [examples](examples) folder for details on usage using dynamic import
 
 ## Documentation
 
 Torus uses <i>window.sessionStorage</i> to store user details
 So, if user reloads the page, all his data would be rehydrated and the user doesn't need to login
 
-These cases are demonstrated in the samples provided in the examples folder
+These cases are demonstrated in the samples provided in the [examples](examples) folder
 
 ## What you need to build your own
 
