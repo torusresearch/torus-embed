@@ -1,3 +1,5 @@
+examples
+secrets.json
 .DS_Store
 node_modules
 /dist
@@ -23,5 +25,9 @@ yarn-error.log*
 
 disc.html
 
-secrets.json
 .vscode
+.editorconfig
+public
+scripts
+test
+.eslintrc.json

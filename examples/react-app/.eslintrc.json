@@ -1,0 +1,30 @@
+{
+  "extends": ["airbnb", "react-app"],
+  "rules": {
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx"]
+      }
+    ],
+    "max-len": [
+      2,
+      {
+        "code": 150
+      }
+    ],
+    "react/sort-comp": 0,
+    "camelcase": 0,
+    "no-console": 0,
+    "import/prefer-default-export": 0,
+    "no-nested-ternary": 0,
+    "no-confusing-arrow": 0,
+    "linebreak-style": 0,
+    "no-param-reassign": [
+      "error",
+      {
+        "props": false
+      }
+    ]
+  }
+}

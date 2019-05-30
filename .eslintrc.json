@@ -4,12 +4,6 @@
   "parserOptions": {
     "sourceType": "module"
   },
-  "overrides": [
-    {
-      "files": ["*/vendor/*"],
-      "excludedFiles": "*"
-    }
-  ],
   "rules": {
     "quotes": [2, "single"],
     "max-len": [

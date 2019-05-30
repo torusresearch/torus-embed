@@ -3,18 +3,17 @@ console.log('TORUS INJECTED IN', window.location.href)
 
 let torusUrl
 let logLevel
+let Web3 = require('web3')
+window.Web3 = Web3
 
 /* global Web3 */
-if (process.env.NODE_ENV === 'production') {
-  require('./vendor/web3.min.js')
-  torusUrl = 'https://app.tor.us'
-  logLevel = 'error'
-} else if (process.env.NODE_ENV === 'staging') {
-  require('./vendor/web3.min.js')
+torusUrl = 'https://app.tor.us'
+logLevel = 'error'
+
+if (process.env.TORUS_BUILD_ENV === 'staging') {
   torusUrl = 'https://staging.tor.us'
   logLevel = 'info'
-} else if (process.env.NODE_ENV === 'development') {
-  require('./vendor/web3.js')
+} else if (process.env.TORUS_BUILD_ENV === 'development') {
   torusUrl = 'https://localhost:3000'
   logLevel = 'debug'
 }
