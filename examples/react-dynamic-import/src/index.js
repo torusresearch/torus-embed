@@ -7,7 +7,7 @@ import web3Obj from "./helper";
 const isTorus = sessionStorage.getItem("pageUsingTorus");
 
 if (isTorus === "true") {
-  import("@toruslabs/torus-embed/src/embed.js").then(() => {
+  import("@toruslabs/torus-embed").then(() => {
     console.log("rehydrated Torus");
     web3Obj.setweb3();
     // set store accounts from here ideally

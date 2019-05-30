@@ -35,7 +35,7 @@ class App extends React.Component {
   };
 
   importTorus = () => {
-    import("@toruslabs/torus-embed/src/embed.js").then(this.enableTorus);
+    import("@toruslabs/torus-embed").then(this.enableTorus);
   };
 
   render() {
