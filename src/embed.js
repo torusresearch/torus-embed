@@ -250,7 +250,7 @@ function setupWeb3() {
   }
 
   if (typeof window.web3 !== 'undefined') {
-    throw new Error(`Torus detected another web3.
+    console.log(`Torus detected another web3.
       Torus will not work reliably with another web3 extension.
       This usually happens if you have two Torus' installed,
       or Torus and another web3 extension. Please remove one

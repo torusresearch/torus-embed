@@ -14,7 +14,7 @@ class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.account !== this.state.account) {
+    if (this.state.account && this.state.account !== "" && prevState.account !== this.state.account) {
       web3.eth.getBalance(this.state.account).then(balance => {
         this.setState({ balance: web3.utils.fromWei(balance) });
       });
