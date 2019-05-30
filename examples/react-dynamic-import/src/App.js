@@ -1,6 +1,5 @@
 import React from "react";
 import web3Obj from "./helper";
-import Web3 from "web3";
 
 class App extends React.Component {
   state = {
@@ -9,11 +8,14 @@ class App extends React.Component {
   };
 
   componentDidMount() {
-    if (window.web3) {
-      web3Obj.web3.eth.getAccounts().then(accounts => {
-        this.setState({ account: accounts[0] });
-      });
-    }
+    // if not using store
+    setTimeout(() => {
+      if (window.web3) {
+        web3Obj.web3.eth.getAccounts().then(accounts => {
+          this.setState({ account: accounts[0] });
+        });
+      }
+    }, 1000);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -25,9 +27,9 @@ class App extends React.Component {
   }
 
   enableTorus = () => {
-    const web3Inst = new Web3(window.web3.currentProvider || "ws://localhost:8546", null, {});
-    web3Obj.web3 = web3Inst;
+    web3Obj.setweb3();
     window.ethereum.enable().then(accounts => {
+      // update store here ideally
       this.setState({ account: accounts[0] });
     });
   };
