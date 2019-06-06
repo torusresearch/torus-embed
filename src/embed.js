@@ -4,8 +4,10 @@ console.log('TORUS INJECTED IN', window.location.href)
 let torusUrl
 let logLevel
 let Web3 = require('web3')
+const sriToolbox = require('sri-toolbox')
 window.Web3 = Web3
 
+const iframeIntegrity = 'sha384-GFNooNudFiA2crkCsG19pCZQHG5ntnq6l7kqlGxwkw01cKaa8dl+vR3CC8kutTr4'
 /* global Web3 */
 torusUrl = 'https://app.tor.us'
 logLevel = 'error'
@@ -36,10 +38,38 @@ if (window.document.currentScript) {
 
 var torusWidget, torusMenuBtn, torusLogin, torusIframe
 
+if (process.env.TORUS_BUILD_ENV !== 'staging' && process.env.TORUS_BUILD_ENV !== 'development') {
+  // hacky solution to check for iframe integrity
+  const fetchUrl = torusUrl + '/index.html'
+  global.window
+    .fetch(fetchUrl)
+    .then(resp => resp.text())
+    .then(response => {
+      const integrity = sriToolbox.generate(
+        {
+          algorithms: ['sha384']
+        },
+        response
+      )
+      console.log(integrity)
+      if (integrity === iframeIntegrity) integritySuccess()
+      else integrityFailed()
+    })
+} else {
+  integritySuccess()
+}
+
+function integrityFailed() {
+  console.log('integrity check failed', arguments)
+}
+
+function integritySuccess() {
+  console.log('integrity check success')
+  embedUtils.runOnLoad(setupWeb3)
+}
+
 restoreContextAfterImports()
 createWidget()
-embedUtils.runOnLoad(setupWeb3)
-
 /**
  * Create widget
  */
@@ -248,7 +278,6 @@ function setupWeb3() {
     var showWalletStream = window.torus.communicationMux.getStream('show_wallet')
     showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
   }
-
   if (typeof window.web3 !== 'undefined') {
     console.log(`Torus detected another web3.
       Torus will not work reliably with another web3 extension.

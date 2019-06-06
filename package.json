@@ -10,10 +10,10 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build": "npm run build-embed:production && npm run pre-build",
+    "build": "cross-env TORUS_BUILD_ENV=production npm run build-embed:production && npm run pre-build",
     "build:staging": "cross-env TORUS_BUILD_ENV=staging npm run build-embed:staging && npm run pre-build",
     "build:dev": "cross-env TORUS_BUILD_ENV=development npm run build-embed:dev && npm run pre-build",
-    "build-embed:production": "node ./scripts/createEmbed.js && npm run test:build-embed",
+    "build-embed:production": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js && npm run test:build-embed",
     "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js && npm run test:build-embed",
     "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js && npm run test:build-embed",
     "lint:es": "eslint ./src/views/* --fix",
@@ -26,11 +26,12 @@
     "buffer": "^5.2.1",
     "json-rpc-engine": "^5.0.0",
     "json-rpc-middleware-stream": "^2.1.1",
-    "loglevel": "^1.6.1",
+    "loglevel": "^1.6.2",
     "obj-multiplex": "^1.0.0",
     "obs-store": "^4.0.2",
     "post-message-stream": "^3.0.0",
     "readable-stream": "^3.4.0",
+    "sri-toolbox": "^0.2.0",
     "through2": "^3.0.1",
     "web3": "0.20.7"
   },
@@ -58,7 +59,6 @@
     "mock-browser": "^0.92.14",
     "prettier": "^1.17.1",
     "puppeteer": "^1.17.0",
-    "sri-toolbox": "^0.2.0",
     "uglifyify": "^5.0.1"
   },
   "mocha": {
