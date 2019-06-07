@@ -5,7 +5,7 @@ const path = require('path')
 describe('# Web3 Test', function() {
   describe('#constructor', function() {
     it('can construct web3', async function() {
-      const browser = await puppeteer.launch({ headless: true })
+      const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] })
       const page = await browser.newPage()
       await page.addScriptTag({ path: path.resolve(__dirname, '../../public/embed.min.js') })
       await sleep(5000)
