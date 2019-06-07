@@ -67,7 +67,7 @@ jobs:
     <<: *job_common
     steps:
       - attach_workspace:
-          at: torus-embed
+          at: ~/torus-embed
       - add_ssh_keys
       - run:
           name: "publish npm package"
@@ -78,12 +78,11 @@ workflows:
   version: 2
   commit:
     jobs:
-      - unit-test
+      - unit-test:
+          requires:
+            - build
       - build:
           filters:
-            branches:
-              only:
-                - master
             tags:
               only: /^v.*/
       - deploy:
@@ -96,7 +95,7 @@ workflows:
                 - master
       - publish-npm:
           requires:
-            - deploy
+            - build
           filters:
             branches:
               ignore: /.*/
