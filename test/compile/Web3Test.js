@@ -10,10 +10,10 @@ describe('# Web3 Test', function() {
       await page.addScriptTag({ path: path.resolve(__dirname, '../../public/embed.min.js') })
       await sleep(5000)
       try {
-        await page.waitForFunction('window.web3.currentProvider.isTorus === true', { timeout: 30000 })
+        await page.waitForFunction('((window.web3||{}).currentProvider||{}).isTorus === true', { timeout: 30000 })
         assert.ok('Passed')
       } catch (e) {
-        assert.fail('Failed')
+        assert.fail('Failed: ', e)
       }
     })
   })
