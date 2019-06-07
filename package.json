@@ -17,10 +17,11 @@
     "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js && npm run test:build-embed",
     "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js && npm run test:build-embed",
     "lint:es": "eslint ./src/views/* --fix",
-    "pre-build": "node ./scripts/calculateIntegrity.js",
+    "pre-build": ". ./scripts/calculateIntegrity.sh",
     "test:e2e": "node ./test/e2e/puppeteer.js",
     "test:e2e:headful": "node ./test/e2e/puppeteer.js false",
-    "test:build-embed": "mocha --exit ./test/compile/Web3Test.js"
+    "test:build-embed": "mocha --exit ./test/compile/Web3Test.js",
+    "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
     "buffer": "^5.2.1",

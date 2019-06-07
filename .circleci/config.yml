@@ -1,0 +1,112 @@
+version: 2
+job_common: &job_common
+  docker:
+    - image: overmorrow/nodext:latest
+  working_directory: ~/torus-embed
+step_save_cache: &step_save_cache
+  save_cache:
+    key: dependency-cache-{{ checksum "package.json" }}
+    paths:
+      - node_modules
+step_restore_cache: &step_restore_cache
+  restore_cache:
+    key: dependency-cache-{{ checksum "package.json" }}
+step_setup_global_packages: &step_setup_global_packages
+  run:
+    name: "Set up global packages"
+    command: |
+      npm install
+
+jobs:
+  build:
+    <<: *job_common
+    steps:
+      - checkout:
+          path: ~/torus-embed
+      - <<: *step_restore_cache
+      - <<: *step_setup_global_packages
+      - run:
+          name: "Build code for torus embed"
+          command: |
+            npm run build
+      - persist_to_workspace:
+          root: ~/torus-embed
+          paths: .
+      - <<: *step_save_cache
+  unit-test:
+    <<: *job_common
+    steps:
+      - attach_workspace:
+          at: ~/torus-embed
+      - run:
+          name: "Run Tests for torus embed"
+          command: |
+            npm run test:e2e
+  deploy:
+    <<: *job_common
+    steps:
+      - attach_workspace:
+          at: ~/torus-embed
+      - add_ssh_keys
+      - run:
+          name: "Deploy Over SSH to AWS"
+          command: |
+            . ./scripts/uploadToAws.sh
+  update-gist:
+    <<: *job_common
+    steps:
+      - attach_workspace:
+          at: ~/torus-embed
+      - add_ssh_keys
+      - run:
+          name: "Deploy Over SSH"
+          command: |
+            ssh-keyscan -H gist.github.com >> ~/.ssh/known_hosts
+            . ./scripts/updateGistIntegrity.sh
+  publish-npm:
+    <<: *job_common
+    steps:
+      - attach_workspace:
+          at: torus-embed
+      - add_ssh_keys
+      - run:
+          name: "publish npm package"
+          command: |
+            . ./scripts/publishnpm.sh
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - unit-test
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+            tags:
+              only: /^v.*/
+      - deploy:
+          requires:
+            - build
+            - unit-test
+          filters:
+            branches:
+              only:
+                - master
+      - publish-npm:
+          requires:
+            - deploy
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - update-gist:
+          requires:
+            - build
+            - unit-test
+          filters:
+            branches:
+              only:
+                - master
