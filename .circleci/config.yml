@@ -33,15 +33,6 @@ jobs:
           root: ~/torus-embed
           paths: .
       - <<: *step_save_cache
-  unit-test:
-    <<: *job_common
-    steps:
-      - attach_workspace:
-          at: ~/torus-embed
-      - run:
-          name: "Run Tests for torus embed"
-          command: |
-            npm run test:e2e
   deploy:
     <<: *job_common
     steps:
@@ -78,9 +69,6 @@ workflows:
   version: 2
   commit:
     jobs:
-      - unit-test:
-          requires:
-            - build
       - build:
           filters:
             tags:
@@ -88,7 +76,6 @@ workflows:
       - deploy:
           requires:
             - build
-            - unit-test
           filters:
             branches:
               only:
@@ -104,7 +91,6 @@ workflows:
       - update-gist:
           requires:
             - build
-            - unit-test
           filters:
             branches:
               only:
