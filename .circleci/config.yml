@@ -1,7 +1,7 @@
 version: 2
 job_common: &job_common
   docker:
-    - image: overmorrow/nodext:latest
+    - image: skyuppercut/node-puppeteer:latest
   working_directory: ~/torus-embed
 step_save_cache: &step_save_cache
   save_cache:
