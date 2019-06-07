@@ -52,6 +52,7 @@ jobs:
       - run:
           name: "Deploy Over SSH"
           command: |
+            mkdir -p ~/.ssh
             ssh-keyscan -H gist.github.com >> ~/.ssh/known_hosts
             . ./scripts/updateGistIntegrity.sh
   publish-npm:
