@@ -38,6 +38,9 @@ if (window.document.currentScript) {
 
 var torusWidget, torusMenuBtn, torusLogin, torusIframe
 
+restoreContextAfterImports()
+createWidget()
+
 if (process.env.TORUS_BUILD_ENV !== 'staging' && process.env.TORUS_BUILD_ENV !== 'development') {
   // hacky solution to check for iframe integrity
   const fetchUrl = torusUrl + '/index.html'
@@ -67,9 +70,6 @@ function integritySuccess() {
   console.log('integrity check success')
   embedUtils.runOnLoad(setupWeb3)
 }
-
-restoreContextAfterImports()
-createWidget()
 /**
  * Create widget
  */
