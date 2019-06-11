@@ -64,6 +64,8 @@ if (process.env.TORUS_BUILD_ENV !== 'staging' && process.env.TORUS_BUILD_ENV !==
 
 function integrityFailed() {
   console.log('integrity check failed', arguments)
+  torusLogin.style.display = 'none'
+  torusMenuBtn.style.display = 'none'
 }
 
 function integritySuccess() {
