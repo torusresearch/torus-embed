@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.0.7",
+  "version": "0.0.6",
   "description": "Embed script for Torus",
   "directories": {
     "test": "test"
@@ -13,7 +13,7 @@
     "build": "cross-env TORUS_BUILD_ENV=production npm run build-embed:production && npm run pre-build",
     "build:staging": "cross-env TORUS_BUILD_ENV=staging npm run build-embed:staging && npm run pre-build",
     "build:dev": "cross-env TORUS_BUILD_ENV=development npm run build-embed:dev && npm run pre-build",
-    "build-embed:production": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js && npm run test:build-embed",
+    "build-embed:production": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
     "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js && npm run test:build-embed",
     "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js && npm run test:build-embed",
     "lint:es": "eslint ./src/views/* --fix",
