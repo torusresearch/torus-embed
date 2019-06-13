@@ -16,7 +16,16 @@ step_setup_global_packages: &step_setup_global_packages
     name: "Set up global packages"
     command: |
       npm install
-
+deploy_function: &deploy_function
+  <<: *job_common
+  steps:
+    - attach_workspace:
+        at: ~/torus-embed
+    - add_ssh_keys
+    - run:
+        name: "Deploy Over SSH to AWS"
+        command: |
+          . ./scripts/uploadToAws.sh
 jobs:
   build:
     <<: *job_common
@@ -33,16 +42,37 @@ jobs:
           root: ~/torus-embed
           paths: .
       - <<: *step_save_cache
-  deploy:
+  build-staging:
     <<: *job_common
     steps:
-      - attach_workspace:
-          at: ~/torus-embed
-      - add_ssh_keys
+      - checkout:
+          path: ~/torus-embed
+      - <<: *step_restore_cache
+      - <<: *step_setup_global_packages
       - run:
-          name: "Deploy Over SSH to AWS"
+          name: "Build code for torus embed"
           command: |
-            . ./scripts/uploadToAws.sh
+            npm run build:staging
+      - persist_to_workspace:
+          root: ~/torus-embed
+          paths: .
+      - <<: *step_save_cache
+  build-dev:
+    <<: *job_common
+    steps:
+      - checkout:
+          path: ~/torus-embed
+      - <<: *step_restore_cache
+      - <<: *step_setup_global_packages
+      - run:
+          name: "Build code for torus embed"
+          command: |
+            npm run build:dev
+      - <<: *step_save_cache
+  deploy:
+    <<: *deploy_function
+  deploy-staging:
+    <<: *deploy_function
   update-gist:
     <<: *job_common
     steps:
@@ -70,10 +100,24 @@ workflows:
   version: 2
   commit:
     jobs:
+      - build-dev:
+          filters:
+            branches:
+              ignore:
+                - master
+                - staging
       - build:
           filters:
+            branches:
+              only:
+                - master
             tags:
               only: /^v.*/
+      - build-staging:
+          filters:
+            branches:
+              only:
+                - staging
       - deploy:
           requires:
             - build
@@ -81,6 +125,13 @@ workflows:
             branches:
               only:
                 - master
+      - deploy-staging:
+          requires:
+            - build-staging
+          filters:
+            branches:
+              only:
+                - staging
       - publish-npm:
           requires:
             - build
