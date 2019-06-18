@@ -7,13 +7,13 @@ let Web3 = require('web3')
 const sriToolbox = require('sri-toolbox')
 window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-RAv9++V1WSE9Ny0mpYKqODSnkD6r5Tu6N4WdFn/+w8bLlvXe460a7O/kgDZnIgP0'
+const iframeIntegrity = 'sha384-2YrW909HMBHYEFKJzboDtCdYC3cn/YdrDGPbPRyCjMNLg96o3DhkSETgKaOJNUSp'
 /* global Web3 */
 torusUrl = 'https://app.tor.us/v2'
 logLevel = 'error'
 
 if (process.env.TORUS_BUILD_ENV === 'staging') {
-  torusUrl = 'https://staging.tor.us/v3'
+  torusUrl = 'https://staging.tor.us/buildVersion'
   logLevel = 'info'
 } else if (process.env.TORUS_BUILD_ENV === 'testing') {
   torusUrl = 'https://testing.tor.us'
