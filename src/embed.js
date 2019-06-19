@@ -7,7 +7,7 @@ let Web3 = require('web3')
 const sriToolbox = require('sri-toolbox')
 window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-k/hwzcu2vYLMx5dlNCLH7ugzNeDQ8LDgU8lLhee5Wer56pzOZYBrqAPmtkvP2AGL'
+const iframeIntegrity = 'sha384-LWmGGJgGI5s/RWYvuoQRfC0bgwcYNxCHoqJXIdT4xKltTxs7AcpPDfiu4KWoEzUx'
 /* global Web3 */
 torusUrl = 'https://app.tor.us/v2'
 logLevel = 'error'
