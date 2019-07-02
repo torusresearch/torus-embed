@@ -2,7 +2,8 @@
   "extends": ["standard", "prettier", "prettier/standard"],
   "plugins": ["prettier", "standard", "mocha"],
   "parserOptions": {
-    "sourceType": "module"
+    "parser": "babel-eslint",
+    "ecmaVersion": 6
   },
   "rules": {
     "quotes": [2, "single"],
@@ -12,7 +13,6 @@
         "code": 150
       }
     ],
-    "camelcase": 0,
     "react/jsx-filename-extension": 0,
     "jsx-a11y/label-has-for": 0,
     "no-console": 0,

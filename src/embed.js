@@ -13,8 +13,11 @@ torusUrl = 'https://app.tor.us/v0.0.15'
 logLevel = 'error'
 
 if (process.env.TORUS_BUILD_ENV === 'staging') {
-  torusUrl = 'https://staging.tor.us'
+  torusUrl = 'https://staging.tor.us/v0.0.15'
   logLevel = 'info'
+} else if (process.env.TORUS_BUILD_ENV === 'testing') {
+  torusUrl = 'https://testing.tor.us'
+  logLevel = 'debug'
 } else if (process.env.TORUS_BUILD_ENV === 'development') {
   torusUrl = 'https://localhost:3000'
   logLevel = 'debug'
