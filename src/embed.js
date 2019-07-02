@@ -9,7 +9,7 @@ window.Web3 = Web3
 
 const iframeIntegrity = 'sha384-LWmGGJgGI5s/RWYvuoQRfC0bgwcYNxCHoqJXIdT4xKltTxs7AcpPDfiu4KWoEzUx'
 /* global Web3 */
-torusUrl = 'https://app.tor.us/v2'
+torusUrl = 'https://app.tor.us/v0.0.15'
 logLevel = 'error'
 
 if (process.env.TORUS_BUILD_ENV === 'staging') {
