@@ -196,7 +196,9 @@ MetamaskInpageProvider.prototype._sendSync = function(payload) {
     default:
       var link = 'https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#dizzy-all-async---think-of-metamask-as-a-light-client'
       // eslint-disable-next-line max-len
-      var message = `The MetaMask Web3 object does not support synchronous methods like ${payload.method} without a callback parameter. See ${link} for details.`
+      var message = `The MetaMask Web3 object does not support synchronous methods like ${
+        payload.method
+      } without a callback parameter. See ${link} for details.`
       throw new Error(message)
   }
 
