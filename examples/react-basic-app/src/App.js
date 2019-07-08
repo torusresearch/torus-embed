@@ -1,31 +1,31 @@
-import React from "react";
-import web3 from "./helper";
+import React from 'react'
+import web3 from './helper'
 
 class App extends React.Component {
   state = {
-    account: "",
-    balance: ""
-  };
+    account: '',
+    balance: ''
+  }
 
   componentDidMount() {
     web3.eth.getAccounts().then(accounts => {
-      this.setState({ account: accounts[0] });
-    });
+      this.setState({ account: accounts[0] })
+    })
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.account && this.state.account !== "" && prevState.account !== this.state.account) {
+    if (this.state.account && this.state.account !== '' && prevState.account !== this.state.account) {
       web3.eth.getBalance(this.state.account).then(balance => {
-        this.setState({ balance: web3.utils.fromWei(balance) });
-      });
+        this.setState({ balance: web3.utils.fromWei(balance) })
+      })
     }
   }
 
   enableTorus = () => {
     window.ethereum.enable().then(accounts => {
-      this.setState({ account: accounts[0] });
-    });
-  };
+      this.setState({ account: accounts[0] })
+    })
+  }
 
   render() {
     return (
@@ -35,8 +35,8 @@ class App extends React.Component {
         <div>Account: {this.state.account}</div>
         <div>Balance: {this.state.balance}</div>
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
