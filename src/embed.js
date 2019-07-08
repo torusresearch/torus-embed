@@ -5,15 +5,15 @@ let torusUrl
 let logLevel
 let Web3 = require('web3')
 const sriToolbox = require('sri-toolbox')
+// eslint-disable-next-line no-unused-vars
 window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-hagwo6QJc/Y7jgB49bEjQbtybCahrriNJ0DmAgNdru81aqQqsIOa38/o4/XQyfuu'
-/* global Web3 */
-torusUrl = 'https://app.tor.us/v2'
+const iframeIntegrity = 'sha384-//xcFLc4lT80ef8s37hakGrXi7Duqcvkmny9o4IcV+HNwKsvMgagS4sIoB1ybZ24'
+torusUrl = 'https://app.tor.us/v0.0.17'
 logLevel = 'error'
 
 if (process.env.TORUS_BUILD_ENV === 'staging') {
-  torusUrl = 'https://staging.tor.us/v1'
+  torusUrl = 'https://staging.tor.us/v0.0.17'
   logLevel = 'info'
 } else if (process.env.TORUS_BUILD_ENV === 'testing') {
   torusUrl = 'https://testing.tor.us'
@@ -274,10 +274,13 @@ function setupWeb3() {
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
-  // window.torus.changeNetwork = function(network) {
-  //   var networkStream = window.torus.communicationMux.getStream('network_change')
-  //   networkStream.write({ name: 'network_change', data: { network } })
-  // }
+  window.torus.setProvider = function(network, type) {
+    var providerChangeStream = window.torus.communicationMux.getStream('provider_change')
+    if (type === 'RPC' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
+      throw new Error('if provider is RPC, a json object {networkUrl, chainId, networkName} is expected as network')
+    log.info('trying to change provider to', network)
+    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
+  }
 
   window.torus.showWallet = function(calledFromEmbed) {
     var showWalletStream = window.torus.communicationMux.getStream('show_wallet')

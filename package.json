@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.0.14",
+  "version": "0.0.17",
   "description": "Embed script for Torus",
   "directories": {
     "test": "test"
@@ -16,7 +16,7 @@
     "build-embed:production": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
     "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js && npm run test:build-embed",
     "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js && npm run test:build-embed",
-    "lint:es": "eslint ./src/views/* --fix",
+    "lint:js": "eslint --fix src/**/*.js",
     "pre-build": ". ./scripts/calculateIntegrity.sh",
     "test:e2e": "node ./test/e2e/puppeteer.js",
     "test:e2e:headful": "node ./test/e2e/puppeteer.js false",
@@ -25,9 +25,9 @@
   },
   "dependencies": {
     "buffer": "^5.2.1",
-    "json-rpc-engine": "^5.0.0",
+    "json-rpc-engine": "^5.1.1",
     "json-rpc-middleware-stream": "^2.1.1",
-    "loglevel": "^1.6.2",
+    "loglevel": "^1.6.3",
     "obj-multiplex": "^1.0.0",
     "obs-store": "^4.0.2",
     "post-message-stream": "^3.0.0",
@@ -37,28 +37,30 @@
     "web3": "0.20.7"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.5",
+    "@babel/core": "^7.5.0",
     "assert": "^2.0.0",
-    "browserify": "^16.2.3",
+    "browserify": "^16.3.0",
     "cross-env": "^5.2.0",
     "discify": "^1.6.3",
     "envify": "^4.1.0",
-    "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-prettier": "^4.3.0",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-flowtype": "^3.9.1",
-    "eslint-plugin-html": "^5.0.5",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-plugin-flowtype": "^3.11.1",
+    "eslint-plugin-html": "^6.0.0",
+    "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-mocha": "^5.3.0",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-promise": "^4.1.1",
+    "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
+    "husky": "^3.0.0",
+    "lint-staged": "^9.1.0",
     "mocha": "^6.1.4",
     "mocha-eslint": "^5.0.0",
-    "prettier": "^1.17.1",
-    "puppeteer": "^1.17.0",
+    "prettier": "^1.18.2",
+    "puppeteer": "^1.18.1",
     "uglifyify": "^5.0.1"
   },
   "mocha": {
@@ -87,5 +89,22 @@
   ],
   "engines": {
     "node": "10.x"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "npm run lint:js --",
+      "prettier --write **/*.js",
+      "git add"
+    ],
+    "*.{json}": [
+      "prettier --write **/*.json",
+      "prettier --write **/*.css",
+      "git add"
+    ]
   }
 }

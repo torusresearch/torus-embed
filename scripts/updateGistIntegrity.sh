@@ -4,9 +4,9 @@ PACKAGE_VERSION=$(cat ./src/embed.js | grep app.tor.us | head -1 | awk -F//app.t
 cd public/
 HASH="$(cat embed.min.js | openssl dgst -sha384 -binary | openssl base64 -A)"
 cd ~/gist
-echo "<script src="https://app.tor.us/$PACKAGE_VERSION/embed.min.js"
+echo "<script src=\"https://app.tor.us/$PACKAGE_VERSION/embed.min.js\"
         integrity=\"sha384-$HASH\"
-        crossorigin="anonymous"></script>" > torus-embed.html
+        crossorigin=\"anonymous\"></script>" > torus-embed.html
 
 git config user.email "chaitanya.potti@gmail.com"
 git config user.name "chaitanyapotti"
