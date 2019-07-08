@@ -276,8 +276,8 @@ function setupWeb3() {
 
   window.torus.setProvider = function(network, type) {
     var providerChangeStream = window.torus.communicationMux.getStream('provider_change')
-    if (type === 'RPC' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
-      throw new Error('if provider is RPC, a json object {networkUrl, chainId, networkName} is expected as network')
+    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
+      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
     log.info('trying to change provider to', network)
     providerChangeStream.write({ name: 'provider_change', data: { network, type } })
   }
