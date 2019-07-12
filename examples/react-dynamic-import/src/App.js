@@ -27,11 +27,13 @@ class App extends React.Component {
   }
 
   enableTorus = () => {
-    web3Obj.setweb3()
-    window.ethereum.enable().then(accounts => {
-      // update store here ideally
-      this.setState({ account: accounts[0] })
-    })
+    setTimeout(() => {
+      web3Obj.setweb3()
+      window.ethereum.enable().then(accounts => {
+        // update store here ideally
+        this.setState({ account: accounts[0] })
+      })
+    }, 100)
   }
 
   importTorus = () => {

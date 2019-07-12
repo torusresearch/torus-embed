@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@toruslabs/torus-embed": "0.0.2",
+    "@toruslabs/torus-embed": "0.0.19",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
     "web3": "^1.0.0-beta.55"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "SKIP_PREFLIGHT_CHECK=true react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
