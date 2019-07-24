@@ -274,6 +274,74 @@ function setupWeb3() {
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
+  window.torus.getPublicKey = function(endpointUrl, email) {
+    function generateJsonRPCObject(method, params) {
+      return {
+        jsonrpc: '2.0',
+        method: method,
+        id: 10,
+        params: params
+      }
+    }
+
+    function getLookupPromise(lookupShare) {
+      return new Promise((resolve, reject) => resolve(lookupShare))
+    }
+
+    function post(url, data, opts) {
+      const options = {
+        mode: 'cors',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8'
+        },
+        body: JSON.stringify(data),
+        method: 'POST'
+      }
+      return fetch(url, options).then(response => {
+        if (response.ok) {
+          return response.json()
+        } else throw new Error('Could not connect', response)
+      })
+    }
+
+    return new Promise((resolve, reject) => {
+      post(
+        endpointUrl,
+        generateJsonRPCObject('VerifierLookupRequest', {
+          verifier: 'google',
+          verifier_id: email
+        })
+      )
+        .catch(err => console.error(err))
+        .then(lookupShare => {
+          if (lookupShare.error) {
+            return post(
+              endpointUrl,
+              generateJsonRPCObject('KeyAssign', {
+                verifier: 'google',
+                verifier_id: email
+              })
+            )
+          } else if (lookupShare.result) {
+            return getLookupPromise(lookupShare)
+          }
+        })
+        .catch(err => console.error(err))
+        .then(lookupShare => {
+          log.info('completed')
+          log.info(lookupShare)
+          var ethAddress = lookupShare.result.keys[0].address
+          log.info(ethAddress)
+          resolve(ethAddress)
+        })
+        .catch(err => {
+          console.error(err)
+          reject(err)
+        })
+    })
+  }
+
   window.torus.setProvider = function(network, type) {
     var providerChangeStream = window.torus.communicationMux.getStream('provider_change')
     if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
@@ -288,10 +356,10 @@ function setupWeb3() {
   }
   if (typeof window.web3 !== 'undefined') {
     console.log(`Torus detected another web3.
-      Torus will not work reliably with another web3 extension.
-      This usually happens if you have two Torus' installed,
-      or Torus and another web3 extension. Please remove one
-      and try again.`)
+		Torus will not work reliably with another web3 extension.
+		This usually happens if you have two Torus' installed,
+		or Torus and another web3 extension. Please remove one
+		and try again.`)
   }
 
   window.torus.web3 = new window.Web3(inpageProvider)
