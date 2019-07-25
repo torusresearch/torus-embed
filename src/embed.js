@@ -33,6 +33,9 @@ const LocalMessageDuplexStream = require('post-message-stream')
 const MetamaskInpageProvider = require('./inpage-provider.js')
 const setupMultiplex = require('./stream-utils.js').setupMultiplex
 const embedUtils = require('./embedUtils.js')
+const httpFunctions = require('./utils/httpHelpers.js')
+const configuration = require('./config.js')
+
 // const styleColor = document.currentScript.getAttribute('style-color')
 let stylePosition = ''
 if (window.document.currentScript) {
@@ -274,57 +277,61 @@ function setupWeb3() {
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
-  window.torus.getPublicKey = function(endpointUrl, email) {
-    function generateJsonRPCObject(method, params) {
-      return {
-        jsonrpc: '2.0',
-        method: method,
-        id: 10,
-        params: params
-      }
-    }
+  /**
+   * Expose the getPublicKey API to the Dapp through window.torus object
+   * @param {String} email Email address of the user
+   */
+  window.torus.getPublicKey = function(email) {
+    // Select random node from the list of endpoints
+    const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
+    const node = configuration.torusNodeEndpoints[randomNumber]
 
-    function getLookupPromise(lookupShare) {
-      return new Promise((resolve, reject) => resolve(lookupShare))
-    }
+    // try {
+    //     var verifier = await httpFunctions.post(node, httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
+    //         verifier: 'google',
+    //         verifier_id: email
+    //     }));
 
-    function post(url, data, opts) {
-      const options = {
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8'
-        },
-        body: JSON.stringify(data),
-        method: 'POST'
-      }
-      return fetch(url, options).then(response => {
-        if (response.ok) {
-          return response.json()
-        } else throw new Error('Could not connect', response)
-      })
-    }
+    //     // VerifierID not assigned
+    //     if(verifier.error){
+    //         verifier = await httpFunctions.post(node, httpFunctions.generateJsonRPCObject('KeyAssign', {
+    //                 verifier: 'google',
+    //                 verifier_id: email
+    //             })
+    //         )
+    //     }
+
+    //     log.info('completed')
+    //     log.info(verifier)
+    //     var ethAddress = verifier.result && verifier.result.keys[0].address
+    //     log.info(ethAddress)
+    //     return ethAddress
+    // }catch(err){
+    //     console.error(err);
+    //     return err
+    // }
 
     return new Promise((resolve, reject) => {
-      post(
-        endpointUrl,
-        generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: 'google',
-          verifier_id: email
-        })
-      )
+      httpFunctions
+        .post(
+          node,
+          httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
+            verifier: 'google',
+            verifier_id: email
+          })
+        )
         .catch(err => console.error(err))
         .then(lookupShare => {
           if (lookupShare.error) {
-            return post(
-              endpointUrl,
-              generateJsonRPCObject('KeyAssign', {
+            return httpFunctions.post(
+              node,
+              httpFunctions.generateJsonRPCObject('KeyAssign', {
                 verifier: 'google',
                 verifier_id: email
               })
             )
           } else if (lookupShare.result) {
-            return getLookupPromise(lookupShare)
+            return httpFunctions.getLookupPromise(lookupShare)
           }
         })
         .catch(err => console.error(err))
