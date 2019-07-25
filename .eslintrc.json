@@ -3,7 +3,7 @@
   "plugins": ["prettier", "standard", "mocha"],
   "parserOptions": {
     "parser": "babel-eslint",
-    "ecmaVersion": 6
+    "ecmaVersion": 8
   },
   "rules": {
     "quotes": [2, "single"],
