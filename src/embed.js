@@ -287,35 +287,72 @@ function setupWeb3() {
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
 
-    try {
-      var verifier = await httpFunctions.post(
-        node,
-        httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: 'google',
-          verifier_id: email
-        })
-      )
+    // try {
+    //   var verifier = await httpFunctions.post(
+    //     node,
+    //     httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
+    //       verifier: 'google',
+    //       verifier_id: email
+    //     })
+    //   )
 
-      // VerifierID not assigned
-      if (verifier.error) {
-        verifier = await httpFunctions.post(
+    //   // VerifierID not assigned
+    //   if (verifier.error) {
+    //     verifier = await httpFunctions.post(
+    //       node,
+    //       httpFunctions.generateJsonRPCObject('KeyAssign', {
+    //         verifier: 'google',
+    //         verifier_id: email
+    //       })
+    //     )
+    //   }
+
+    //   log.info('completed')
+    //   log.info(verifier)
+    //   var ethAddress = verifier.result && verifier.result.keys[0].address
+    //   log.info(ethAddress)
+    //   return ethAddress
+    // } catch (err) {
+    //   console.error(err)
+    //   return err
+    // }
+
+    return new Promise((resolve, reject) => {
+      httpFunctions
+        .post(
           node,
-          httpFunctions.generateJsonRPCObject('KeyAssign', {
+          httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
             verifier: 'google',
             verifier_id: email
           })
         )
-      }
-
-      log.info('completed')
-      log.info(verifier)
-      var ethAddress = verifier.result && verifier.result.keys[0].address
-      log.info(ethAddress)
-      return ethAddress
-    } catch (err) {
-      console.error(err)
-      return err
-    }
+        .catch(err => console.error(err))
+        .then(lookupShare => {
+          if (lookupShare.error) {
+            return httpFunctions.post(
+              node,
+              httpFunctions.generateJsonRPCObject('KeyAssign', {
+                verifier: 'google',
+                verifier_id: email
+              })
+            )
+          } else if (lookupShare.result) {
+            return httpFunctions.getLookupPromise(lookupShare)
+          }
+        })
+        .catch(err => console.error(err))
+        .then(lookupShare => {
+          log.info('completed')
+          log.info(lookupShare)
+          var ethAddress = lookupShare.result.keys[0].address
+          log.info(ethAddress)
+          resolve(ethAddress)
+        })
+        .catch(err => {
+          console.error(err)
+          reject(err)
+        })
+    })
   }
 
   window.torus.setProvider = function(network, type) {
