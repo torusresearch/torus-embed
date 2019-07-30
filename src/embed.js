@@ -282,40 +282,10 @@ function setupWeb3() {
    * @param {String} email Email address of the user
    */
 
-  window.torus.getPublicKey = async function(email) {
+  window.torus.getPublicKey = function(email) {
     // Select random node from the list of endpoints
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
-
-    // try {
-    //   var verifier = await httpFunctions.post(
-    //     node,
-    //     httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
-    //       verifier: 'google',
-    //       verifier_id: email
-    //     })
-    //   )
-
-    //   // VerifierID not assigned
-    //   if (verifier.error) {
-    //     verifier = await httpFunctions.post(
-    //       node,
-    //       httpFunctions.generateJsonRPCObject('KeyAssign', {
-    //         verifier: 'google',
-    //         verifier_id: email
-    //       })
-    //     )
-    //   }
-
-    //   log.info('completed')
-    //   log.info(verifier)
-    //   var ethAddress = verifier.result && verifier.result.keys[0].address
-    //   log.info(ethAddress)
-    //   return ethAddress
-    // } catch (err) {
-    //   console.error(err)
-    //   return err
-    // }
 
     return new Promise((resolve, reject) => {
       httpFunctions
