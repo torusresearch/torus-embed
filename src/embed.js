@@ -8,8 +8,8 @@ const sriToolbox = require('sri-toolbox')
 // eslint-disable-next-line no-unused-vars
 window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-//xcFLc4lT80ef8s37hakGrXi7Duqcvkmny9o4IcV+HNwKsvMgagS4sIoB1ybZ24'
-torusUrl = 'https://app.tor.us/v0.0.17'
+const iframeIntegrity = 'sha384-PLiyjpbIYFFGZyPT1cLo555dYldaLQO0qZd0C1NZuJnUZjoMdFIk9t3E7uhk0bxO'
+torusUrl = 'https://app.tor.us/v0.0.18'
 logLevel = 'error'
 
 if (process.env.TORUS_BUILD_ENV === 'staging') {
