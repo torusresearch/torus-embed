@@ -1,4 +1,4 @@
-const log = require('loglevel')
+import log from 'loglevel'
 
 /**
  * JSON-RPC error object
@@ -68,4 +68,4 @@ function createErrorMiddleware({ override = true } = {}) {
   }
 }
 
-module.exports = createErrorMiddleware
+export default createErrorMiddleware

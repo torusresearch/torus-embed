@@ -1,18 +1,12 @@
-const Through = require('through2')
-const ObjectMultiplex = require('obj-multiplex')
-const pump = require('pump')
-
-module.exports = {
-  jsonParseStream: jsonParseStream,
-  jsonStringifyStream: jsonStringifyStream,
-  setupMultiplex: setupMultiplex
-}
+import Through from 'through2'
+import ObjectMultiplex from 'obj-multiplex'
+import pump from 'pump'
 
 /**
  * Returns a stream transform that parses JSON strings passing through
  * @return {stream.Transform}
  */
-function jsonParseStream() {
+const jsonParseStream = () => {
   return Through.obj(function(serialized, _, cb) {
     this.push(JSON.parse(serialized))
     cb()
@@ -24,7 +18,7 @@ function jsonParseStream() {
  * on objects passing through
  * @return {stream.Transform} the stream transform
  */
-function jsonStringifyStream() {
+const jsonStringifyStream = () => {
   return Through.obj(function(obj, _, cb) {
     this.push(JSON.stringify(obj))
     cb()
@@ -36,7 +30,7 @@ function jsonStringifyStream() {
  * @param {any} connectionStream - the stream to mux
  * @return {stream.Stream} the multiplexed stream
  */
-function setupMultiplex(connectionStream) {
+const setupMultiplex = connectionStream => {
   const mux = new ObjectMultiplex()
   // bind helper method to get previously created streams
   mux.getStream = function(name) {
@@ -52,3 +46,5 @@ function setupMultiplex(connectionStream) {
   })
   return mux
 }
+
+export { jsonParseStream, jsonStringifyStream, setupMultiplex }
