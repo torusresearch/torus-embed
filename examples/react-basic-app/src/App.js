@@ -1,5 +1,5 @@
 import React from 'react'
-import web3 from './helper'
+import web3Obj from './helper'
 
 class App extends React.Component {
   state = {
@@ -8,32 +8,44 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    web3.eth.getAccounts().then(accounts => {
-      this.setState({ account: accounts[0] })
-    })
-  }
+    const isTorus = sessionStorage.getItem('pageUsingTorus')
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.account && this.state.account !== '' && prevState.account !== this.state.account) {
-      web3.eth.getBalance(this.state.account).then(balance => {
-        this.setState({ balance: web3.utils.fromWei(balance) })
+    if (isTorus) {
+      web3Obj.initialize().then(() => {
+        this.setStateInfo()
       })
     }
   }
 
-  enableTorus = () => {
-    window.ethereum.enable().then(accounts => {
+  setStateInfo = () => {
+    web3Obj.web3.eth.getAccounts().then(accounts => {
       this.setState({ account: accounts[0] })
+      web3Obj.web3.eth.getBalance(accounts[0]).then(balance => {
+        this.setState({ balance: balance })
+      })
     })
+  }
+
+  enableTorus = async () => {
+    try {
+      await web3Obj.initialize()
+      this.setStateInfo()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   render() {
     return (
       <div className="App">
-        <button onClick={this.enableTorus}>Enable Torus</button>
-
-        <div>Account: {this.state.account}</div>
-        <div>Balance: {this.state.balance}</div>
+        <div>
+          <button onClick={this.enableTorus}>Start using Torus</button>
+        </div>
+        <div>
+          {/* <button onClick={this.enableTorus}>Enable Torus</button> */}
+          <div>Account: {this.state.account}</div>
+          <div>Balance: {this.state.balance}</div>
+        </div>
       </div>
     )
   }

@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@toruslabs/torus-embed": "0.0.19",
+    "@toruslabs/torus-embed": "0.0.24",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1",
-    "web3": "^1.0.0-beta.55"
+    "web3": "^1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
