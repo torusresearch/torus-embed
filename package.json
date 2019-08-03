@@ -10,7 +10,7 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build:babel": "babel ./src --out-dir dist/",
+    "build:babel": "babel ./src --out-dir dist/ && cp ./src/embed.d.ts ./dist/embed.d.ts",
     "build": "cross-env TORUS_BUILD_ENV=production npm run build-embed:production && npm run pre-build",
     "build:staging": "cross-env TORUS_BUILD_ENV=staging npm run build-embed:staging && npm run pre-build",
     "build:dev": "cross-env TORUS_BUILD_ENV=development npm run build-embed:dev && npm run pre-build",
