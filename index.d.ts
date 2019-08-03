@@ -1,2 +1,2 @@
-export { default } from './dist/embed'
-export * from './dist/embed'
+import Torus from './dist/embed'
+export default Torus

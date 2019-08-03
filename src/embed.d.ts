@@ -1,20 +1,16 @@
-// provider
-// ethereum
-// getPublicKey
-// init
-// web3
-
 import Web3 from 'web3'
 
-export class Torus {
+export default class Torus {
   web3: Web3
   provider: Provider
   ethereum: Provider
   getPublicAddress(email: string): Promise<string>;
+  setProvider(network: string | {networkUrl: string, chainId: number, networkName: string}, type?: "rpc")
+  showWallet(calledFromEmbed: boolean)
   init(buildEnv?: 'production' | 'development' | 'staging' | 'testing'): Promise<void>
 }
 
-class Provider {
+declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
 }
 
