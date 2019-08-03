@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Embed script for Torus",
   "directories": {
     "test": "test"
