@@ -1,10 +1,3 @@
-module.exports = {
-  runOnLoad,
-  runOnComplete,
-  htmlToElement,
-  transformEthAddress
-}
-
 function runOnLoad(fn) {
   if (window.document.body != null) {
     fn()
@@ -39,3 +32,5 @@ function transformEthAddress(ethAddress) {
     throw new Error('Unexpected Ethereum address format')
   }
 }
+
+export { runOnLoad, runOnComplete, htmlToElement, transformEthAddress }

@@ -1,21 +1,16 @@
-var browserify = require('browserify')
-var fs = require('fs')
-var envify = require('envify/custom')
+const browserify = require('browserify')
+const fs = require('fs')
+const path = require('path')
 try {
-  var bundler = browserify(__dirname + '/../src/embed.js', {
+  const bundler = browserify(path.resolve(__dirname, '/../dist/embed.js'), {
     fullPaths: true
   })
 
   if (process.env.TORUS_BUILD_ENV !== 'development') {
     bundler.transform('uglifyify', { global: true, keep_fnames: true })
   }
-  bundler.transform(
-    envify({
-      TORUS_BUILD_ENV: process.env.TORUS_BUILD_ENV
-    })
-  )
 
-  bundler.bundle().pipe(fs.createWriteStream(__dirname + '/../public/embed.min.js'))
+  bundler.bundle().pipe(fs.createWriteStream(path.resolve(__dirname, '/../public/embed.min.js')))
 } catch (e) {
   console.log(e)
 }

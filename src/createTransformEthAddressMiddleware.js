@@ -1,4 +1,4 @@
-const embedUtils = require('./embedUtils')
+import embedUtils from './embedUtils'
 
 function CreateTransformEthAddressMiddleware({ override = true } = {}) {
   return (req, res, next, end) => {
@@ -11,4 +11,4 @@ function CreateTransformEthAddressMiddleware({ override = true } = {}) {
   }
 }
 
-module.exports = CreateTransformEthAddressMiddleware
+export default CreateTransformEthAddressMiddleware

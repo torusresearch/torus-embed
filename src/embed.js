@@ -1,313 +1,323 @@
 // Torus loading message
-console.log('TORUS INJECTED IN', window.location.href)
+// const Web3 = require('web3')
+import sriToolbox from 'sri-toolbox'
+import log from 'loglevel'
+import LocalMessageDuplexStream from 'post-message-stream'
+import MetamaskInpageProvider from './inpage-provider.js'
+import { setupMultiplex } from './stream-utils.js'
+import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils.js'
+import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers.js'
+import configuration from './config.js'
+import Web3 from 'web3'
 
-let torusUrl
-let logLevel
-let Web3 = require('web3')
-const sriToolbox = require('sri-toolbox')
+cleanContextForImports()
+
 // eslint-disable-next-line no-unused-vars
-window.Web3 = Web3
+// window.Web3 = Web3
 
 const iframeIntegrity = 'sha384-//xcFLc4lT80ef8s37hakGrXi7Duqcvkmny9o4IcV+HNwKsvMgagS4sIoB1ybZ24'
-torusUrl = 'https://app.tor.us/v0.0.17'
-logLevel = 'error'
-
-if (process.env.TORUS_BUILD_ENV === 'staging') {
-  torusUrl = 'https://staging.tor.us/v0.0.17'
-  logLevel = 'info'
-} else if (process.env.TORUS_BUILD_ENV === 'testing') {
-  torusUrl = 'https://testing.tor.us'
-  logLevel = 'debug'
-} else if (process.env.TORUS_BUILD_ENV === 'development') {
-  torusUrl = 'https://localhost:3000'
-  logLevel = 'debug'
-}
-
-if (window.torus === undefined) {
-  window.torus = {}
-}
-cleanContextForImports()
-const log = require('loglevel')
-log.setDefaultLevel(logLevel)
-const LocalMessageDuplexStream = require('post-message-stream')
-const MetamaskInpageProvider = require('./inpage-provider.js')
-const setupMultiplex = require('./stream-utils.js').setupMultiplex
-const embedUtils = require('./embedUtils.js')
-const httpFunctions = require('./utils/httpHelpers.js')
-const configuration = require('./config.js')
-
-// const styleColor = document.currentScript.getAttribute('style-color')
-let stylePosition = ''
-if (window.document.currentScript) {
-  stylePosition = window.document.currentScript.getAttribute('style-position')
-}
-
-var torusWidget, torusMenuBtn, torusLogin, torusIframe
 
 restoreContextAfterImports()
-createWidget()
 
-if (process.env.TORUS_BUILD_ENV !== 'staging' && process.env.TORUS_BUILD_ENV !== 'development') {
-  // hacky solution to check for iframe integrity
-  const fetchUrl = torusUrl + '/index.html'
-  global.window
-    .fetch(fetchUrl)
-    .then(resp => resp.text())
-    .then(response => {
-      const integrity = sriToolbox.generate(
-        {
-          algorithms: ['sha384']
-        },
-        response
-      )
-      console.log(integrity)
-      if (integrity === iframeIntegrity) integritySuccess()
-      else integrityFailed()
-    })
-} else {
-  integritySuccess()
-}
-
-function integrityFailed() {
-  console.log('integrity check failed', arguments)
-  torusLogin.style.display = 'none'
-  torusMenuBtn.style.display = 'none'
-}
-
-function integritySuccess() {
-  console.log('integrity check success')
-  embedUtils.runOnLoad(setupWeb3)
-}
-/**
- * Create widget
- */
-function createWidget() {
-  log.info('Creating Torus widget...')
-  var link = window.document.createElement('link')
-  link.setAttribute('rel', 'stylesheet')
-  link.setAttribute('type', 'text/css')
-  link.setAttribute('href', torusUrl + '/css/widget.css')
-  // Login button code
-  torusWidget = embedUtils.htmlToElement('<div id="torusWidget" class="widget"></div>')
-  torusLogin = embedUtils.htmlToElement('<button id="torusLogin" />')
-  torusWidget.appendChild(torusLogin)
-  torusMenuBtn = embedUtils.htmlToElement('<button id="torusMenuBtn" />')
-  torusWidget.appendChild(torusMenuBtn)
-
-  // Iframe code
-  torusIframe = embedUtils.htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
-
-  // Setup on load code
-  var bindOnLoad = function() {
-    torusLogin.addEventListener('click', function() {
-      window.torus.login(false)
-    })
-    torusMenuBtn.addEventListener('click', function() {
-      window.torus.showWallet(true)
-    })
+class Torus {
+  constructor(...args) {
+    this.stylePosition = ''
+    if (window.document.currentScript) {
+      this.stylePosition = window.document.currentScript.getAttribute('style-position')
+    }
+    this.torusWidget = {}
+    this.torusMenuBtn = {}
+    this.torusLogin = {}
+    this.torusIframe = {}
   }
-  var attachOnLoad = function() {
-    window.document.head.appendChild(link)
-    window.document.body.appendChild(torusIframe)
-    window.document.body.appendChild(torusWidget)
-  }
-  embedUtils.runOnLoad(attachOnLoad)
-  embedUtils.runOnLoad(bindOnLoad)
 
-  log.info('STYLE POSITION: ' + stylePosition)
-  switch (stylePosition) {
-    case 'top-left':
-      torusWidget.style.top = '8px'
-      torusWidget.style.left = '8px'
-      break
-    case 'top-right':
-      torusWidget.style.top = '8px'
-      torusWidget.style.right = '8px'
-      break
-    case 'bottom-right':
-      torusWidget.style.bottom = '8px'
-      torusWidget.style.right = '8px'
-      break
-    case 'bottom-left':
-      torusWidget.style.bottom = '8px'
-      torusWidget.style.left = '8px'
-      break
-    default:
-      torusWidget.style.bottom = '8px'
-      torusWidget.style.left = '8px'
-  }
-}
-
-function showTorusButton() {
-  // torusIframeContainer.style.display = 'none'
-  torusMenuBtn.style.display = 'block'
-  torusLogin.style.display = 'none'
-}
-
-function hideTorusButton() {
-  torusLogin.style.display = 'block'
-  torusMenuBtn.style.display = 'none'
-}
-
-function setupWeb3() {
-  log.info('setupWeb3 running')
-  // setup background connection
-  window.torus.metamaskStream = new LocalMessageDuplexStream({
-    name: 'embed_metamask',
-    target: 'iframe_metamask',
-    targetWindow: torusIframe.contentWindow
-  })
-  window.torus.metamaskStream.setMaxListeners(100)
-
-  // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
-  // because the MetamaskInpageProvider also attempts to do so.
-  // We create another LocalMessageDuplexStream for communication between dapp <> iframe
-  window.torus.communicationStream = new LocalMessageDuplexStream({
-    name: 'embed_comm',
-    target: 'iframe_comm',
-    targetWindow: torusIframe.contentWindow
-  })
-  window.torus.communicationStream.setMaxListeners(100)
-
-  // Backward compatibility with Gotchi :)
-  window.metamaskStream = window.torus.communicationStream
-
-  // compose the inpage provider
-  var inpageProvider = new MetamaskInpageProvider(window.torus.metamaskStream)
-
-  // detect eth_requestAccounts and pipe to enable for now
-  function detectAccountRequestPrototypeModifier(m) {
-    const originalMethod = inpageProvider[m]
-    inpageProvider[m] = function({ method }) {
-      if (method === 'eth_requestAccounts') {
-        return window.ethereum.enable()
+  init(buildEnv = 'production') {
+    return new Promise((resolve, reject) => {
+      let torusUrl
+      let logLevel
+      switch (buildEnv) {
+        case 'staging':
+          torusUrl = 'https://staging.tor.us/v0.0.17'
+          logLevel = 'info'
+          break
+        case 'testing':
+          torusUrl = 'https://testing.tor.us'
+          logLevel = 'debug'
+          break
+        case 'development':
+          torusUrl = 'https://localhost:3000'
+          logLevel = 'debug'
+          break
+        default:
+          torusUrl = 'https://app.tor.us/v0.0.17'
+          logLevel = 'error'
+          break
       }
-      return originalMethod.apply(this, arguments)
+      log.setDefaultLevel(logLevel)
+      this.createWidget(torusUrl)
+      if (buildEnv !== 'staging' && buildEnv !== 'development') {
+        // hacky solution to check for iframe integrity
+        const fetchUrl = torusUrl + '/index.html'
+        global.window
+          .fetch(fetchUrl)
+          .then(resp => resp.text())
+          .then(response => {
+            const integrity = sriToolbox.generate(
+              {
+                algorithms: ['sha384']
+              },
+              response
+            )
+            log.info(integrity, 'integrity')
+            if (integrity === iframeIntegrity) {
+              runOnLoad(this.setupWeb3)
+              resolve()
+            } else {
+              this.torusLogin.style.display = 'none'
+              this.torusMenuBtn.style.display = 'none'
+              reject(new Error('Integrity check failed'))
+            }
+          })
+      } else {
+        runOnLoad(this.setupWeb3)
+        resolve()
+      }
+    })
+  }
+
+  /**
+   * Create widget
+   */
+  createWidget(torusUrl) {
+    var link = window.document.createElement('link')
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('type', 'text/css')
+    link.setAttribute('href', torusUrl + '/css/widget.css')
+    // Login button code
+    this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
+    this.torusLogin = htmlToElement('<button id="torusLogin" />')
+    this.torusWidget.appendChild(this.torusLogin)
+    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
+    this.torusWidget.appendChild(this.torusMenuBtn)
+
+    // Iframe code
+    this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
+    // Setup on load code
+    function bindOnLoad() {
+      this.torusLogin.addEventListener('click', function() {
+        this.login(false)
+      })
+      this.torusMenuBtn.addEventListener('click', function() {
+        this.showWallet(true)
+      })
+    }
+
+    function attachOnLoad() {
+      window.document.head.appendChild(link)
+      window.document.body.appendChild(this.torusIframe)
+      window.document.body.appendChild(this.torusWidget)
+    }
+    runOnLoad(attachOnLoad)
+    runOnLoad(bindOnLoad)
+
+    log.info('STYLE POSITION: ' + this.stylePosition)
+    switch (this.stylePosition) {
+      case 'top-left':
+        this.torusWidget.style.top = '8px'
+        this.torusWidget.style.left = '8px'
+        break
+      case 'top-right':
+        this.torusWidget.style.top = '8px'
+        this.torusWidget.style.right = '8px'
+        break
+      case 'bottom-right':
+        this.torusWidget.style.bottom = '8px'
+        this.torusWidget.style.right = '8px'
+        break
+      case 'bottom-left':
+        this.torusWidget.style.bottom = '8px'
+        this.torusWidget.style.left = '8px'
+        break
+      default:
+        this.torusWidget.style.bottom = '8px'
+        this.torusWidget.style.left = '8px'
     }
   }
-  detectAccountRequestPrototypeModifier('send')
-  detectAccountRequestPrototypeModifier('sendAsync')
 
-  inpageProvider.setMaxListeners(100)
-  inpageProvider.enable = function() {
-    return new Promise((resolve, reject) => {
-      // TODO: Handle errors when pipe is broken (eg. popup window is closed)
-
-      // If user is already logged in, we assume they have given access to the website
-      window.web3.eth.getAccounts(function(err, res) {
-        if (err) {
-          setTimeout(function() {
-            reject(err)
-          }, 50)
-        } else if (Array.isArray(res) && res.length > 0) {
-          setTimeout(function() {
-            resolve(res)
-          }, 50)
-        } else {
-          // set up listener for login
-          var oauthStream = window.torus.communicationMux.getStream('oauth')
-          var handler = function(data) {
-            var { err, selectedAddress } = data
-            if (err) {
-              reject(err)
-            } else {
-              // returns an array (cause accounts expects it)
-              resolve([embedUtils.transformEthAddress(selectedAddress)])
-            }
-            oauthStream.removeListener('data', handler)
-          }
-          oauthStream.on('data', handler)
-          window.torus.login(true)
-        }
-      })
-    })
+  showTorusButton() {
+    // torusIframeContainer.style.display = 'none'
+    this.torusMenuBtn.style.display = 'block'
+    this.torusLogin.style.display = 'none'
   }
 
-  // Work around for web3@1.0 deleting the bound `sendAsync` but not the unbound
-  // `sendAsync` method on the prototype, causing `this` reference issues with drizzle
-  const proxiedInpageProvider = new Proxy(inpageProvider, {
-    // straight up lie that we deleted the property so that it doesnt
-    // throw an error in strict mode
-    deleteProperty: () => true
-  })
+  hideTorusButton() {
+    this.torusLogin.style.display = 'block'
+    this.torusMenuBtn.style.display = 'none'
+  }
 
-  window.ethereum = proxiedInpageProvider
-  var communicationMux = setupMultiplex(window.torus.communicationStream)
-  window.torus.communicationMux = communicationMux
+  setupWeb3() {
+    log.info('setupWeb3 running')
+    // setup background connection
+    this.metamaskStream = new LocalMessageDuplexStream({
+      name: 'embed_metamask',
+      target: 'iframe_metamask',
+      targetWindow: this.torusIframe.contentWindow
+    })
+    this.metamaskStream.setMaxListeners(100)
 
-  // window.addEventListener('message', message => {
-  //   if (message.data === 'showTorusIframe') {
-  //     showTorusOverlay()
-  //   } else if (message.data === 'hideTorusIframe') {
-  //     hideTorusOverlay()
-  //   }
-  // })
+    // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
+    // because the MetamaskInpageProvider also attempts to do so.
+    // We create another LocalMessageDuplexStream for communication between dapp <> iframe
+    this.communicationStream = new LocalMessageDuplexStream({
+      name: 'embed_comm',
+      target: 'iframe_comm',
+      targetWindow: this.torusIframe.contentWindow
+    })
+    this.communicationStream.setMaxListeners(100)
 
-  // TODO: check if unused
-  // function showTorusOverlay() {
-  //   window.document.getElementById('torusLogin').style.display = 'none'
-  // }
+    // Backward compatibility with Gotchi :)
+    window.metamaskStream = this.communicationStream
 
-  // function hideTorusOverlay() {
-  //   window.document.getElementById('torusLogin').style.display = 'block'
-  // }
+    // compose the inpage provider
+    const inpageProvider = new MetamaskInpageProvider(this.metamaskStream)
 
-  // var displayStream = communicationMux.getStream('display')
-  // displayStream.on('data', function(msg) {
-  //   if (msg === 'close') {
-  //     showTorusButton()
-  //   } else if (msg === 'open') {
-  //     showTorusOverlay()
-  //   }
-  // })
-  // TODO: end check if unused
+    // detect eth_requestAccounts and pipe to enable for now
+    function detectAccountRequestPrototypeModifier(m) {
+      const originalMethod = inpageProvider[m]
+      inpageProvider[m] = function({ method }) {
+        if (method === 'eth_requestAccounts') {
+          return window.ethereum.enable()
+        }
+        return originalMethod.apply(this, arguments)
+      }
+    }
+    detectAccountRequestPrototypeModifier('send')
+    detectAccountRequestPrototypeModifier('sendAsync')
 
-  // Show torus button if wallet has been hydrated/detected
-  var statusStream = window.torus.communicationMux.getStream('status')
-  statusStream.on('data', function(status) {
-    log.info('data received on statusStream')
-    log.info(status)
-    if (status.loggedIn) showTorusButton()
-    else if (status.loggedIn === false) hideTorusButton()
-  })
+    inpageProvider.setMaxListeners(100)
+    inpageProvider.enable = () => {
+      return new Promise((resolve, reject) => {
+        // TODO: Handle errors when pipe is broken (eg. popup window is closed)
+
+        // If user is already logged in, we assume they have given access to the website
+        this.web3.eth.getAccounts((err, res) => {
+          if (err) {
+            setTimeout(function() {
+              reject(err)
+            }, 50)
+          } else if (Array.isArray(res) && res.length > 0) {
+            setTimeout(function() {
+              resolve(res)
+            }, 50)
+          } else {
+            // set up listener for login
+            var oauthStream = this.communicationMux.getStream('oauth')
+            var handler = function(data) {
+              var { err, selectedAddress } = data
+              if (err) {
+                reject(err)
+              } else {
+                // returns an array (cause accounts expects it)
+                resolve([transformEthAddress(selectedAddress)])
+              }
+              oauthStream.removeListener('data', handler)
+            }
+            oauthStream.on('data', handler)
+            this.login(true)
+          }
+        })
+      })
+    }
+
+    // Work around for web3@1.0 deleting the bound `sendAsync` but not the unbound
+    // `sendAsync` method on the prototype, causing `this` reference issues with drizzle
+    const proxiedInpageProvider = new Proxy(inpageProvider, {
+      // straight up lie that we deleted the property so that it doesnt
+      // throw an error in strict mode
+      deleteProperty: () => true
+    })
+
+    this.ethereum = proxiedInpageProvider
+    var communicationMux = setupMultiplex(this.communicationStream)
+    this.communicationMux = communicationMux
+
+    // Show torus button if wallet has been hydrated/detected
+    var statusStream = communicationMux.getStream('status')
+    statusStream.on('data', function(status) {
+      log.info('data received on statusStream')
+      log.info(status)
+      if (status.loggedIn) this.showTorusButton()
+      else if (status.loggedIn === false) this.hideTorusButton()
+    })
+    // if (typeof window.web3 !== 'undefined') {
+    //   console.log(`Torus detected another web3.
+    // Torus will not work reliably with another web3 extension.
+    // This usually happens if you have two Torus' installed,
+    // or Torus and another web3 extension. Please remove one
+    // and try again.`)
+    // }
+
+    this.provider = inpageProvider
+
+    this.web3 = new Web3(inpageProvider)
+    this.web3.setProvider = function() {
+      log.debug('Torus - overrode web3.setProvider')
+    }
+    // pretend to be Metamask for dapp compatibility reasons
+    this.web3.currentProvider.isMetamask = true
+    this.web3.currentProvider.isTorus = true
+    // window.web3 = window.torus.web3
+    log.debug('Torus - injected web3')
+  }
 
   // Exposing login function, if called from embed, flag as true
-  window.torus.login = function(calledFromEmbed) {
-    var oauthStream = window.torus.communicationMux.getStream('oauth')
+  login(calledFromEmbed) {
+    var oauthStream = this.communicationMux.getStream('oauth')
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
+  }
+
+  setProvider(network, type) {
+    var providerChangeStream = this.communicationMux.getStream('provider_change')
+    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
+      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
+    log.info('trying to change provider to', network)
+    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
+  }
+
+  showWallet(calledFromEmbed) {
+    var showWalletStream = this.communicationMux.getStream('show_wallet')
+    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
   }
 
   /**
    * Expose the getPublicKey API to the Dapp through window.torus object
    * @param {String} email Email address of the user
    */
-
-  window.torus.getPublicKey = function(email) {
+  getPublicKey(email) {
     // Select random node from the list of endpoints
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
 
     return new Promise((resolve, reject) => {
-      httpFunctions
-        .post(
-          node,
-          httpFunctions.generateJsonRPCObject('VerifierLookupRequest', {
-            verifier: 'google',
-            verifier_id: email
-          })
-        )
+      post(
+        node,
+        generateJsonRPCObject('VerifierLookupRequest', {
+          verifier: 'google',
+          verifier_id: email
+        })
+      )
         .catch(err => console.error(err))
         .then(lookupShare => {
           if (lookupShare.error) {
-            return httpFunctions.post(
+            return post(
               node,
-              httpFunctions.generateJsonRPCObject('KeyAssign', {
+              generateJsonRPCObject('KeyAssign', {
                 verifier: 'google',
                 verifier_id: email
               })
             )
           } else if (lookupShare.result) {
-            return httpFunctions.getLookupPromise(lookupShare)
+            return getLookupPromise(lookupShare)
           }
         })
         .catch(err => console.error(err))
@@ -324,36 +334,6 @@ function setupWeb3() {
         })
     })
   }
-
-  window.torus.setProvider = function(network, type) {
-    var providerChangeStream = window.torus.communicationMux.getStream('provider_change')
-    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
-      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
-    log.info('trying to change provider to', network)
-    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
-  }
-
-  window.torus.showWallet = function(calledFromEmbed) {
-    var showWalletStream = window.torus.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
-  }
-  if (typeof window.web3 !== 'undefined') {
-    console.log(`Torus detected another web3.
-		Torus will not work reliably with another web3 extension.
-		This usually happens if you have two Torus' installed,
-		or Torus and another web3 extension. Please remove one
-		and try again.`)
-  }
-
-  window.torus.web3 = new window.Web3(inpageProvider)
-  window.torus.web3.setProvider = function() {
-    log.debug('Torus - overrode web3.setProvider')
-  }
-  // pretend to be Metamask for dapp compatibility reasons
-  window.torus.web3.currentProvider.isMetamask = true
-  window.torus.web3.currentProvider.isTorus = true
-  window.web3 = window.torus.web3
-  log.debug('Torus - injected web3')
 }
 
 // need to make sure we aren't affected by overlapping namespaces
@@ -385,3 +365,5 @@ function restoreContextAfterImports() {
     log.warn('MetaMask - global.define could not be overwritten.')
   }
 }
+
+export default Torus
