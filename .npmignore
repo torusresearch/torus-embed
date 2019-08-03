@@ -31,3 +31,9 @@ public
 scripts
 test
 .eslintrc.json
+server.js
+.circleci
+.babelrc
+.eslintignore
+.prettierignore
+.prettierrc.yaml

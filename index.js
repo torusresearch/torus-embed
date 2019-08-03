@@ -1,3 +1,3 @@
-const embed = require('./src/embed')
+const embed = require('./dist/embed')
 
 module.exports = embed
