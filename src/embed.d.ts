@@ -11,7 +11,7 @@ export class Torus {
   provider: Provider
   ethereum: Provider
   getPublicAddress(email: string): Promise<string>;
-  init(buildEnv?: 'production' | 'development' | 'staging' | 'testing'): Promise<>
+  init(buildEnv?: 'production' | 'development' | 'staging' | 'testing'): Promise<void>
 }
 
 class Provider {
