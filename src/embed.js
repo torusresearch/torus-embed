@@ -288,7 +288,7 @@ class Torus {
    * Expose the getPublicKey API to the Dapp through window.torus object
    * @param {String} email Email address of the user
    */
-  getPublicKey(email) {
+  getPublicAddress(email) {
     // Select random node from the list of endpoints
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
