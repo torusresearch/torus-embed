@@ -20,11 +20,8 @@ const iframeIntegrity = 'sha384-//xcFLc4lT80ef8s37hakGrXi7Duqcvkmny9o4IcV+HNwKsv
 restoreContextAfterImports()
 
 class Torus {
-  constructor(...args) {
-    this.stylePosition = ''
-    if (window.document.currentScript) {
-      this.stylePosition = window.document.currentScript.getAttribute('style-position')
-    }
+  constructor(stylePosition = 'bottom-left', ...args) {
+    this.stylePosition = stylePosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
     this.torusLogin = {}
@@ -135,12 +132,10 @@ class Torus {
         this.torusWidget.style.right = '8px'
         break
       case 'bottom-left':
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.left = '8px'
-        break
       default:
         this.torusWidget.style.bottom = '8px'
         this.torusWidget.style.left = '8px'
+        break
     }
   }
 
