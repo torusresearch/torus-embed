@@ -1,10 +1,4 @@
-module.exports = {
-  post,
-  generateJsonRPCObject,
-  getLookupPromise
-}
-
-function post(url, data) {
+const post = (url, data) => {
   const options = {
     mode: 'cors',
     cache: 'no-cache',
@@ -21,7 +15,7 @@ function post(url, data) {
   })
 }
 
-function generateJsonRPCObject(method, params) {
+const generateJsonRPCObject = (method, params) => {
   return {
     jsonrpc: '2.0',
     method: method,
@@ -30,6 +24,8 @@ function generateJsonRPCObject(method, params) {
   }
 }
 
-function getLookupPromise(el) {
+const getLookupPromise = el => {
   return new Promise((resolve, reject) => resolve(el))
 }
+
+export { post, generateJsonRPCObject, getLookupPromise }

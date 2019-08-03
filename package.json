@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.0.22",
+  "version": "0.0.24",
   "description": "Embed script for Torus",
   "directories": {
     "test": "test"
@@ -10,12 +10,9 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build": "cross-env TORUS_BUILD_ENV=production npm run build-embed:production && npm run pre-build",
-    "build:staging": "cross-env TORUS_BUILD_ENV=staging npm run build-embed:staging && npm run pre-build",
-    "build:dev": "cross-env TORUS_BUILD_ENV=development npm run build-embed:dev && npm run pre-build",
-    "build-embed:production": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
-    "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js && npm run test:build-embed",
-    "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js && npm run test:build-embed",
+    "build:babel": "babel ./src --out-dir dist/ && cp ./src/embed.d.ts ./dist/embed.d.ts",
+    "build": "rimraf ./dist && npm run build:babel && npm run build-embed && npm run pre-build",
+    "build-embed": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
     "lint:js": "eslint --fix src/**/*.js",
     "pre-build": ". ./scripts/calculateIntegrity.sh",
     "test:e2e": "node ./test/e2e/puppeteer.js",
@@ -24,7 +21,6 @@
     "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
-    "buffer": "^5.2.1",
     "json-rpc-engine": "^5.1.1",
     "json-rpc-middleware-stream": "^2.1.1",
     "loglevel": "^1.6.3",
@@ -37,17 +33,20 @@
     "web3": "0.20.7"
   },
   "devDependencies": {
+    "@babel/cli": "^7.5.5",
     "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
     "assert": "^2.0.0",
     "browserify": "^16.3.0",
-    "cross-env": "^5.2.0",
+    "rimraf": "^2.6.3",
     "discify": "^1.6.3",
     "envify": "^4.1.0",
     "eslint": "^6.1.0",
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^13.0.1",
-    "eslint-plugin-flowtype": "^3.12.2",
+    "eslint-plugin-flowtype": "^3.13.0",
     "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-mocha": "^6.0.0",

@@ -2,7 +2,7 @@ examples
 secrets.json
 .DS_Store
 node_modules
-/dist
+src/
 
 embed.min.js
 # local env files
@@ -31,3 +31,9 @@ public
 scripts
 test
 .eslintrc.json
+server.js
+.circleci
+.babelrc
+.eslintignore
+.prettierignore
+.prettierrc.yaml
