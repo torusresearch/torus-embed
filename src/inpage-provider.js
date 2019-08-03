@@ -2,7 +2,7 @@ import createErrorMiddleware from './createErrorMiddleware'
 import createTransformEthAddressMiddleware from './createTransformEthAddressMiddleware'
 import { setupMultiplex } from './stream-utils.js'
 import { Duplex as DuplexStream } from 'readable-stream'
-import embedUtils from './embedUtils'
+import { transformEthAddress } from './embedUtils'
 const pump = require('pump')
 const RpcEngine = require('json-rpc-engine')
 const createIdRemapMiddleware = require('json-rpc-engine/src/idRemapMiddleware')
@@ -33,13 +33,13 @@ class LocalStorageStream extends DuplexStream {
       if (key === 'selectedAddress') {
         if (data[key] !== '' && data[key] !== null && data[key] !== undefined) {
           var prevSelectedAddress = window.sessionStorage.getItem('selectedAddress')
-          var newSelectedAddress = embedUtils.transformEthAddress(data[key])
+          var newSelectedAddress = transformEthAddress(data[key])
           this.web3.eth.defaultAccount = newSelectedAddress
           this.ethereum.selectedAddress = newSelectedAddress
           this.ethereum.publicConfigStore.updateState({ selectedAddress: newSelectedAddress })
           window.sessionStorage.setItem('selectedAddress', newSelectedAddress)
           if (prevSelectedAddress !== newSelectedAddress) {
-            self.emit('accountsChanged', [newSelectedAddress])
+            this.emit('accountsChanged', [newSelectedAddress])
           }
         } else {
           delete this.web3.eth.defaultAccount
@@ -61,15 +61,20 @@ class LocalStorageStream extends DuplexStream {
 }
 
 class MetamaskInpageProvider extends SafeEventEmitter {
-  constructor(connectionStream, opts = {}) {
+  constructor(connectionStream) {
     super()
+    this.connectionStream = connectionStream
     const self = this
     self.isMetaMask = true
     // super constructor
     SafeEventEmitter.call(self)
+  }
 
+  init(opts = {}) {
+    const self = this
+    // subscribe to metamask public config (one-way)
     // setup connectionStream multiplexing
-    const mux = setupMultiplex(connectionStream)
+    const mux = setupMultiplex(this.connectionStream)
     const publicConfigStream = mux.createStream('publicConfig')
     Object.defineProperty(self, 'mux', {
       value: mux,
@@ -77,7 +82,6 @@ class MetamaskInpageProvider extends SafeEventEmitter {
       enumerable: false
     })
 
-    // subscribe to metamask public config (one-way)
     if (!opts.skipStatic) {
       self.publicConfigStore = new ObservableStore({})
       self.publicConfigStore.updateState = function(partialState) {
@@ -108,12 +112,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
     // connect to async provider
     const jsonRpcConnection = createJsonRpcStream()
-    pump(
-      jsonRpcConnection.stream,
-      mux.createStream('provider'),
-      jsonRpcConnection.stream,
-      logStreamDisconnectWarning.bind(this, 'MetaMask RpcProvider')
-    )
+    pump(jsonRpcConnection.stream, mux.getStream('provider'), jsonRpcConnection.stream, logStreamDisconnectWarning.bind(this, 'MetaMask RpcProvider'))
 
     // handle sendAsync requests via dapp-side rpc engine
     const rpcEngine = new RpcEngine()
@@ -124,7 +123,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     self.rpcEngine = rpcEngine
 
     // forward json rpc notifications
-    jsonRpcConnection.events.on('notification', function(payload) {
+    jsonRpcConnection.events.on('notification', payload => {
       self.emit('data', null, payload)
     })
 

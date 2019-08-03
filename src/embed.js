@@ -15,7 +15,7 @@ cleanContextForImports()
 // eslint-disable-next-line no-unused-vars
 // window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-//xcFLc4lT80ef8s37hakGrXi7Duqcvkmny9o4IcV+HNwKsvMgagS4sIoB1ybZ24'
+const iframeIntegrity = 'sha384-Vb3FLwTGGxk5vC+XhA4J0NoeaPUt1TnvE+422mMhqh5d8cbiHJVKM/judK8H8QMS'
 
 restoreContextAfterImports()
 
@@ -34,7 +34,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.0.17'
+          torusUrl = 'https://staging.tor.us/v0.0.20'
           logLevel = 'info'
           break
         case 'testing':
@@ -46,13 +46,16 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.0.17'
+          torusUrl = 'https://app.tor.us/v0.0.20'
           logLevel = 'error'
           break
       }
       log.setDefaultLevel(logLevel)
       this.createWidget(torusUrl)
-      if (buildEnv !== 'staging' && buildEnv !== 'development') {
+      const attachIFrame = () => {
+        window.document.body.appendChild(this.torusIframe)
+      }
+      if (buildEnv !== 'testing' && buildEnv !== 'development') {
         // hacky solution to check for iframe integrity
         const fetchUrl = torusUrl + '/index.html'
         global.window
@@ -67,6 +70,7 @@ class Torus {
             )
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
+              runOnLoad(attachIFrame.bind(this))
               runOnLoad(this.setupWeb3.bind(this))
               resolve()
             } else {
@@ -76,6 +80,7 @@ class Torus {
             }
           })
       } else {
+        runOnLoad(attachIFrame.bind(this))
         runOnLoad(this.setupWeb3.bind(this))
         resolve()
       }
@@ -111,7 +116,6 @@ class Torus {
 
     const attachOnLoad = () => {
       window.document.head.appendChild(link)
-      window.document.body.appendChild(this.torusIframe)
       window.document.body.appendChild(this.torusWidget)
     }
 
@@ -172,23 +176,21 @@ class Torus {
     this.communicationStream.setMaxListeners(100)
 
     // Backward compatibility with Gotchi :)
-    window.metamaskStream = this.communicationStream
+    // window.metamaskStream = this.communicationStream
 
     // compose the inpage provider
-    const inpageProvider = new MetamaskInpageProvider(this.metamaskStream, {
-      ethereum: this.ethereum,
-      web3: this.web3
-    })
+    const inpageProvider = new MetamaskInpageProvider(this.metamaskStream)
 
     // detect eth_requestAccounts and pipe to enable for now
     const detectAccountRequestPrototypeModifier = m => {
       const originalMethod = inpageProvider[m]
+      const self = this
       inpageProvider[m] = function({ method }) {
         if (method === 'eth_requestAccounts') {
-          return this.ethereum.enable()
+          return self.ethereum.enable()
         }
         return originalMethod.apply(this, arguments)
-      }.bind(this)
+      }
     }
 
     detectAccountRequestPrototypeModifier('send')
@@ -200,32 +202,34 @@ class Torus {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
         // If user is already logged in, we assume they have given access to the website
-        this.web3.eth.getAccounts((err, res) => {
-          if (err) {
-            setTimeout(function() {
-              reject(err)
-            }, 50)
-          } else if (Array.isArray(res) && res.length > 0) {
-            setTimeout(function() {
-              resolve(res)
-            }, 50)
-          } else {
-            // set up listener for login
-            var oauthStream = this.communicationMux.getStream('oauth')
-            var handler = function(data) {
-              var { err, selectedAddress } = data
-              if (err) {
+        this.web3.eth.getAccounts(
+          function(err, res) {
+            if (err) {
+              setTimeout(function() {
                 reject(err)
-              } else {
-                // returns an array (cause accounts expects it)
-                resolve([transformEthAddress(selectedAddress)])
+              }, 50)
+            } else if (Array.isArray(res) && res.length > 0) {
+              setTimeout(function() {
+                resolve(res)
+              }, 50)
+            } else {
+              // set up listener for login
+              var oauthStream = this.communicationMux.getStream('oauth')
+              var handler = function(data) {
+                var { err, selectedAddress } = data
+                if (err) {
+                  reject(err)
+                } else {
+                  // returns an array (cause accounts expects it)
+                  resolve([transformEthAddress(selectedAddress)])
+                }
+                oauthStream.removeListener('data', handler)
               }
-              oauthStream.removeListener('data', handler)
+              oauthStream.on('data', handler)
+              this.login(true)
             }
-            oauthStream.on('data', handler)
-            this.login(true)
-          }
-        })
+          }.bind(this)
+        )
       })
     }
 
@@ -266,6 +270,8 @@ class Torus {
     // pretend to be Metamask for dapp compatibility reasons
     this.web3.currentProvider.isMetamask = true
     this.web3.currentProvider.isTorus = true
+
+    inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
