@@ -8,43 +8,38 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    // if not using store
-    setTimeout(() => {
-      if (window.web3) {
-        web3Obj.web3.eth.getAccounts().then(accounts => {
-          this.setState({ account: accounts[0] })
-        })
-      }
-    }, 1000)
-  }
+    const isTorus = sessionStorage.getItem('pageUsingTorus')
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.account && this.state.account !== '' && prevState.account !== this.state.account) {
-      web3Obj.web3.eth.getBalance(this.state.account).then(balance => {
-        this.setState({ balance: web3Obj.web3.utils.fromWei(balance) })
+    if (isTorus) {
+      web3Obj.initialize().then(() => {
+        this.setStateInfo()
       })
     }
   }
 
-  enableTorus = () => {
-    setTimeout(() => {
-      web3Obj.setweb3()
-      window.ethereum.enable().then(accounts => {
-        // update store here ideally
-        this.setState({ account: accounts[0] })
+  setStateInfo = () => {
+    web3Obj.web3.eth.getAccounts().then(accounts => {
+      this.setState({ account: accounts[0] })
+      web3Obj.web3.eth.getBalance(accounts[0]).then(balance => {
+        this.setState({ balance: balance })
       })
-    }, 100)
+    })
   }
 
-  importTorus = () => {
-    import('@toruslabs/torus-embed').then(this.enableTorus)
+  enableTorus = async () => {
+    try {
+      await web3Obj.initialize()
+      this.setStateInfo()
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   render() {
     return (
       <div className="App">
         <div>
-          <button onClick={this.importTorus}>Start using Torus</button>
+          <button onClick={this.enableTorus}>Start using Torus</button>
         </div>
         <div>
           {/* <button onClick={this.enableTorus}>Enable Torus</button> */}
