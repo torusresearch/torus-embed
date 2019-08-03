@@ -67,7 +67,7 @@ class Torus {
             )
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
-              runOnLoad(this.setupWeb3)
+              runOnLoad(this.setupWeb3.bind(this))
               resolve()
             } else {
               this.torusLogin.style.display = 'none'
@@ -76,7 +76,7 @@ class Torus {
             }
           })
       } else {
-        runOnLoad(this.setupWeb3)
+        runOnLoad(this.setupWeb3.bind(this))
         resolve()
       }
     })
@@ -100,22 +100,23 @@ class Torus {
     // Iframe code
     this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
     // Setup on load code
-    function bindOnLoad() {
-      this.torusLogin.addEventListener('click', function() {
+    const bindOnLoad = () => {
+      this.torusLogin.addEventListener('click', () => {
         this.login(false)
       })
-      this.torusMenuBtn.addEventListener('click', function() {
+      this.torusMenuBtn.addEventListener('click', () => {
         this.showWallet(true)
       })
     }
 
-    function attachOnLoad() {
+    const attachOnLoad = () => {
       window.document.head.appendChild(link)
       window.document.body.appendChild(this.torusIframe)
       window.document.body.appendChild(this.torusWidget)
     }
-    runOnLoad(attachOnLoad)
-    runOnLoad(bindOnLoad)
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
 
     log.info('STYLE POSITION: ' + this.stylePosition)
     switch (this.stylePosition) {
@@ -174,18 +175,22 @@ class Torus {
     window.metamaskStream = this.communicationStream
 
     // compose the inpage provider
-    const inpageProvider = new MetamaskInpageProvider(this.metamaskStream)
+    const inpageProvider = new MetamaskInpageProvider(this.metamaskStream, {
+      ethereum: this.ethereum,
+      web3: this.web3
+    })
 
     // detect eth_requestAccounts and pipe to enable for now
-    function detectAccountRequestPrototypeModifier(m) {
+    const detectAccountRequestPrototypeModifier = m => {
       const originalMethod = inpageProvider[m]
       inpageProvider[m] = function({ method }) {
         if (method === 'eth_requestAccounts') {
-          return window.ethereum.enable()
+          return this.ethereum.enable()
         }
         return originalMethod.apply(this, arguments)
-      }
+      }.bind(this)
     }
+
     detectAccountRequestPrototypeModifier('send')
     detectAccountRequestPrototypeModifier('sendAsync')
 
@@ -238,7 +243,7 @@ class Torus {
 
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
-    statusStream.on('data', function(status) {
+    statusStream.on('data', status => {
       log.info('data received on statusStream')
       log.info(status)
       if (status.loggedIn) this.showTorusButton()

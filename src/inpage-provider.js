@@ -1,19 +1,21 @@
+import createErrorMiddleware from './createErrorMiddleware'
+import createTransformEthAddressMiddleware from './createTransformEthAddressMiddleware'
+import { setupMultiplex } from './stream-utils.js'
+import { Duplex as DuplexStream } from 'readable-stream'
+import embedUtils from './embedUtils'
 const pump = require('pump')
 const RpcEngine = require('json-rpc-engine')
 const createIdRemapMiddleware = require('json-rpc-engine/src/idRemapMiddleware')
-const createErrorMiddleware = require('./createErrorMiddleware')
 const createJsonRpcStream = require('json-rpc-middleware-stream')
-const createTransformEthAddressMiddleware = require('./createTransformEthAddressMiddleware')
 const SafeEventEmitter = require('safe-event-emitter')
-const setupMultiplex = require('./stream-utils.js').setupMultiplex
-const DuplexStream = require('readable-stream').Duplex
 const log = require('loglevel')
 const ObservableStore = require('obs-store')
-const embedUtils = require('./embedUtils')
 
 class LocalStorageStream extends DuplexStream {
-  constructor() {
+  constructor(ethereum, web3) {
     super({ objectMode: true })
+    this.ethereum = ethereum
+    this.web3 = web3
   }
 
   _read(chunk, enc, cb) {
@@ -32,23 +34,23 @@ class LocalStorageStream extends DuplexStream {
         if (data[key] !== '' && data[key] !== null && data[key] !== undefined) {
           var prevSelectedAddress = window.sessionStorage.getItem('selectedAddress')
           var newSelectedAddress = embedUtils.transformEthAddress(data[key])
-          window.torus.web3.eth.defaultAccount = newSelectedAddress
-          window.ethereum.selectedAddress = newSelectedAddress
-          window.ethereum.publicConfigStore.updateState({ selectedAddress: newSelectedAddress })
+          this.web3.eth.defaultAccount = newSelectedAddress
+          this.ethereum.selectedAddress = newSelectedAddress
+          this.ethereum.publicConfigStore.updateState({ selectedAddress: newSelectedAddress })
           window.sessionStorage.setItem('selectedAddress', newSelectedAddress)
           if (prevSelectedAddress !== newSelectedAddress) {
             self.emit('accountsChanged', [newSelectedAddress])
           }
         } else {
-          delete window.torus.web3.eth.defaultAccount
-          delete window.ethereum.selectedAddress
+          delete this.web3.eth.defaultAccount
+          delete this.ethereum.selectedAddress
           window.sessionStorage.removeItem('selectedAddress')
         }
       } else if (key === 'networkVersion') {
         window.sessionStorage.setItem(key, data[key])
-        if (window.ethereum.networkVersion !== data[key].toString()) {
-          window.ethereum.publicConfigStore.updateState({ networkVersion: data[key].toString() })
-          window.ethereum.networkVersion = data[key].toString()
+        if (this.ethereum.networkVersion !== data[key].toString()) {
+          this.ethereum.publicConfigStore.updateState({ networkVersion: data[key].toString() })
+          this.ethereum.networkVersion = data[key].toString()
         }
       } else {
         window.sessionStorage.setItem(key, data[key])
@@ -90,12 +92,12 @@ class MetamaskInpageProvider extends SafeEventEmitter {
         }
       }
       self.publicConfigStore.subscribe(function(state) {
-        window.torus.web3.eth.defaultAccount = state.selectedAddress
+        opts.web3.eth.defaultAccount = state.selectedAddress
       })
     }
 
     Object.defineProperty(self, 'lss', {
-      value: new LocalStorageStream(),
+      value: new LocalStorageStream(opts.ethereum, opts.web3),
       writable: true,
       enumerable: false
     })

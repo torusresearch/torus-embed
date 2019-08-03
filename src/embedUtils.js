@@ -1,4 +1,4 @@
-function runOnLoad(fn) {
+const runOnLoad = fn => {
   if (window.document.body != null) {
     fn()
   } else {
@@ -6,7 +6,7 @@ function runOnLoad(fn) {
   }
 }
 
-function runOnComplete(fn) {
+const runOnComplete = fn => {
   var retry = window.setInterval(function() {
     if (window.document.readyState === 'complete') {
       window.clearInterval(retry)
@@ -15,14 +15,14 @@ function runOnComplete(fn) {
   }, 300)
 }
 
-function htmlToElement(html) {
+const htmlToElement = html => {
   var template = window.document.createElement('template')
   var trimmedHtml = html.trim() // Never return a text node of whitespace as the result
   template.innerHTML = trimmedHtml
   return template.content.firstChild
 }
 
-function transformEthAddress(ethAddress) {
+const transformEthAddress = ethAddress => {
   // return ethAddress
   if (Array.isArray(ethAddress)) {
     return ethAddress.map(addr => (typeof addr === 'string' ? addr.toLowerCase() : addr))
