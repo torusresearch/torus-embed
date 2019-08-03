@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   torusNodeEndpoints: [
     'https://binancelabs-main-2.tor.us/jrpc',
     'https://waseda-main-2.tor.us/jrpc',
