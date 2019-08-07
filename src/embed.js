@@ -123,7 +123,6 @@ class Torus {
     runOnLoad(attachOnLoad.bind(this))
     runOnLoad(bindOnLoad.bind(this))
 
-    log.info('STYLE POSITION: ' + this.stylePosition)
     switch (this.stylePosition) {
       case 'top-left':
         this.torusWidget.style.top = '8px'
@@ -266,8 +265,6 @@ class Torus {
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
-      log.info('data received on statusStream')
-      log.info(status)
       this.isLoggedIn = status.loggedIn
       if (status.loggedIn) this.showTorusButtonAndHideGoogle()
       else this.hideTorusButtonAndShowGoogle()
@@ -305,7 +302,6 @@ class Torus {
     var providerChangeStream = this.communicationMux.getStream('provider_change')
     if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
       throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
-    log.info('trying to change provider to', network)
     providerChangeStream.write({ name: 'provider_change', data: { network, type } })
   }
 
@@ -347,10 +343,7 @@ class Torus {
         })
         .catch(err => console.error(err))
         .then(lookupShare => {
-          log.info('completed')
-          log.info(lookupShare)
           var ethAddress = lookupShare.result.keys[0].address
-          log.info(ethAddress)
           resolve(ethAddress)
         })
         .catch(err => {
@@ -368,7 +361,6 @@ class Torus {
       const userInfoStream = this.communicationMux.getStream('user_info')
       userInfoStream.write({ name: 'user_info_request' })
       userInfoStream.on('data', function(chunk) {
-        log.info(chunk, 'chunk')
         resolve(chunk)
         if (chunk.name === 'user_info_response') {
           if (chunk.data.approved) {
