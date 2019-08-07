@@ -26,6 +26,7 @@ class Torus {
     this.torusMenuBtn = {}
     this.torusLogin = {}
     this.torusIframe = {}
+    this.isLoggedIn = false
   }
 
   init(buildEnv = 'production') {
@@ -144,15 +145,32 @@ class Torus {
     }
   }
 
-  showTorusButton() {
+  showTorusButtonAndHideGoogle() {
     // torusIframeContainer.style.display = 'none'
     this.torusMenuBtn.style.display = 'block'
     this.torusLogin.style.display = 'none'
   }
 
-  hideTorusButton() {
+  hideTorusButtonAndShowGoogle() {
     this.torusLogin.style.display = 'block'
     this.torusMenuBtn.style.display = 'none'
+  }
+
+  /**
+   * Hides the torus button in the dapp context
+   */
+  hideTorusButton() {
+    this.torusMenuBtn.style.display = 'none'
+    this.torusLogin.style.display = 'none'
+  }
+
+  /**
+   * Shows the torus button in the dapp context.
+   * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
+   */
+  showTorusButton() {
+    if (this.isLoggedIn) this.showTorusButtonAndHideGoogle()
+    else this.hideTorusButtonAndShowGoogle()
   }
 
   setupWeb3() {
@@ -250,8 +268,9 @@ class Torus {
     statusStream.on('data', status => {
       log.info('data received on statusStream')
       log.info(status)
-      if (status.loggedIn) this.showTorusButton()
-      else if (status.loggedIn === false) this.hideTorusButton()
+      this.isLoggedIn = status.loggedIn
+      if (status.loggedIn) this.showTorusButtonAndHideGoogle()
+      else this.hideTorusButtonAndShowGoogle()
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
@@ -296,7 +315,7 @@ class Torus {
   }
 
   /**
-   * Expose the getPublicKey API to the Dapp through window.torus object
+   * Expose the getPublicAddress API to the Dapp through torus object
    * @param {String} email Email address of the user
    */
   getPublicAddress(email) {
@@ -338,6 +357,27 @@ class Torus {
           console.error(err)
           reject(err)
         })
+    })
+  }
+
+  /**
+   * Expose the loggedin user info to the Dapp through torus object
+   */
+  getUserInfo() {
+    return new Promise((resolve, reject) => {
+      const userInfoStream = this.communicationMux.getStream('user_info')
+      userInfoStream.write({ name: 'user_info_request' })
+      userInfoStream.on('data', function(chunk) {
+        log.info(chunk, 'chunk')
+        resolve(chunk)
+        if (chunk.name === 'user_info_response') {
+          if (chunk.data.approved) {
+            resolve(chunk.data.payload)
+          } else {
+            reject(new Error('User rejected the request'))
+          }
+        }
+      })
     })
   }
 }

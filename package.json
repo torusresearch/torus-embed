@@ -12,7 +12,7 @@
   "scripts": {
     "build:babel": "babel ./src --out-dir dist/ && cp ./src/embed.d.ts ./dist/embed.d.ts",
     "build": "rimraf ./dist && npm run build:babel && npm run build-embed && npm run pre-build",
-    "build-embed": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
+    "build-embed": "node ./scripts/createEmbed.js",
     "lint:js": "eslint --fix src/**/*.js",
     "pre-build": ". ./scripts/calculateIntegrity.sh",
     "test:e2e": "node ./test/e2e/puppeteer.js",
