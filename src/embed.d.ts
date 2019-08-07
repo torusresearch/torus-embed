@@ -5,13 +5,22 @@ export default class Torus {
   provider: Provider
   ethereum: Provider
   getPublicAddress(email: string): Promise<string>;
-  setProvider(network: string | {networkUrl: string, chainId: number, networkName: string}, type?: "rpc")
+  setProvider(network: string | { networkUrl: string, chainId: number, networkName: string }, type?: "rpc")
   showWallet(calledFromEmbed: boolean)
+  showTorusButton()
+  hideTorusButton()
+  getUserInfo(): Promise<UserInfo>;
   init(buildEnv?: 'production' | 'development' | 'staging' | 'testing'): Promise<void>
 }
 
 declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
+}
+
+interface UserInfo {
+  email: string;
+  name: string;
+  profileImage: string;
 }
 
 interface JsonRPCResponse {
