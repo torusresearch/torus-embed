@@ -10,7 +10,9 @@ export default class Torus {
   showTorusButton()
   hideTorusButton()
   getUserInfo(): Promise<UserInfo>;
-  init(buildEnv?: 'production' | 'development' | 'staging' | 'testing'): Promise<void>
+  init(buildEnv?: 'production' | 'development' | 'staging' | 'testing', enableLogging?: boolean): Promise<void>
+  login(): Promise<string[]>
+  logout(): Promise<void>
 }
 
 declare class Provider {

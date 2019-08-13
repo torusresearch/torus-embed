@@ -1,7 +1,7 @@
 // Torus loading message
 // const Web3 = require('web3')
 import sriToolbox from 'sri-toolbox'
-import log from 'loglevel'
+import * as log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import MetamaskInpageProvider from './inpage-provider.js'
 import { setupMultiplex } from './stream-utils.js'
@@ -29,7 +29,7 @@ class Torus {
     this.isLoggedIn = false
   }
 
-  init(buildEnv = 'production') {
+  init(buildEnv = 'production', enableLogging = false) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
@@ -52,7 +52,9 @@ class Torus {
           break
       }
       log.setDefaultLevel(logLevel)
-      this.createWidget(torusUrl)
+      if (enableLogging) log.enableAll()
+      else log.disableAll()
+      this._createWidget(torusUrl)
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
       }
@@ -82,8 +84,29 @@ class Torus {
           })
       } else {
         runOnLoad(attachIFrame.bind(this))
-        runOnLoad(this.setupWeb3.bind(this))
+        runOnLoad(this._setupWeb3.bind(this))
         resolve()
+      }
+    })
+  }
+
+  login() {
+    if (this.isLoggedIn) throw new Error('User has already logged in')
+    else {
+      return this.ethereum.enable()
+    }
+  }
+
+  logout() {
+    return new Promise((resolve, reject) => {
+      if (!this.isLoggedIn) reject(new Error('User has not logged in yet'))
+      else {
+        const logOutStream = this.communicationMux.getStream('logout')
+        logOutStream.write({ name: 'logOut' })
+        var statusStream = this.communicationMux.getStream('status')
+        statusStream.on('data', status => {
+          if (!status.loggedIn) resolve()
+        })
       }
     })
   }
@@ -91,7 +114,7 @@ class Torus {
   /**
    * Create widget
    */
-  createWidget(torusUrl) {
+  _createWidget(torusUrl) {
     var link = window.document.createElement('link')
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
@@ -108,7 +131,7 @@ class Torus {
     // Setup on load code
     const bindOnLoad = () => {
       this.torusLogin.addEventListener('click', () => {
-        this.login(false)
+        this._showLoginPopup(false)
       })
       this.torusMenuBtn.addEventListener('click', () => {
         this.showWallet(true)
@@ -144,13 +167,13 @@ class Torus {
     }
   }
 
-  showTorusButtonAndHideGoogle() {
+  _showTorusButtonAndHideGoogle() {
     // torusIframeContainer.style.display = 'none'
     this.torusMenuBtn.style.display = 'block'
     this.torusLogin.style.display = 'none'
   }
 
-  hideTorusButtonAndShowGoogle() {
+  _hideTorusButtonAndShowGoogle() {
     this.torusLogin.style.display = 'block'
     this.torusMenuBtn.style.display = 'none'
   }
@@ -168,11 +191,11 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
-    if (this.isLoggedIn) this.showTorusButtonAndHideGoogle()
-    else this.hideTorusButtonAndShowGoogle()
+    if (this.isLoggedIn) this._showTorusButtonAndHideGoogle()
+    else this._hideTorusButtonAndShowGoogle()
   }
 
-  setupWeb3() {
+  _setupWeb3() {
     log.info('setupWeb3 running')
     // setup background connection
     this.metamaskStream = new LocalMessageDuplexStream({
@@ -243,7 +266,7 @@ class Torus {
                 oauthStream.removeListener('data', handler)
               }
               oauthStream.on('data', handler)
-              this.login(true)
+              this._showLoginPopup(true)
             }
           }.bind(this)
         )
@@ -266,8 +289,8 @@ class Torus {
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
       this.isLoggedIn = status.loggedIn
-      if (status.loggedIn) this.showTorusButtonAndHideGoogle()
-      else this.hideTorusButtonAndShowGoogle()
+      if (status.loggedIn) this._showTorusButtonAndHideGoogle()
+      else this._hideTorusButtonAndShowGoogle()
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
@@ -293,7 +316,7 @@ class Torus {
   }
 
   // Exposing login function, if called from embed, flag as true
-  login(calledFromEmbed) {
+  _showLoginPopup(calledFromEmbed) {
     var oauthStream = this.communicationMux.getStream('oauth')
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
@@ -324,7 +347,7 @@ class Torus {
         node,
         generateJsonRPCObject('VerifierLookupRequest', {
           verifier: 'google',
-          verifier_id: email
+          verifier_id: email.toLowerCase()
         })
       )
         .catch(err => console.error(err))
@@ -334,7 +357,7 @@ class Torus {
               node,
               generateJsonRPCObject('KeyAssign', {
                 verifier: 'google',
-                verifier_id: email
+                verifier_id: email.toLowerCase()
               })
             )
           } else if (lookupShare.result) {
@@ -358,18 +381,20 @@ class Torus {
    */
   getUserInfo() {
     return new Promise((resolve, reject) => {
-      const userInfoStream = this.communicationMux.getStream('user_info')
-      userInfoStream.write({ name: 'user_info_request' })
-      userInfoStream.on('data', function(chunk) {
-        resolve(chunk)
-        if (chunk.name === 'user_info_response') {
-          if (chunk.data.approved) {
-            resolve(chunk.data.payload)
-          } else {
-            reject(new Error('User rejected the request'))
+      if (this.isLoggedIn) {
+        const userInfoStream = this.communicationMux.getStream('user_info')
+        userInfoStream.write({ name: 'user_info_request' })
+        userInfoStream.on('data', function(chunk) {
+          resolve(chunk)
+          if (chunk.name === 'user_info_response') {
+            if (chunk.data.approved) {
+              resolve(chunk.data.payload)
+            } else {
+              reject(new Error('User rejected the request'))
+            }
           }
-        }
-      })
+        })
+      } else reject(new Error('User has not logged in yet'))
     })
   }
 }
