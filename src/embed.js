@@ -1,7 +1,7 @@
 // Torus loading message
 // const Web3 = require('web3')
 import sriToolbox from 'sri-toolbox'
-import * as log from 'loglevel'
+import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import MetamaskInpageProvider from './inpage-provider.js'
 import { setupMultiplex } from './stream-utils.js'
