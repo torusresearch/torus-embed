@@ -52,7 +52,7 @@ jobs:
       - run:
           name: "Build code for torus embed"
           command: |
-            npm run build
+            npm run build:staging
       - persist_to_workspace:
           root: ~/torus-embed
           paths: .
@@ -67,7 +67,7 @@ jobs:
       - run:
           name: "Build code for torus embed"
           command: |
-            npm run build
+            npm run build:dev
       - <<: *step_save_cache
   deploy:
     <<: *deploy_function

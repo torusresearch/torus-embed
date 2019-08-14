@@ -5,6 +5,7 @@ node_modules
 src/
 
 embed.min.js
+embed.user.js
 # local env files
 .env.local
 .env.*.local
@@ -27,7 +28,6 @@ disc.html
 
 .vscode
 .editorconfig
-public
 scripts
 test
 .eslintrc.json

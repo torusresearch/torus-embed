@@ -13,11 +13,6 @@ const securityHeaderMiddleware = (req, res, next) => {
   res.setHeader('X-XSS-Protection', '1; mode=block')
   res.setHeader('X-Content-Type-Options', 'nosniff')
   res.setHeader('Access-Control-Allow-Origin', '*')
-  if (req.originalUrl.startsWith('/popup')) {
-    // skip any /popup routes for x-frame-options for it to function properly
-    next()
-    return
-  }
   res.setHeader('X-Frame-Options', 'sameorigin')
   next()
 }

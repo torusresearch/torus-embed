@@ -27,6 +27,7 @@ class Torus {
     this.torusLogin = {}
     this.torusIframe = {}
     this.isLoggedIn = false
+    this.Web3 = Web3
   }
 
   init(buildEnv = 'production', enableLogging = false) {
@@ -74,7 +75,7 @@ class Torus {
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
               runOnLoad(attachIFrame.bind(this))
-              runOnLoad(this.setupWeb3.bind(this))
+              runOnLoad(this._setupWeb3.bind(this))
               resolve()
             } else {
               this.torusLogin.style.display = 'none'
