@@ -11,7 +11,7 @@ const web3Obj = {
   initialize: async function() {
     const torus = new Torus()
     await torus.init()
-    await torus.ethereum.enable()
+    await torus.login()
     web3Obj.setweb3(torus.provider)
   }
 }

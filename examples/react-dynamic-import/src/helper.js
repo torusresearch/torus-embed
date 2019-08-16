@@ -12,7 +12,7 @@ const web3Obj = {
     const Torus = defaultTorus.default
     const torus = new Torus()
     await torus.init()
-    await torus.ethereum.enable()
+    await torus.login()
     web3Obj.setweb3(torus.provider)
   }
 }
