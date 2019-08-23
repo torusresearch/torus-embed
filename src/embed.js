@@ -15,7 +15,7 @@ cleanContextForImports()
 // eslint-disable-next-line no-unused-vars
 // window.Web3 = Web3
 
-const iframeIntegrity = 'sha384-Vb3FLwTGGxk5vC+XhA4J0NoeaPUt1TnvE+422mMhqh5d8cbiHJVKM/judK8H8QMS'
+const iframeIntegrity = 'sha384-wqP/6cbQLNWAPqh5HGdPNuNdrEfTbiF/YKWF+3+ofAoK+r6a7cSgoxV69MN5IPk9'
 
 restoreContextAfterImports()
 
@@ -48,7 +48,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.0.20'
+          torusUrl = 'https://app.tor.us/v0.0.21'
           logLevel = 'error'
           break
       }
