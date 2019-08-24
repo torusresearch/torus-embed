@@ -36,7 +36,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.0.21'
+          torusUrl = 'https://staging.tor.us/v0.0.23'
           logLevel = 'info'
           break
         case 'testing':
@@ -410,8 +410,8 @@ var __define
  * AMD's define function
  */
 function cleanContextForImports() {
-  __define = global.define
   try {
+    __define = global.define
     global.define = undefined
   } catch (_) {
     log.warn('MetaMask - global.define could not be deleted.')
