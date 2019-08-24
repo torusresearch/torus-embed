@@ -62,8 +62,7 @@ class Torus {
       if (buildEnv !== 'testing' && buildEnv !== 'development') {
         // hacky solution to check for iframe integrity
         const fetchUrl = torusUrl + '/index.html'
-        global.window
-          .fetch(fetchUrl)
+        fetch(fetchUrl)
           .then(resp => resp.text())
           .then(response => {
             const integrity = sriToolbox.generate(
