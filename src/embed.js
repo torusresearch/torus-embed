@@ -245,13 +245,14 @@ class Torus {
         this.web3.eth.getAccounts(
           function(err, res) {
             if (err) {
-              setTimeout(function() {
+              setTimeout(() => {
                 reject(err)
-              }, 50)
+              }, 100)
             } else if (Array.isArray(res) && res.length > 0) {
-              setTimeout(function() {
+              this.isLoggedIn = true
+              setTimeout(() => {
                 resolve(res)
-              }, 50)
+              }, 100)
             } else {
               // set up listener for login
               var oauthStream = this.communicationMux.getStream('oauth')
