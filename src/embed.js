@@ -139,11 +139,20 @@ class Torus {
     // Speed dial list
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
     this.homeBtn = htmlToElement('<li><button class="torus-btn"><img src="' + homeImg + '" alt="" /></button></li>')
-    this.keyBtn = htmlToElement('<li><button class="torus-btn torus-btn--text">0xe5..</button></li>')
+
+    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy to clickboard</div>')
+    const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
+    this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
+    this.keyContainer = htmlToElement('<li class="tooltip"></li>')
+
+    this.keyContainer.appendChild(this.keyBtn)
+    this.keyContainer.appendChild(tooltipNote)
+    this.keyContainer.appendChild(tooltipCopied)
+
     this.transferBtn = htmlToElement('<li><button class="torus-btn"><img src="' + transferImg + '" alt="" /></button></li>')
 
     this.torusSpeedDial.appendChild(this.homeBtn)
-    this.torusSpeedDial.appendChild(this.keyBtn)
+    this.torusSpeedDial.appendChild(this.keyContainer)
     this.torusSpeedDial.appendChild(this.transferBtn)
 
     this.torusWidget.prepend(this.torusSpeedDial)
@@ -163,8 +172,23 @@ class Torus {
       this.transferBtn.addEventListener('click', () => {
         this.showWallet(true, '/transfer')
       })
-      // TODO
-      // keyBtn
+
+      this.keyBtn.addEventListener('click', () => {
+        const publicKey = htmlToElement('<input type="text" value="' + this.ethereum.selectedAddress + '">')
+        this.torusWidget.prepend(publicKey)
+        publicKey.select()
+        publicKey.setSelectionRange(0, 99999) // For mobile
+
+        document.execCommand('copy')
+        this.torusWidget.removeChild(publicKey)
+
+        tooltipCopied.classList.add('active')
+        tooltipNote.classList.add('active')
+        setTimeout(function() {
+          tooltipCopied.classList.remove('active')
+          tooltipNote.classList.remove('active')
+        }, 1000)
+      })
 
       var self = this
       this.torusMenuBtn.addEventListener('click', function() {
