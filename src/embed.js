@@ -30,7 +30,7 @@ class Torus {
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'production', enableLogging = false) {
+  init(buildEnv = 'development', enableLogging = false) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
@@ -160,9 +160,11 @@ class Torus {
         this.showWallet(true)
       })
 
+      this.transferBtn.addEventListener('click', () => {
+        this.showWallet(true, '/transfer')
+      })
       // TODO
       // keyBtn
-      // transferBtn
 
       var self = this
       this.torusMenuBtn.addEventListener('click', function() {
@@ -361,9 +363,9 @@ class Torus {
     providerChangeStream.write({ name: 'provider_change', data: { network, type } })
   }
 
-  showWallet(calledFromEmbed) {
+  showWallet(calledFromEmbed, path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
+    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
   }
 
   toggleSpeedDial(target, isActive, torusDarkImg, torusLightImg) {
