@@ -30,7 +30,7 @@ class Torus {
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'development', enableLogging = false) {
+  init(buildEnv = 'production', enableLogging = false) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
@@ -116,8 +116,6 @@ class Torus {
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
-    var loginImg = torusUrl + '/images/login.png'
-    var loginWithGoogleImg = torusUrl + '/images/loginwithgoogle.png'
     var homeImg = torusUrl + '/img/icons/home.svg'
     var transferImg = torusUrl + '/img/icons/indent-increase.svg'
     var torusDarkImg = torusUrl + '/img/icons/torus-icon-dark.svg'
@@ -129,7 +127,7 @@ class Torus {
 
     // Login button code
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"><img src="' + loginImg + '" alt="" /></button>')
+    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
     this.torusWidget.appendChild(this.torusLogin)
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
 
@@ -156,16 +154,6 @@ class Torus {
     const bindOnLoad = () => {
       this.torusLogin.addEventListener('click', () => {
         this._showLoginPopup(false)
-      })
-
-      this.torusLogin.addEventListener('mouseenter', function() {
-        const targetImg = Object.values(this.children).filter(el => el.tagName === 'IMG')[0]
-        targetImg.src = loginWithGoogleImg
-      })
-
-      this.torusLogin.addEventListener('mouseleave', function() {
-        const targetImg = Object.values(this.children).filter(el => el.tagName === 'IMG')[0]
-        targetImg.src = loginImg
       })
 
       this.homeBtn.addEventListener('click', () => {
