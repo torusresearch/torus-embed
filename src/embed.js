@@ -30,7 +30,7 @@ class Torus {
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'production', enableLogging = false) {
+  init(buildEnv = 'development', enableLogging = false) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
@@ -116,15 +116,39 @@ class Torus {
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
+    var loginImg = torusUrl + '/images/login.png'
+    var loginWithGoogleImg = torusUrl + '/images/loginwithgoogle.png'
+    var homeImg = torusUrl + '/img/icons/home.svg'
+    var transferImg = torusUrl + '/img/icons/indent-increase.svg'
+    var torusDarkImg = torusUrl + '/img/icons/torus-icon-dark.svg'
+    var torusLightImg = torusUrl + '/img/icons/torus-icon-light.svg'
+
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
     link.setAttribute('href', torusUrl + '/css/widget.css')
+
     // Login button code
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-    this.torusLogin = htmlToElement('<button id="torusLogin" />')
+    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"><img src="' + loginImg + '" alt="" /></button>')
     this.torusWidget.appendChild(this.torusLogin)
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
+
+    this.torusMenuImg = htmlToElement('<img src="' + torusLightImg + '" alt="" />')
+    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
+    this.torusMenuBtn.appendChild(this.torusMenuImg)
     this.torusWidget.appendChild(this.torusMenuBtn)
+
+    // Speed dial list
+    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
+    this.homeBtn = htmlToElement('<li><button class="torus-btn"><img src="' + homeImg + '" alt="" /></button></li>')
+    this.keyBtn = htmlToElement('<li><button class="torus-btn torus-btn--text">0xe5..</button></li>')
+    this.transferBtn = htmlToElement('<li><button class="torus-btn"><img src="' + transferImg + '" alt="" /></button></li>')
+
+    this.torusSpeedDial.appendChild(this.homeBtn)
+    this.torusSpeedDial.appendChild(this.keyBtn)
+    this.torusSpeedDial.appendChild(this.transferBtn)
+
+    this.torusWidget.prepend(this.torusSpeedDial)
 
     // Iframe code
     this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
@@ -133,8 +157,29 @@ class Torus {
       this.torusLogin.addEventListener('click', () => {
         this._showLoginPopup(false)
       })
-      this.torusMenuBtn.addEventListener('click', () => {
+
+      this.torusLogin.addEventListener('mouseenter', function() {
+        const targetImg = Object.values(this.children).filter(el => el.tagName === 'IMG')[0]
+        targetImg.src = loginWithGoogleImg
+      })
+
+      this.torusLogin.addEventListener('mouseleave', function() {
+        const targetImg = Object.values(this.children).filter(el => el.tagName === 'IMG')[0]
+        targetImg.src = loginImg
+      })
+
+      this.homeBtn.addEventListener('click', () => {
         this.showWallet(true)
+      })
+
+      // TODO
+      // keyBtn
+      // transferBtn
+
+      var self = this
+      this.torusMenuBtn.addEventListener('click', function() {
+        this.classList.toggle('active')
+        self.toggleSpeedDial(this, this.classList.contains('active'), torusDarkImg, torusLightImg)
       })
     }
 
@@ -148,21 +193,21 @@ class Torus {
 
     switch (this.stylePosition) {
       case 'top-left':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.left = '34px'
         break
       case 'top-right':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-right':
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-left':
       default:
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.left = '34px'
         break
     }
   }
@@ -331,6 +376,23 @@ class Torus {
   showWallet(calledFromEmbed) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
     showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
+  }
+
+  toggleSpeedDial(target, isActive, torusDarkImg, torusLightImg) {
+    const targetImg = Object.values(target.children).filter(el => el.tagName === 'IMG')[0]
+
+    targetImg.src = isActive ? torusDarkImg : torusLightImg
+
+    this.torusSpeedDial.classList.toggle('active')
+
+    var torusSpeedDial = this.torusSpeedDial
+    setTimeout(function() {
+      let time = isActive ? 0.05 : 0.15
+      Object.values(torusSpeedDial.children).forEach(element => {
+        element.style.transitionDelay = time + 's'
+        time += isActive ? 0.05 : -0.05
+      })
+    }, 200)
   }
 
   /**
