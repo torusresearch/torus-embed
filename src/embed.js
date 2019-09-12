@@ -30,7 +30,7 @@ class Torus {
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'development', enableLogging = false) {
+  init(buildEnv = 'production', enableLogging = false) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
