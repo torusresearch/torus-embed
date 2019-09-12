@@ -104,9 +104,12 @@ class Torus {
         const logOutStream = this.communicationMux.getStream('logout')
         logOutStream.write({ name: 'logOut' })
         var statusStream = this.communicationMux.getStream('status')
-        statusStream.on('data', status => {
+        const statusStreamHandler = status => {
           if (!status.loggedIn) resolve()
-        })
+          else reject(new Error('Some Error Occured'))
+          statusStream.removeListener('data', statusStreamHandler)
+        }
+        statusStream.on('data', statusStreamHandler)
       }
     })
   }
@@ -254,10 +257,12 @@ class Torus {
               // when a user is logged in
               // with a combination of ethereum.enable() not waiting for rehydration
               const statusStream = this.communicationMux.getStream('status')
-              statusStream.on('data', status => {
+              const statusStreamHandler = status => {
                 if (status.loggedIn) resolve(res)
                 else reject(new Error('User has not logged in yet'))
-              })
+                statusStream.removeListener('data', statusStreamHandler)
+              }
+              statusStream.on('data', statusStreamHandler)
             } else {
               // set up listener for login
               var oauthStream = this.communicationMux.getStream('oauth')
@@ -390,8 +395,7 @@ class Torus {
       if (this.isLoggedIn) {
         const userInfoStream = this.communicationMux.getStream('user_info')
         userInfoStream.write({ name: 'user_info_request' })
-        userInfoStream.on('data', function(chunk) {
-          resolve(chunk)
+        const userInfoHandler = chunk => {
           if (chunk.name === 'user_info_response') {
             if (chunk.data.approved) {
               resolve(chunk.data.payload)
@@ -399,7 +403,9 @@ class Torus {
               reject(new Error('User rejected the request'))
             }
           }
-        })
+          userInfoStream.removeListener('data', userInfoHandler)
+        }
+        userInfoStream.on('data', userInfoHandler)
       } else reject(new Error('User has not logged in yet'))
     })
   }
