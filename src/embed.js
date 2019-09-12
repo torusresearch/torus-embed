@@ -136,7 +136,7 @@ class Torus {
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
     this.homeBtn = htmlToElement('<li><button class="torus-btn"><img src="' + homeImg + '" alt="" /></button></li>')
 
-    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy to clickboard</div>')
+    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
     const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
     this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
     this.keyContainer = htmlToElement('<li class="tooltip"></li>')
