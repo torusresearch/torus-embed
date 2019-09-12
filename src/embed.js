@@ -116,8 +116,6 @@ class Torus {
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
-    var homeImg = torusUrl + '/img/icons/home.svg'
-    var transferImg = torusUrl + '/img/icons/indent-increase.svg'
 
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
@@ -134,7 +132,7 @@ class Torus {
 
     // Speed dial list
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
-    this.homeBtn = htmlToElement('<li><button class="torus-btn"><img src="' + homeImg + '" alt="" /></button></li>')
+    this.homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
 
     const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
     const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
@@ -145,7 +143,7 @@ class Torus {
     this.keyContainer.appendChild(tooltipNote)
     this.keyContainer.appendChild(tooltipCopied)
 
-    this.transferBtn = htmlToElement('<li><button class="torus-btn"><img src="' + transferImg + '" alt="" /></button></li>')
+    this.transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
 
     this.torusSpeedDial.appendChild(this.homeBtn)
     this.torusSpeedDial.appendChild(this.keyContainer)
