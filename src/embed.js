@@ -247,16 +247,17 @@ class Torus {
             if (err) {
               setTimeout(() => {
                 reject(err)
-              }, 100)
+              }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
               // Fix to solve issue #30
               // On rehydration, torus.getUserInfo() fails until a certain time due to status stream not updating
               // when a user is logged in
               // with a combination of ethereum.enable() not waiting for rehydration
-              this.isLoggedIn = true
-              setTimeout(() => {
-                resolve(res)
-              }, 100)
+              const statusStream = this.communicationMux.getStream('status')
+              statusStream.on('data', status => {
+                if (status.loggedIn) resolve(res)
+                else reject(new Error('User has not logged in yet'))
+              })
             } else {
               // set up listener for login
               var oauthStream = this.communicationMux.getStream('oauth')
