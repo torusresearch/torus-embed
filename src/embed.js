@@ -118,8 +118,6 @@ class Torus {
     var link = window.document.createElement('link')
     var homeImg = torusUrl + '/img/icons/home.svg'
     var transferImg = torusUrl + '/img/icons/indent-increase.svg'
-    var torusDarkImg = torusUrl + '/img/icons/torus-icon-dark.svg'
-    var torusLightImg = torusUrl + '/img/icons/torus-icon-light.svg'
 
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
@@ -131,9 +129,7 @@ class Torus {
     this.torusWidget.appendChild(this.torusLogin)
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
 
-    this.torusMenuImg = htmlToElement('<img src="' + torusLightImg + '" alt="" />')
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
-    this.torusMenuBtn.appendChild(this.torusMenuImg)
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
@@ -167,10 +163,12 @@ class Torus {
 
       this.homeBtn.addEventListener('click', () => {
         this.showWallet(true)
+        this.toggleSpeedDial()
       })
 
       this.transferBtn.addEventListener('click', () => {
         this.showWallet(true, '/transfer')
+        this.toggleSpeedDial()
       })
 
       this.keyBtn.addEventListener('click', () => {
@@ -184,16 +182,17 @@ class Torus {
 
         tooltipCopied.classList.add('active')
         tooltipNote.classList.add('active')
+
+        var self = this
         setTimeout(function() {
           tooltipCopied.classList.remove('active')
           tooltipNote.classList.remove('active')
+          self.toggleSpeedDial()
         }, 1000)
       })
 
-      var self = this
-      this.torusMenuBtn.addEventListener('click', function() {
-        this.classList.toggle('active')
-        self.toggleSpeedDial(this, this.classList.contains('active'), torusDarkImg, torusLightImg)
+      this.torusMenuBtn.addEventListener('click', () => {
+        this.toggleSpeedDial()
       })
     }
 
@@ -392,14 +391,12 @@ class Torus {
     showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
   }
 
-  toggleSpeedDial(target, isActive, torusDarkImg, torusLightImg) {
-    const targetImg = Object.values(target.children).filter(el => el.tagName === 'IMG')[0]
-
-    targetImg.src = isActive ? torusDarkImg : torusLightImg
-
-    this.torusSpeedDial.classList.toggle('active')
+  toggleSpeedDial() {
+    this.torusMenuBtn.classList.toggle('active')
+    const isActive = this.torusMenuBtn.classList.contains('active')
 
     var torusSpeedDial = this.torusSpeedDial
+    torusSpeedDial.classList.toggle('active')
     setTimeout(function() {
       let time = isActive ? 0.05 : 0.15
       Object.values(torusSpeedDial.children).forEach(element => {
