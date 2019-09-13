@@ -306,6 +306,7 @@ class Torus {
   }
 
   _hideTorusButtonAndShowGoogle() {
+    this.torusLoadingBtn.style.display = 'none'
     this.torusLogin.style.display = 'block'
     this.torusMenuBtn.style.display = 'none'
   }
@@ -399,21 +400,7 @@ class Torus {
               statusStream.on('data', statusStreamHandler)
             } else {
               // set up listener for login
-              var oauthStream = this.communicationMux.getStream('oauth')
-              var handler = function(data) {
-                var { err, selectedAddress } = data
-                if (err) {
-                  reject(err)
-                } else {
-                  // returns an array (cause accounts expects it)
-                  resolve([transformEthAddress(selectedAddress)])
-                }
-
-                self._showTorusButtonAndHideGoogle()
-                oauthStream.removeListener('data', handler)
-              }
-              oauthStream.on('data', handler)
-              this._showLoginPopup(true)
+              this._showLoginPopup(true, resolve, reject)
             }
           }.bind(this)
         )
@@ -468,8 +455,23 @@ class Torus {
   }
 
   // Exposing login function, if called from embed, flag as true
-  _showLoginPopup(calledFromEmbed) {
+  _showLoginPopup(calledFromEmbed, resolve, reject) {
     var oauthStream = this.communicationMux.getStream('oauth')
+    const self = this
+    var handler = function(data) {
+      var { err, selectedAddress } = data
+      if (err) {
+        log.error(err)
+        self._hideTorusButtonAndShowGoogle()
+        if (reject) reject(err)
+      } else {
+        // returns an array (cause accounts expects it)
+        if (resolve) resolve([transformEthAddress(selectedAddress)])
+        self._showTorusButtonAndHideGoogle()
+      }
+      oauthStream.removeListener('data', handler)
+    }
+    oauthStream.on('data', handler)
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
