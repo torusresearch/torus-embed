@@ -192,7 +192,6 @@ class Torus {
     this.torusWidget.appendChild(this.torusLogin)
 
     // Menu button
-    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
     this.torusWidget.appendChild(this.torusMenuBtn)
 
@@ -317,6 +316,7 @@ class Torus {
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
+    this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
   }
