@@ -147,9 +147,20 @@ class Torus {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
     }
-    if (isElement(this.styleLink)) window.document.head.removeChild(this.styleLink)
-    if (isElement(this.torusWidget)) window.document.body.removeChild(this.torusWidget)
-    if (isElement(this.torusIframe)) window.document.body.removeChild(this.torusIframe)
+    if (isElement(this.styleLink)) {
+      window.document.head.removeChild(this.styleLink)
+      this.styleLink = {}
+    }
+    if (isElement(this.torusWidget)) {
+      window.document.body.removeChild(this.torusWidget)
+      this.torusWidget = {}
+      this.torusLogin = {}
+      this.torusMenuBtn = {}
+    }
+    if (isElement(this.torusIframe)) {
+      window.document.body.removeChild(this.torusIframe)
+      this.torusIframe = {}
+    }
   }
 
   /**
