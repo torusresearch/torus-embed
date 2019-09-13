@@ -223,7 +223,7 @@ class Torus {
     }
   }
 
-  updateKeyBtnAddress(selectedAddress) {
+  _updateKeyBtnAddress(selectedAddress) {
     this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
   }
 
@@ -310,19 +310,16 @@ class Torus {
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
               setTimeout(() => {
-                this.updateKeyBtnAddress(res[0])
                 resolve(res)
               }, 50)
             } else {
               // set up listener for login
               var oauthStream = this.communicationMux.getStream('oauth')
-              const self = this
               var handler = function(data) {
                 var { err, selectedAddress } = data
                 if (err) {
                   reject(err)
                 } else {
-                  self.updateKeyBtnAddress(selectedAddress)
                   // returns an array (cause accounts expects it)
                   resolve([transformEthAddress(selectedAddress)])
                 }
@@ -374,6 +371,11 @@ class Torus {
     this.web3.currentProvider.isTorus = true
 
     inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
+    inpageProvider.publicConfigStore.subscribe(
+      function(state) {
+        this._updateKeyBtnAddress(state.selectedAddress)
+      }.bind(this)
+    )
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
@@ -492,7 +494,7 @@ function cleanContextForImports() {
     __define = global.define
     global.define = undefined
   } catch (_) {
-    log.warn('MetaMask - global.define could not be deleted.')
+    log.warn('Torus - global.define could not be deleted.')
   }
 }
 
@@ -503,7 +505,7 @@ function restoreContextAfterImports() {
   try {
     global.define = __define
   } catch (_) {
-    log.warn('MetaMask - global.define could not be overwritten.')
+    log.warn('Torus - global.define could not be overwritten.')
   }
 }
 
