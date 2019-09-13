@@ -119,15 +119,40 @@ class Torus {
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
+
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
     link.setAttribute('href', torusUrl + '/css/widget.css')
+
     // Login button code
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-    this.torusLogin = htmlToElement('<button id="torusLogin" />')
+    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
     this.torusWidget.appendChild(this.torusLogin)
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
+
+    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
     this.torusWidget.appendChild(this.torusMenuBtn)
+
+    // Speed dial list
+    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
+    this.homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
+
+    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
+    const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
+    this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
+    this.keyContainer = htmlToElement('<li class="tooltip"></li>')
+
+    this.keyContainer.appendChild(this.keyBtn)
+    this.keyContainer.appendChild(tooltipNote)
+    this.keyContainer.appendChild(tooltipCopied)
+
+    this.transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
+
+    this.torusSpeedDial.appendChild(this.homeBtn)
+    this.torusSpeedDial.appendChild(this.keyContainer)
+    this.torusSpeedDial.appendChild(this.transferBtn)
+
+    this.torusWidget.prepend(this.torusSpeedDial)
 
     // Iframe code
     this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
@@ -136,8 +161,39 @@ class Torus {
       this.torusLogin.addEventListener('click', () => {
         this._showLoginPopup(false)
       })
-      this.torusMenuBtn.addEventListener('click', () => {
+
+      this.homeBtn.addEventListener('click', () => {
         this.showWallet(true)
+        this.toggleSpeedDial()
+      })
+
+      this.transferBtn.addEventListener('click', () => {
+        this.showWallet(true, '/transfer')
+        this.toggleSpeedDial()
+      })
+
+      this.keyBtn.addEventListener('click', () => {
+        const publicKey = htmlToElement('<input type="text" value="' + this.ethereum.selectedAddress + '">')
+        this.torusWidget.prepend(publicKey)
+        publicKey.select()
+        publicKey.setSelectionRange(0, 99999) // For mobile
+
+        document.execCommand('copy')
+        this.torusWidget.removeChild(publicKey)
+
+        tooltipCopied.classList.add('active')
+        tooltipNote.classList.add('active')
+
+        var self = this
+        setTimeout(function() {
+          tooltipCopied.classList.remove('active')
+          tooltipNote.classList.remove('active')
+          self.toggleSpeedDial()
+        }, 1000)
+      })
+
+      this.torusMenuBtn.addEventListener('click', () => {
+        this.toggleSpeedDial()
       })
     }
 
@@ -151,23 +207,27 @@ class Torus {
 
     switch (this.stylePosition) {
       case 'top-left':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.left = '34px'
         break
       case 'top-right':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-right':
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-left':
       default:
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.left = '34px'
         break
     }
+  }
+
+  _updateKeyBtnAddress(selectedAddress) {
+    this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
   }
 
   _showTorusButtonAndHideGoogle() {
@@ -322,6 +382,11 @@ class Torus {
     this.web3.currentProvider.isTorus = true
 
     inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
+    inpageProvider.publicConfigStore.subscribe(
+      function(state) {
+        this._updateKeyBtnAddress(state.selectedAddress)
+      }.bind(this)
+    )
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
@@ -339,9 +404,24 @@ class Torus {
     providerChangeStream.write({ name: 'provider_change', data: { network, type } })
   }
 
-  showWallet(calledFromEmbed) {
+  showWallet(calledFromEmbed, path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
+    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
+  }
+
+  toggleSpeedDial() {
+    this.torusMenuBtn.classList.toggle('active')
+    const isActive = this.torusMenuBtn.classList.contains('active')
+
+    var torusSpeedDial = this.torusSpeedDial
+    torusSpeedDial.classList.toggle('active')
+    setTimeout(function() {
+      let time = isActive ? 0.05 : 0.15
+      Object.values(torusSpeedDial.children).forEach(element => {
+        element.style.transitionDelay = time + 's'
+        time += isActive ? 0.05 : -0.05
+      })
+    }, 200)
   }
 
   /**
@@ -426,7 +506,7 @@ function cleanContextForImports() {
     __define = global.define
     global.define = undefined
   } catch (_) {
-    log.warn('MetaMask - global.define could not be deleted.')
+    log.warn('Torus - global.define could not be deleted.')
   }
 }
 
@@ -437,7 +517,7 @@ function restoreContextAfterImports() {
   try {
     global.define = __define
   } catch (_) {
-    log.warn('MetaMask - global.define could not be overwritten.')
+    log.warn('Torus - global.define could not be overwritten.')
   }
 }
 
