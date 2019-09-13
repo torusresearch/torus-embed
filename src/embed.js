@@ -223,6 +223,10 @@ class Torus {
     }
   }
 
+  updateKeyBtnAddress(selectedAddress) {
+    this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
+  }
+
   _showTorusButtonAndHideGoogle() {
     // torusIframeContainer.style.display = 'none'
     this.torusMenuBtn.style.display = 'block'
@@ -301,21 +305,24 @@ class Torus {
         this.web3.eth.getAccounts(
           function(err, res) {
             if (err) {
-              setTimeout(function() {
+              setTimeout(() => {
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
-              setTimeout(function() {
+              setTimeout(() => {
+                this.updateKeyBtnAddress(res[0])
                 resolve(res)
               }, 50)
             } else {
               // set up listener for login
               var oauthStream = this.communicationMux.getStream('oauth')
+              const self = this
               var handler = function(data) {
                 var { err, selectedAddress } = data
                 if (err) {
                   reject(err)
                 } else {
+                  self.updateKeyBtnAddress(selectedAddress)
                   // returns an array (cause accounts expects it)
                   resolve([transformEthAddress(selectedAddress)])
                 }
