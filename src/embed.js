@@ -175,12 +175,22 @@ class Torus {
 
     this.styleLink = link
 
-    // Login button code
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
+
+    // Loading spinner
+    const spinner = htmlToElement(
+      '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
+    )
+    this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
+    this.torusLoadingBtn.appendChild(spinner)
+    this.torusWidget.appendChild(this.torusLoadingBtn)
+
+    // Login button code
     this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
     this.torusWidget.appendChild(this.torusLogin)
-    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
 
+    // Menu button
+    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
     this.torusWidget.appendChild(this.torusMenuBtn)
 
@@ -210,6 +220,7 @@ class Torus {
     // Setup on load code
     const bindOnLoad = () => {
       this.torusLogin.addEventListener('click', () => {
+        this._showLoadingAndHideGoogleAndTorus()
         this._showLoginPopup(false)
       })
 
@@ -281,8 +292,15 @@ class Torus {
     this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
   }
 
+  _showLoadingAndHideGoogleAndTorus() {
+    this.torusLoadingBtn.style.display = 'block'
+    this.torusMenuBtn.style.display = 'none'
+    this.torusLogin.style.display = 'none'
+  }
+
   _showTorusButtonAndHideGoogle() {
     // torusIframeContainer.style.display = 'none'
+    this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'block'
     this.torusLogin.style.display = 'none'
   }
@@ -352,14 +370,17 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
+      this._showLoadingAndHideGoogleAndTorus()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
         // If user is already logged in, we assume they have given access to the website
         this.web3.eth.getAccounts(
           function(err, res) {
+            const self = this
             if (err) {
               setTimeout(() => {
+                self._showTorusButtonAndHideGoogle()
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
@@ -371,6 +392,8 @@ class Torus {
               const statusStreamHandler = status => {
                 if (status.loggedIn) resolve(res)
                 else reject(new Error('User has not logged in yet'))
+
+                self._showTorusButtonAndHideGoogle()
                 statusStream.removeListener('data', statusStreamHandler)
               }
               statusStream.on('data', statusStreamHandler)
@@ -385,6 +408,8 @@ class Torus {
                   // returns an array (cause accounts expects it)
                   resolve([transformEthAddress(selectedAddress)])
                 }
+
+                self._showTorusButtonAndHideGoogle()
                 oauthStream.removeListener('data', handler)
               }
               oauthStream.on('data', handler)
