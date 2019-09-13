@@ -7,12 +7,13 @@ export default class Torus {
   getPublicAddress(email: string): Promise<string>;
   setProvider(network: string | { networkUrl: string, chainId: number, networkName: string }, type?: "rpc")
   showWallet(calledFromEmbed: boolean)
-  showTorusButton()
-  hideTorusButton()
+  showTorusButton(): void
+  hideTorusButton(): void
   getUserInfo(): Promise<UserInfo>;
   init(buildEnv?: 'production' | 'development' | 'staging' | 'testing', enableLogging?: boolean): Promise<void>
   login(): Promise<string[]>
   logout(): Promise<void>
+  cleanUp(): Promise<void>
 }
 
 declare class Provider {

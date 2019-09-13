@@ -1,5 +1,3 @@
-// Torus loading message
-// const Web3 = require('web3')
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
@@ -12,9 +10,6 @@ import Web3 from 'web3'
 
 cleanContextForImports()
 
-// eslint-disable-next-line no-unused-vars
-// window.Web3 = Web3
-
 const iframeIntegrity = 'sha384-YOo2zmYNXxAuBC7uL/91Wujc5UuLFTmC/OpraXc3QtlOLXTRVXvO+09gR/0B9tUF'
 
 restoreContextAfterImports()
@@ -26,6 +21,7 @@ class Torus {
     this.torusMenuBtn = {}
     this.torusLogin = {}
     this.torusIframe = {}
+    this.styleLink = {}
     this.isLoggedIn = false
     this.Web3 = Web3
   }
@@ -77,9 +73,13 @@ class Torus {
               runOnLoad(this._setupWeb3.bind(this))
               resolve()
             } else {
-              this.torusLogin.style.display = 'none'
-              this.torusMenuBtn.style.display = 'none'
-              reject(new Error('Integrity check failed'))
+              try {
+                this._cleanUp()
+              } catch (error) {
+                reject(error)
+              } finally {
+                reject(new Error('Integrity check failed'))
+              }
             }
           })
       } else {
@@ -90,6 +90,9 @@ class Torus {
     })
   }
 
+  /**
+   * Logs the user in
+   */
   login() {
     if (this.isLoggedIn) throw new Error('User has already logged in')
     else {
@@ -97,6 +100,9 @@ class Torus {
     }
   }
 
+  /**
+   * Logs the user out
+   */
   logout() {
     return new Promise((resolve, reject) => {
       if (!this.isLoggedIn) reject(new Error('User has not logged in yet'))
@@ -115,7 +121,50 @@ class Torus {
   }
 
   /**
-   * Create widget
+   * Logs the user out and then cleans up (removes iframe, widget, css)
+   */
+  cleanUp() {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn)
+        this.logout()
+          .then(() => {
+            this._cleanUp()
+            resolve()
+          })
+          .catch(err => reject(err))
+      else {
+        try {
+          this._cleanUp()
+          resolve()
+        } catch (error) {
+          reject(error)
+        }
+      }
+    })
+  }
+
+  _cleanUp() {
+    function isElement(element) {
+      return element instanceof Element || element instanceof HTMLDocument
+    }
+    if (isElement(this.styleLink)) {
+      window.document.head.removeChild(this.styleLink)
+      this.styleLink = {}
+    }
+    if (isElement(this.torusWidget)) {
+      window.document.body.removeChild(this.torusWidget)
+      this.torusWidget = {}
+      this.torusLogin = {}
+      this.torusMenuBtn = {}
+    }
+    if (isElement(this.torusIframe)) {
+      window.document.body.removeChild(this.torusIframe)
+      this.torusIframe = {}
+    }
+  }
+
+  /**
+   * Creates the widget
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
@@ -123,6 +172,8 @@ class Torus {
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
     link.setAttribute('href', torusUrl + '/css/widget.css')
+
+    this.styleLink = link
 
     // Login button code
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
@@ -164,12 +215,12 @@ class Torus {
 
       this.homeBtn.addEventListener('click', () => {
         this.showWallet(true)
-        this.toggleSpeedDial()
+        this._toggleSpeedDial()
       })
 
       this.transferBtn.addEventListener('click', () => {
         this.showWallet(true, '/transfer')
-        this.toggleSpeedDial()
+        this._toggleSpeedDial()
       })
 
       this.keyBtn.addEventListener('click', () => {
@@ -188,12 +239,12 @@ class Torus {
         setTimeout(function() {
           tooltipCopied.classList.remove('active')
           tooltipNote.classList.remove('active')
-          self.toggleSpeedDial()
+          self._toggleSpeedDial()
         }, 1000)
       })
 
       this.torusMenuBtn.addEventListener('click', () => {
-        this.toggleSpeedDial()
+        this._toggleSpeedDial()
       })
     }
 
@@ -404,12 +455,17 @@ class Torus {
     providerChangeStream.write({ name: 'provider_change', data: { network, type } })
   }
 
+  /**
+   * Shows the wallet popup
+   * @param {boolean} calledFromEmbed if called from dapp context
+   * @param {string} path the route to open
+   */
   showWallet(calledFromEmbed, path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
     showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
   }
 
-  toggleSpeedDial() {
+  _toggleSpeedDial() {
     this.torusMenuBtn.classList.toggle('active')
     const isActive = this.torusMenuBtn.classList.contains('active')
 
@@ -425,7 +481,7 @@ class Torus {
   }
 
   /**
-   * Expose the getPublicAddress API to the Dapp through torus object
+   * Gets the public address of an user with email
    * @param {String} email Email address of the user
    */
   getPublicAddress(email) {
@@ -468,7 +524,7 @@ class Torus {
   }
 
   /**
-   * Expose the loggedin user info to the Dapp through torus object
+   * Exposes the loggedin user info to the Dapp
    */
   getUserInfo() {
     return new Promise((resolve, reject) => {
