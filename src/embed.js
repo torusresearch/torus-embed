@@ -20,6 +20,7 @@ class Torus {
     this.torusWidget = {}
     this.torusMenuBtn = {}
     this.torusLogin = {}
+    this.torusLoadingBtn = {}
     this.torusIframe = {}
     this.styleLink = {}
     this.isLoggedIn = false
@@ -156,6 +157,7 @@ class Torus {
       this.torusWidget = {}
       this.torusLogin = {}
       this.torusMenuBtn = {}
+      this.torusLoadingBtn = {}
     }
     if (isElement(this.torusIframe)) {
       window.document.body.removeChild(this.torusIframe)
