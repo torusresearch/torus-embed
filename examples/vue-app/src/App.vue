@@ -16,21 +16,25 @@ export default {
   name: 'app',
   data() {
     return {
-      publicAddress: ''
+      publicAddress: '',
+      torus: {}
     }
   },
   methods: {
     async login() {
       try {
-        const torus = new Torus()
-        await torus.init('development', true)
-        await torus.login() // await torus.ethereum.enable()
-        const web3 = new Web3(torus.provider)
+        this.torus = new Torus()
+        await this.torus.init('development', true)
+        await this.torus.login() // await this.torus.ethereum.enable()
+        const web3 = new Web3(this.torus.provider)
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
+
+          // For testing typed messages
+          // this.requestFakeSignature()
         })
-        window.torus = torus
+        window.torus = this.torus
       } catch (error) {
         console.error(error)
       }
@@ -53,9 +57,9 @@ export default {
         }
       }
       const domainData = {
-        name: 'My amazing dApp',
-        version: '2',
-        chainId: parseInt(torus.web3.version.network, 10),
+        name: 'My vuejs test dapp for torus',
+        version: '1',
+        chainId: parseInt(this.torus.web3.version.network, 10),
         verifyingContract: '0x1C56346CD2A2Bf3202F771f50d3D14a367B48070',
         salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558'
       }
@@ -71,11 +75,11 @@ export default {
         message: message
       })
 
-      torus.web3.currentProvider.sendAsync(
+      this.torus.web3.currentProvider.sendAsync(
         {
           method: 'eth_signTypedData_v3',
-          params: [torus.web3.eth.accounts[0], data],
-          from: torus.web3.eth.accounts[0]
+          params: [this.torus.web3.eth.accounts[0], data],
+          from: this.torus.web3.eth.accounts[0]
         },
         function(err, result) {
           if (err) {
