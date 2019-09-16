@@ -1,11 +1,11 @@
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
-import MetamaskInpageProvider from './inpage-provider.js'
-import { setupMultiplex } from './stream-utils.js'
-import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils.js'
-import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers.js'
-import configuration from './config.js'
+import MetamaskInpageProvider from './inpage-provider'
+import { setupMultiplex } from './stream-utils'
+import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
+import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
+import configuration from './config'
 import Web3 from 'web3'
 
 cleanContextForImports()
@@ -15,7 +15,7 @@ const iframeIntegrity = 'sha384-YOo2zmYNXxAuBC7uL/91Wujc5UuLFTmC/OpraXc3QtlOLXTR
 restoreContextAfterImports()
 
 class Torus {
-  constructor(stylePosition = 'bottom-left', ...args) {
+  constructor({ stylePosition = 'bottom-left' } = {}) {
     this.stylePosition = stylePosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
@@ -24,10 +24,19 @@ class Torus {
     this.torusIframe = {}
     this.styleLink = {}
     this.isLoggedIn = false
+    this.isInitalized = false
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'production', enableLogging = false) {
+  init({
+    buildEnv = 'production',
+    enableLogging = false,
+    network = {
+      host: 'mainnet',
+      chainId: 1,
+      networkName: 'mainnet'
+    }
+  } = {}) {
     return new Promise((resolve, reject) => {
       let torusUrl
       let logLevel
@@ -71,8 +80,13 @@ class Torus {
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
               runOnLoad(attachIFrame.bind(this))
-              runOnLoad(this._setupWeb3.bind(this))
-              resolve()
+              runOnLoad(() => this._setupWeb3())
+              runOnLoad(() =>
+                this._setProvider(network).then(() => {
+                  this.isInitalized = true
+                  resolve()
+                })
+              )
             } else {
               try {
                 this._cleanUp()
@@ -85,8 +99,13 @@ class Torus {
           })
       } else {
         runOnLoad(attachIFrame.bind(this))
-        runOnLoad(this._setupWeb3.bind(this))
-        resolve()
+        runOnLoad(() => this._setupWeb3())
+        runOnLoad(() =>
+          this._setProvider(network).then(() => {
+            this.isInitalized = true
+            resolve()
+          })
+        )
       }
     })
   }
@@ -95,6 +114,7 @@ class Torus {
    * Logs the user in
    */
   login() {
+    if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     else {
       return this.ethereum.enable()
@@ -392,7 +412,9 @@ class Torus {
               // when a user is logged in
               // with a combination of ethereum.enable() not waiting for rehydration
               const statusStream = this.communicationMux.getStream('status')
+              log.info('writing to status stream 2 start')
               const statusStreamHandler = status => {
+                log.info('writing to status stream 2 wait')
                 if (status.loggedIn) resolve(res)
                 else reject(new Error('User has not logged in yet'))
 
@@ -419,14 +441,17 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     var communicationMux = setupMultiplex(this.communicationStream)
+    communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
-    // Show torus button if wallet has been hydrated/detected
+    // Show torus button if wallet has been logged out
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
-      this.isLoggedIn = status.loggedIn
-      if (status.loggedIn) this._showTorusButtonAndHideGoogle()
-      else this._hideTorusButtonAndShowGoogle()
+      log.info('writing to status stream')
+      if (!status.loggedIn) {
+        this.isLoggedIn = status.loggedIn
+        this._hideTorusButtonAndShowGoogle()
+      }
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
@@ -477,11 +502,72 @@ class Torus {
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
-  setProvider(network, type) {
-    var providerChangeStream = this.communicationMux.getStream('provider_change')
-    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
-      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
-    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
+  setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+      const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+      const handler = function(ev) {
+        var { err, success } = ev.data
+        if (err) {
+          log.error(err)
+          reject(err)
+        } else if (success) {
+          resolve()
+        } else reject(new Error('some error occured'))
+        providerChangeSuccess.removeListener('data', handler)
+      }
+      providerChangeSuccess.on('data', handler)
+      if (configuration.networkList.includes(host))
+        providerChangeStream.write({ name: 'show_provider_change', data: { network: host, override: false } })
+      else
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            type: 'RPC'
+          },
+          override: false
+        })
+    })
+  }
+
+  _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      if (!this.isInitalized) {
+        const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+        const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+        const handler = function(ev) {
+          var { err, success } = ev.data
+          if (err) {
+            log.error(err)
+            reject(err)
+          } else if (success) {
+            resolve()
+          } else reject(new Error('some error occured'))
+          providerChangeSuccess.removeListener('data', handler)
+        }
+        providerChangeSuccess.on('data', handler)
+        if (configuration.networkList.includes(host))
+          providerChangeStream.write({ name: 'show_provider_change', data: { network: host, override: true } })
+        else
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              type: 'RPC',
+              override: true
+            }
+          })
+      } else reject(new Error('Already initialized'))
+    })
   }
 
   /**
@@ -491,7 +577,8 @@ class Torus {
    */
   showWallet(calledFromEmbed, path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
+    const finalPath = path ? `/${path}` : ''
+    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: finalPath } })
   }
 
   _toggleSpeedDial() {

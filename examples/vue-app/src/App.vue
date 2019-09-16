@@ -22,8 +22,19 @@ export default {
   methods: {
     async login() {
       try {
-        const torus = new Torus();
-        await torus.init();
+        const torus = new Torus({
+          stylePosition: 'bottom-left'
+        });
+        await torus.init({
+          buildEnv: 'development',
+          enableLogging: true,
+          network: {
+            host: 'kovan', // mandatory
+            // chainId: 1, // optional
+            networkName: 'kovan' // optional
+          }
+        });
+        console.log('initialized at this point')
         await torus.login(); // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider);
         web3.eth.getAccounts().then(accounts => {
@@ -38,8 +49,9 @@ export default {
     logout() {
       window.torus.logout().then(() => this.publicAddress = '')
     },
-    changeProvider() {
-      window.torus.setProvider('rinkeby')
+    async changeProvider() {
+      await window.torus.setProvider({ host: 'ropsten' })
+      console.log('finished changing provider')
     },
     async getUserInfo() {
       const userInfo = await window.torus.getUserInfo()
