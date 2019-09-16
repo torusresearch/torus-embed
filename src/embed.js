@@ -23,8 +23,9 @@ class Torus {
     this.torusLoadingBtn = {}
     this.torusIframe = {}
     this.styleLink = {}
-    this.isLoggedIn = false
-    this.isInitalized = false
+    this.isRehydrated = false // rehydrated
+    this.isLoggedIn = false // ethereum.enable working
+    this.isInitalized = false // init done
     this.Web3 = Web3
   }
 
@@ -38,6 +39,7 @@ class Torus {
     }
   } = {}) {
     return new Promise((resolve, reject) => {
+      if (this.isInitalized) reject(new Error('Already initialized'))
       let torusUrl
       let logLevel
       switch (buildEnv) {
@@ -132,8 +134,11 @@ class Torus {
         logOutStream.write({ name: 'logOut' })
         var statusStream = this.communicationMux.getStream('status')
         const statusStreamHandler = status => {
-          if (!status.loggedIn) resolve()
-          else reject(new Error('Some Error Occured'))
+          if (!status.loggedIn) {
+            this.isLoggedIn = false
+            this.isRehydrated = false
+            resolve()
+          } else reject(new Error('Some Error Occured'))
           statusStream.removeListener('data', statusStreamHandler)
         }
         statusStream.on('data', statusStreamHandler)
@@ -251,7 +256,7 @@ class Torus {
       })
 
       this.transferBtn.addEventListener('click', () => {
-        this.showWallet(true, '/transfer')
+        this.showWallet(true, 'transfer')
         this._toggleSpeedDial()
       })
 
@@ -407,21 +412,26 @@ class Torus {
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
-              // Fix to solve issue #30
-              // On rehydration, torus.getUserInfo() fails until a certain time due to status stream not updating
-              // when a user is logged in
-              // with a combination of ethereum.enable() not waiting for rehydration
-              const statusStream = this.communicationMux.getStream('status')
-              log.info('writing to status stream 2 start')
-              const statusStreamHandler = status => {
-                log.info('writing to status stream 2 wait')
-                if (status.loggedIn) resolve(res)
-                else reject(new Error('User has not logged in yet'))
-
+              // If user is already rehydrated, resolve this
+              // else wait for something to be written to status stream
+              if (this.isRehydrated) {
+                resolve(res)
                 self._showTorusButtonAndHideGoogle()
-                statusStream.removeListener('data', statusStreamHandler)
+                this.isLoggedIn = true
+              } else {
+                const statusStream = this.communicationMux.getStream('status')
+                const statusStreamHandler = status => {
+                  if (status.loggedIn) {
+                    this.isRehydrated = true
+                    this.isLoggedIn = true
+                    resolve(res)
+                  } else reject(new Error('User has not logged in yet'))
+
+                  self._showTorusButtonAndHideGoogle()
+                  statusStream.removeListener('data', statusStreamHandler)
+                }
+                statusStream.on('data', statusStreamHandler)
               }
-              statusStream.on('data', statusStreamHandler)
             } else {
               // set up listener for login
               this._showLoginPopup(true, resolve, reject)
@@ -444,14 +454,17 @@ class Torus {
     communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
-    // Show torus button if wallet has been logged out
+    // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
-      log.info('writing to status stream')
-      if (!status.loggedIn) {
+      // rehydration
+      if (status.rehydrate && status.loggedIn) this.isRehydrated = status.rehydrate
+      // normal login
+      else if (status.loggedIn) {
         this.isLoggedIn = status.loggedIn
-        this._hideTorusButtonAndShowGoogle()
-      }
+        this._showTorusButtonAndHideGoogle()
+      } // logout
+      else this._hideTorusButtonAndShowGoogle()
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
@@ -518,7 +531,17 @@ class Torus {
       }
       providerChangeSuccess.on('data', handler)
       if (configuration.networkList.includes(host))
-        providerChangeStream.write({ name: 'show_provider_change', data: { network: host, override: false } })
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            override: false
+          }
+        })
       else
         providerChangeStream.write({
           name: 'show_provider_change',
@@ -528,7 +551,7 @@ class Torus {
               chainId,
               networkName
             },
-            type: 'RPC'
+            type: 'rpc'
           },
           override: false
         })
@@ -552,7 +575,17 @@ class Torus {
         }
         providerChangeSuccess.on('data', handler)
         if (configuration.networkList.includes(host))
-          providerChangeStream.write({ name: 'show_provider_change', data: { network: host, override: true } })
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              override: true
+            }
+          })
         else
           providerChangeStream.write({
             name: 'show_provider_change',
@@ -562,7 +595,7 @@ class Torus {
                 chainId,
                 networkName
               },
-              type: 'RPC',
+              type: 'rpc',
               override: true
             }
           })
