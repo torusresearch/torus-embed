@@ -26,6 +26,7 @@ class Torus {
     this.isRehydrated = false // rehydrated
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
+    this.torusButtonVisibility = true
     this.Web3 = Web3
   }
 
@@ -36,7 +37,8 @@ class Torus {
       host: 'mainnet',
       chainId: 1,
       networkName: 'mainnet'
-    }
+    },
+    showTorusButton = true
   } = {}) {
     return new Promise((resolve, reject) => {
       if (this.isInitalized) reject(new Error('Already initialized'))
@@ -63,6 +65,7 @@ class Torus {
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
       else log.disableAll()
+      this.torusButtonVisibility = showTorusButton
       this._createWidget(torusUrl)
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
@@ -209,15 +212,24 @@ class Torus {
       '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
     )
     this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+    }
     this.torusLoadingBtn.appendChild(spinner)
     this.torusWidget.appendChild(this.torusLoadingBtn)
 
     // Login button code
     this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLogin.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusLogin)
 
     // Menu button
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
+    if (!this.torusButtonVisibility) {
+      this.torusMenuBtn.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
@@ -319,28 +331,35 @@ class Torus {
   }
 
   _showLoadingAndHideGoogleAndTorus() {
-    this.torusLoadingBtn.style.display = 'block'
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+      this.torusLogin.style.display = 'none'
+    }
   }
 
   _showTorusButtonAndHideGoogle() {
-    // torusIframeContainer.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusMenuBtn.style.display = 'block'
-    this.torusLogin.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      // torusIframeContainer.style.display = 'none'
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusMenuBtn.style.display = 'block'
+      this.torusLogin.style.display = 'none'
+    }
   }
 
   _hideTorusButtonAndShowGoogle() {
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLogin.style.display = 'block'
-    this.torusMenuBtn.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusLogin.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+    }
   }
 
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
+    this.torusButtonVisibility = false
     this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
@@ -351,6 +370,7 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
+    this.torusButtonVisibility = true
     if (this.isLoggedIn) this._showTorusButtonAndHideGoogle()
     else this._hideTorusButtonAndShowGoogle()
   }

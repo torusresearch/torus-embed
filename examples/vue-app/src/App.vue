@@ -32,7 +32,8 @@ export default {
             host: 'kovan', // mandatory
             // chainId: 1, // optional
             networkName: 'kovan' // optional
-          }
+          },
+          showTorusButton: false
         });
         console.log('initialized at this point')
         await torus.login(); // await torus.ethereum.enable()

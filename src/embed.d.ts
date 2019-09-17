@@ -35,6 +35,7 @@ interface TorusParams {
   network: NetworkInterface;
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   enableLogging?: boolean;
+  showTorusButton?: boolean;
 }
 
 interface NetworkInterface {
