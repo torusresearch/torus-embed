@@ -1,11 +1,11 @@
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
-import MetamaskInpageProvider from './inpage-provider.js'
-import { setupMultiplex } from './stream-utils.js'
-import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils.js'
-import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers.js'
-import configuration from './config.js'
+import MetamaskInpageProvider from './inpage-provider'
+import { setupMultiplex } from './stream-utils'
+import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
+import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
+import configuration from './config'
 import Web3 from 'web3'
 
 cleanContextForImports()
@@ -15,7 +15,7 @@ const iframeIntegrity = 'sha384-YOo2zmYNXxAuBC7uL/91Wujc5UuLFTmC/OpraXc3QtlOLXTR
 restoreContextAfterImports()
 
 class Torus {
-  constructor(stylePosition = 'bottom-left', ...args) {
+  constructor({ stylePosition = 'bottom-left' } = {}) {
     this.stylePosition = stylePosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
@@ -23,12 +23,25 @@ class Torus {
     this.torusLoadingBtn = {}
     this.torusIframe = {}
     this.styleLink = {}
-    this.isLoggedIn = false
+    this.isRehydrated = false // rehydrated
+    this.isLoggedIn = false // ethereum.enable working
+    this.isInitalized = false // init done
+    this.torusButtonVisibility = true
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'production', enableLogging = false) {
+  init({
+    buildEnv = 'production',
+    enableLogging = false,
+    network = {
+      host: 'mainnet',
+      chainId: 1,
+      networkName: 'mainnet'
+    },
+    showTorusButton = true
+  } = {}) {
     return new Promise((resolve, reject) => {
+      if (this.isInitalized) reject(new Error('Already initialized'))
       let torusUrl
       let logLevel
       switch (buildEnv) {
@@ -52,6 +65,7 @@ class Torus {
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
       else log.disableAll()
+      this.torusButtonVisibility = showTorusButton
       this._createWidget(torusUrl)
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
@@ -71,8 +85,13 @@ class Torus {
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
               runOnLoad(attachIFrame.bind(this))
-              runOnLoad(this._setupWeb3.bind(this))
-              resolve()
+              runOnLoad(() => this._setupWeb3())
+              runOnLoad(() =>
+                this._setProvider(network).then(() => {
+                  this.isInitalized = true
+                  resolve()
+                })
+              )
             } else {
               try {
                 this._cleanUp()
@@ -85,8 +104,13 @@ class Torus {
           })
       } else {
         runOnLoad(attachIFrame.bind(this))
-        runOnLoad(this._setupWeb3.bind(this))
-        resolve()
+        runOnLoad(() => this._setupWeb3())
+        runOnLoad(() =>
+          this._setProvider(network).then(() => {
+            this.isInitalized = true
+            resolve()
+          })
+        )
       }
     })
   }
@@ -95,6 +119,7 @@ class Torus {
    * Logs the user in
    */
   login() {
+    if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     else {
       return this.ethereum.enable()
@@ -112,8 +137,11 @@ class Torus {
         logOutStream.write({ name: 'logOut' })
         var statusStream = this.communicationMux.getStream('status')
         const statusStreamHandler = status => {
-          if (!status.loggedIn) resolve()
-          else reject(new Error('Some Error Occured'))
+          if (!status.loggedIn) {
+            this.isLoggedIn = false
+            this.isRehydrated = false
+            resolve()
+          } else reject(new Error('Some Error Occured'))
           statusStream.removeListener('data', statusStreamHandler)
         }
         statusStream.on('data', statusStreamHandler)
@@ -184,15 +212,24 @@ class Torus {
       '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
     )
     this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+    }
     this.torusLoadingBtn.appendChild(spinner)
     this.torusWidget.appendChild(this.torusLoadingBtn)
 
     // Login button code
     this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLogin.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusLogin)
 
     // Menu button
     this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
+    if (!this.torusButtonVisibility) {
+      this.torusMenuBtn.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
@@ -231,7 +268,7 @@ class Torus {
       })
 
       this.transferBtn.addEventListener('click', () => {
-        this.showWallet(true, '/transfer')
+        this.showWallet(true, 'transfer')
         this._toggleSpeedDial()
       })
 
@@ -294,28 +331,35 @@ class Torus {
   }
 
   _showLoadingAndHideGoogleAndTorus() {
-    this.torusLoadingBtn.style.display = 'block'
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+      this.torusLogin.style.display = 'none'
+    }
   }
 
   _showTorusButtonAndHideGoogle() {
-    // torusIframeContainer.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusMenuBtn.style.display = 'block'
-    this.torusLogin.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      // torusIframeContainer.style.display = 'none'
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusMenuBtn.style.display = 'block'
+      this.torusLogin.style.display = 'none'
+    }
   }
 
   _hideTorusButtonAndShowGoogle() {
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLogin.style.display = 'block'
-    this.torusMenuBtn.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusLogin.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+    }
   }
 
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
+    this.torusButtonVisibility = false
     this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
@@ -326,6 +370,7 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
+    this.torusButtonVisibility = true
     if (this.isLoggedIn) this._showTorusButtonAndHideGoogle()
     else this._hideTorusButtonAndShowGoogle()
   }
@@ -387,19 +432,26 @@ class Torus {
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
-              // Fix to solve issue #30
-              // On rehydration, torus.getUserInfo() fails until a certain time due to status stream not updating
-              // when a user is logged in
-              // with a combination of ethereum.enable() not waiting for rehydration
-              const statusStream = this.communicationMux.getStream('status')
-              const statusStreamHandler = status => {
-                if (status.loggedIn) resolve(res)
-                else reject(new Error('User has not logged in yet'))
-
+              // If user is already rehydrated, resolve this
+              // else wait for something to be written to status stream
+              if (this.isRehydrated) {
+                resolve(res)
                 self._showTorusButtonAndHideGoogle()
-                statusStream.removeListener('data', statusStreamHandler)
+                this.isLoggedIn = true
+              } else {
+                const statusStream = this.communicationMux.getStream('status')
+                const statusStreamHandler = status => {
+                  if (status.loggedIn) {
+                    this.isRehydrated = true
+                    this.isLoggedIn = true
+                    resolve(res)
+                  } else reject(new Error('User has not logged in yet'))
+
+                  self._showTorusButtonAndHideGoogle()
+                  statusStream.removeListener('data', statusStreamHandler)
+                }
+                statusStream.on('data', statusStreamHandler)
               }
-              statusStream.on('data', statusStreamHandler)
             } else {
               // set up listener for login
               this._showLoginPopup(true, resolve, reject)
@@ -419,13 +471,19 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     var communicationMux = setupMultiplex(this.communicationStream)
+    communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
-      this.isLoggedIn = status.loggedIn
-      if (status.loggedIn) this._showTorusButtonAndHideGoogle()
+      // rehydration
+      if (status.rehydrate && status.loggedIn) this.isRehydrated = status.rehydrate
+      // normal login
+      else if (status.loggedIn) {
+        this.isLoggedIn = status.loggedIn
+        this._showTorusButtonAndHideGoogle()
+      } // logout
       else this._hideTorusButtonAndShowGoogle()
     })
     // if (typeof window.web3 !== 'undefined') {
@@ -477,11 +535,92 @@ class Torus {
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
-  setProvider(network, type) {
-    var providerChangeStream = this.communicationMux.getStream('provider_change')
-    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
-      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
-    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
+  setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+      const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+      const handler = function(ev) {
+        var { err, success } = ev.data
+        if (err) {
+          log.error(err)
+          reject(err)
+        } else if (success) {
+          resolve()
+        } else reject(new Error('some error occured'))
+        providerChangeSuccess.removeListener('data', handler)
+      }
+      providerChangeSuccess.on('data', handler)
+      if (configuration.networkList.includes(host))
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            override: false
+          }
+        })
+      else
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            type: 'rpc'
+          },
+          override: false
+        })
+    })
+  }
+
+  _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      if (!this.isInitalized) {
+        const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+        const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+        const handler = function(ev) {
+          var { err, success } = ev.data
+          if (err) {
+            log.error(err)
+            reject(err)
+          } else if (success) {
+            resolve()
+          } else reject(new Error('some error occured'))
+          providerChangeSuccess.removeListener('data', handler)
+        }
+        providerChangeSuccess.on('data', handler)
+        if (configuration.networkList.includes(host))
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              override: true
+            }
+          })
+        else
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              type: 'rpc',
+              override: true
+            }
+          })
+      } else reject(new Error('Already initialized'))
+    })
   }
 
   /**
@@ -491,7 +630,8 @@ class Torus {
    */
   showWallet(calledFromEmbed, path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: path || '' } })
+    const finalPath = path ? `/${path}` : ''
+    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: finalPath } })
   }
 
   _toggleSpeedDial() {
