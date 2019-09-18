@@ -53,7 +53,35 @@ export default {
         amount: 100,
         bidder: {
           userId: 323,
-          wallet: '0x33asdf3333333333333333333333333333333333333'
+          wallet: '0x33asdf3333333333333333333333333333333333333',
+          bidder2: {
+            userId: 323,
+            wallet: '0x33asdf3333333333333333333333333333333333333',
+            bidder: {
+              userId: 323,
+              wallet: '0x33asdf3333333333333333333333333333333333333',
+              bidder: {
+                userId: 323,
+                wallet: '0x33asdf3333333333333333333333333333333333333',
+                bidder: {
+                  userId: 323,
+                  wallet: '0x33asdf3333333333333333333333333333333333333'
+                }
+              },
+              bidder: {
+                userId: 323,
+                wallet: '0x33asdf3333333333333333333333333333333333333'
+              }
+            }
+          },
+          bidder: {
+            userId: 323,
+            wallet: '0x33asdf3333333333333333333333333333333333333'
+          },
+          bidder: {
+            userId: 323,
+            wallet: '0x33asdf3333333333333333333333333333333333333'
+          }
         }
       }
       const domainData = {
