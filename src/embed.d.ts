@@ -22,7 +22,7 @@ declare class Provider {
 }
 
 interface TorusCtorArgs {
-  stylePosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
+  buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
 }
 
 interface UserInfo {
