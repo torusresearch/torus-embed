@@ -23,7 +23,7 @@ export default {
     async login() {
       try {
         const torus = new Torus({
-          stylePosition: 'bottom-left'
+          buttonPosition: 'bottom-left'
         });
         await torus.init({
           buildEnv: 'development',
