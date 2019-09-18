@@ -36,7 +36,7 @@ if (inWhiteList) {
   sc.setAttribute('crossorigin', 'anonymous')
   sc.setAttribute('type', 'text/javascript')
   sc.setAttribute('style-color', '#75b4fd')
-  sc.setAttribute('style-position', 'bottom-left')
+  sc.setAttribute('button-position', 'bottom-left')
   sc.setAttribute('style-padding', '8px')
   document.getElementsByTagName('html')[0].appendChild(sc)
 }

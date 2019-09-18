@@ -15,8 +15,8 @@ const iframeIntegrity = 'sha384-YOo2zmYNXxAuBC7uL/91Wujc5UuLFTmC/OpraXc3QtlOLXTR
 restoreContextAfterImports()
 
 class Torus {
-  constructor({ stylePosition = 'bottom-left' } = {}) {
-    this.stylePosition = stylePosition
+  constructor({ buttonPosition = 'bottom-left' } = {}) {
+    this.buttonPosition = buttonPosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
     this.torusLogin = {}
@@ -305,7 +305,7 @@ class Torus {
     runOnLoad(attachOnLoad.bind(this))
     runOnLoad(bindOnLoad.bind(this))
 
-    switch (this.stylePosition) {
+    switch (this.buttonPosition) {
       case 'top-left':
         this.torusWidget.style.top = '34px'
         this.torusWidget.style.left = '34px'
