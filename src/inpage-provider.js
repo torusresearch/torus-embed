@@ -163,6 +163,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     const self = this
 
     let selectedAddress
+    let networkVersion
     let result = null
     switch (payload.method) {
       case 'eth_accounts':
@@ -184,7 +185,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
       case 'net_version':
         log.info('NET VERSION REQUESTED')
-        const networkVersion = window.sessionStorage.getItem('networkVersion')
+        networkVersion = window.sessionStorage.getItem('networkVersion')
         result = networkVersion || null
         break
 
@@ -192,7 +193,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
       default:
         var link = 'https://github.com/MetaMask/faq/blob/master/DEVELOPERS.md#dizzy-all-async---think-of-metamask-as-a-light-client'
         // eslint-disable-next-line max-len
-        var message = `The MetaMask Web3 object does not support synchronous methods like ${payload.method} without a callback parameter. See ${link} for details.`
+        var message = `The Torus Web3 object does not support synchronous methods like ${payload.method} without a callback parameter. See ${link} for details.`
         throw new Error(message)
     }
 
