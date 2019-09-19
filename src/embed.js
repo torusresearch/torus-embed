@@ -46,7 +46,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.1.0'
+          torusUrl = 'https://staging.tor.us/v0.1.1'
           logLevel = 'info'
           break
         case 'testing':
@@ -263,12 +263,12 @@ class Torus {
       })
 
       this.homeBtn.addEventListener('click', () => {
-        this.showWallet(true)
+        this.showWallet()
         this._toggleSpeedDial()
       })
 
       this.transferBtn.addEventListener('click', () => {
-        this.showWallet(true, 'transfer')
+        this.showWallet('transfer')
         this._toggleSpeedDial()
       })
 

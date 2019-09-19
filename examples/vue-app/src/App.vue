@@ -26,7 +26,7 @@ export default {
           buttonPosition: 'bottom-left'
         });
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: 'production',
           enableLogging: true,
           network: {
             host: 'kovan', // mandatory
@@ -35,7 +35,6 @@ export default {
           },
           showTorusButton: false
         });
-        console.log('initialized at this point')
         await torus.login(); // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider);
         web3.eth.getAccounts().then(accounts => {
