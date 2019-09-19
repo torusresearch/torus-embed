@@ -263,12 +263,12 @@ class Torus {
       })
 
       this.homeBtn.addEventListener('click', () => {
-        this.showWallet(true)
+        this.showWallet()
         this._toggleSpeedDial()
       })
 
       this.transferBtn.addEventListener('click', () => {
-        this.showWallet(true, 'transfer')
+        this.showWallet('transfer')
         this._toggleSpeedDial()
       })
 
