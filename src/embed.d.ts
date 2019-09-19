@@ -32,7 +32,7 @@ interface UserInfo {
 }
 
 interface TorusParams {
-  network: NetworkInterface;
+  network?: NetworkInterface;
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   enableLogging?: boolean;
   showTorusButton?: boolean;
