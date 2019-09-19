@@ -46,7 +46,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.0.23'
+          torusUrl = 'https://staging.tor.us/v0.1.0'
           logLevel = 'info'
           break
         case 'testing':
