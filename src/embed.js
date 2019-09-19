@@ -628,10 +628,10 @@ class Torus {
    * @param {boolean} calledFromEmbed if called from dapp context
    * @param {string} path the route to open
    */
-  showWallet(calledFromEmbed, path) {
+  showWallet(path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed, path: finalPath } })
+    showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
   }
 
   _toggleSpeedDial() {

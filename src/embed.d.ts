@@ -6,8 +6,8 @@ export default class Torus {
   provider: Provider
   ethereum: Provider
   getPublicAddress(email: string): Promise<string>;
-  setProvider(networkParams: NetworkInterface): NetworkInterface;
-  showWallet(calledFromEmbed: boolean, path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
+  setProvider(networkParams: NetworkInterface): Promise<void>;
+  showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
   showTorusButton(): void
   hideTorusButton(): void
   getUserInfo(): Promise<UserInfo>
