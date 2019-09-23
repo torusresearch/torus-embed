@@ -1,42 +1,52 @@
-// Torus loading message
-// const Web3 = require('web3')
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
-import MetamaskInpageProvider from './inpage-provider.js'
-import { setupMultiplex } from './stream-utils.js'
-import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils.js'
-import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers.js'
-import configuration from './config.js'
+import MetamaskInpageProvider from './inpage-provider'
+import { setupMultiplex } from './stream-utils'
+import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
+import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
+import configuration from './config'
 import Web3 from 'web3'
 
 cleanContextForImports()
 
-// eslint-disable-next-line no-unused-vars
-// window.Web3 = Web3
-
-const iframeIntegrity = 'sha384-YOo2zmYNXxAuBC7uL/91Wujc5UuLFTmC/OpraXc3QtlOLXTRVXvO+09gR/0B9tUF'
+const iframeIntegrity = 'sha384-OEH+dnsS8LZ3rAM7CM0Ycs69i3f6Ss1+FPQvLkSMIDSKg7RaD8V1Worhxrynm/5V'
 
 restoreContextAfterImports()
 
 class Torus {
-  constructor(stylePosition = 'bottom-left', ...args) {
-    this.stylePosition = stylePosition
+  constructor({ buttonPosition = 'bottom-left' } = {}) {
+    this.buttonPosition = buttonPosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
     this.torusLogin = {}
+    this.torusLoadingBtn = {}
     this.torusIframe = {}
-    this.isLoggedIn = false
+    this.styleLink = {}
+    this.isRehydrated = false // rehydrated
+    this.isLoggedIn = false // ethereum.enable working
+    this.isInitalized = false // init done
+    this.torusButtonVisibility = true
     this.Web3 = Web3
   }
 
-  init(buildEnv = 'production', enableLogging = false) {
+  init({
+    buildEnv = 'production',
+    enableLogging = false,
+    network = {
+      host: 'mainnet',
+      chainId: 1,
+      networkName: 'mainnet'
+    },
+    showTorusButton = true
+  } = {}) {
     return new Promise((resolve, reject) => {
+      if (this.isInitalized) reject(new Error('Already initialized'))
       let torusUrl
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.0.21'
+          torusUrl = 'https://staging.tor.us/v0.1.2'
           logLevel = 'info'
           break
         case 'testing':
@@ -48,13 +58,14 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.0.23'
+          torusUrl = 'https://app.tor.us/v0.1.2'
           logLevel = 'error'
           break
       }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
       else log.disableAll()
+      this.torusButtonVisibility = showTorusButton
       this._createWidget(torusUrl)
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
@@ -62,8 +73,7 @@ class Torus {
       if (buildEnv !== 'testing' && buildEnv !== 'development') {
         // hacky solution to check for iframe integrity
         const fetchUrl = torusUrl + '/index.html'
-        global.window
-          .fetch(fetchUrl)
+        fetch(fetchUrl)
           .then(resp => resp.text())
           .then(response => {
             const integrity = sriToolbox.generate(
@@ -75,29 +85,50 @@ class Torus {
             log.info(integrity, 'integrity')
             if (integrity === iframeIntegrity) {
               runOnLoad(attachIFrame.bind(this))
-              runOnLoad(this._setupWeb3.bind(this))
-              resolve()
+              runOnLoad(() => this._setupWeb3())
+              runOnLoad(() =>
+                this._setProvider(network).then(() => {
+                  this.isInitalized = true
+                  resolve()
+                })
+              )
             } else {
-              this.torusLogin.style.display = 'none'
-              this.torusMenuBtn.style.display = 'none'
-              reject(new Error('Integrity check failed'))
+              try {
+                this._cleanUp()
+              } catch (error) {
+                reject(error)
+              } finally {
+                reject(new Error('Integrity check failed'))
+              }
             }
           })
       } else {
         runOnLoad(attachIFrame.bind(this))
-        runOnLoad(this._setupWeb3.bind(this))
-        resolve()
+        runOnLoad(() => this._setupWeb3())
+        runOnLoad(() =>
+          this._setProvider(network).then(() => {
+            this.isInitalized = true
+            resolve()
+          })
+        )
       }
     })
   }
 
+  /**
+   * Logs the user in
+   */
   login() {
+    if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     else {
       return this.ethereum.enable()
     }
   }
 
+  /**
+   * Logs the user out
+   */
   logout() {
     return new Promise((resolve, reject) => {
       if (!this.isLoggedIn) reject(new Error('User has not logged in yet'))
@@ -105,37 +136,164 @@ class Torus {
         const logOutStream = this.communicationMux.getStream('logout')
         logOutStream.write({ name: 'logOut' })
         var statusStream = this.communicationMux.getStream('status')
-        statusStream.on('data', status => {
-          if (!status.loggedIn) resolve()
-        })
+        const statusStreamHandler = status => {
+          if (!status.loggedIn) {
+            this.isLoggedIn = false
+            this.isRehydrated = false
+            resolve()
+          } else reject(new Error('Some Error Occured'))
+          statusStream.removeListener('data', statusStreamHandler)
+        }
+        statusStream.on('data', statusStreamHandler)
       }
     })
   }
 
   /**
-   * Create widget
+   * Logs the user out and then cleans up (removes iframe, widget, css)
+   */
+  cleanUp() {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn)
+        this.logout()
+          .then(() => {
+            this._cleanUp()
+            resolve()
+          })
+          .catch(err => reject(err))
+      else {
+        try {
+          this._cleanUp()
+          resolve()
+        } catch (error) {
+          reject(error)
+        }
+      }
+    })
+  }
+
+  _cleanUp() {
+    function isElement(element) {
+      return element instanceof Element || element instanceof HTMLDocument
+    }
+    if (isElement(this.styleLink)) {
+      window.document.head.removeChild(this.styleLink)
+      this.styleLink = {}
+    }
+    if (isElement(this.torusWidget)) {
+      window.document.body.removeChild(this.torusWidget)
+      this.torusWidget = {}
+      this.torusLogin = {}
+      this.torusMenuBtn = {}
+      this.torusLoadingBtn = {}
+    }
+    if (isElement(this.torusIframe)) {
+      window.document.body.removeChild(this.torusIframe)
+      this.torusIframe = {}
+    }
+  }
+
+  /**
+   * Creates the widget
    */
   _createWidget(torusUrl) {
     var link = window.document.createElement('link')
+
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
     link.setAttribute('href', torusUrl + '/css/widget.css')
-    // Login button code
+
+    this.styleLink = link
+
     this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-    this.torusLogin = htmlToElement('<button id="torusLogin" />')
+
+    // Loading spinner
+    const spinner = htmlToElement(
+      '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
+    )
+    this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+    }
+    this.torusLoadingBtn.appendChild(spinner)
+    this.torusWidget.appendChild(this.torusLoadingBtn)
+
+    // Login button code
+    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
+    if (!this.torusButtonVisibility) {
+      this.torusLogin.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusLogin)
-    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" />')
+
+    // Menu button
+    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
+    if (!this.torusButtonVisibility) {
+      this.torusMenuBtn.style.display = 'none'
+    }
     this.torusWidget.appendChild(this.torusMenuBtn)
+
+    // Speed dial list
+    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
+    this.homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
+
+    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
+    const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
+    this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
+    this.keyContainer = htmlToElement('<li class="tooltip"></li>')
+
+    this.keyContainer.appendChild(this.keyBtn)
+    this.keyContainer.appendChild(tooltipNote)
+    this.keyContainer.appendChild(tooltipCopied)
+
+    this.transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
+
+    this.torusSpeedDial.appendChild(this.homeBtn)
+    this.torusSpeedDial.appendChild(this.keyContainer)
+    this.torusSpeedDial.appendChild(this.transferBtn)
+
+    this.torusWidget.prepend(this.torusSpeedDial)
 
     // Iframe code
     this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
     // Setup on load code
     const bindOnLoad = () => {
       this.torusLogin.addEventListener('click', () => {
+        this._showLoadingAndHideGoogleAndTorus()
         this._showLoginPopup(false)
       })
+
+      this.homeBtn.addEventListener('click', () => {
+        this.showWallet()
+        this._toggleSpeedDial()
+      })
+
+      this.transferBtn.addEventListener('click', () => {
+        this.showWallet('transfer')
+        this._toggleSpeedDial()
+      })
+
+      this.keyBtn.addEventListener('click', () => {
+        const publicKey = htmlToElement('<input type="text" value="' + this.ethereum.selectedAddress + '">')
+        this.torusWidget.prepend(publicKey)
+        publicKey.select()
+        publicKey.setSelectionRange(0, 99999) // For mobile
+
+        document.execCommand('copy')
+        this.torusWidget.removeChild(publicKey)
+
+        tooltipCopied.classList.add('active')
+        tooltipNote.classList.add('active')
+
+        var self = this
+        setTimeout(function() {
+          tooltipCopied.classList.remove('active')
+          tooltipNote.classList.remove('active')
+          self._toggleSpeedDial()
+        }, 1000)
+      })
+
       this.torusMenuBtn.addEventListener('click', () => {
-        this.showWallet(true)
+        this._toggleSpeedDial()
       })
     }
 
@@ -147,42 +305,62 @@ class Torus {
     runOnLoad(attachOnLoad.bind(this))
     runOnLoad(bindOnLoad.bind(this))
 
-    switch (this.stylePosition) {
+    switch (this.buttonPosition) {
       case 'top-left':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.left = '34px'
         break
       case 'top-right':
-        this.torusWidget.style.top = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.top = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-right':
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.right = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.right = '34px'
         break
       case 'bottom-left':
       default:
-        this.torusWidget.style.bottom = '8px'
-        this.torusWidget.style.left = '8px'
+        this.torusWidget.style.bottom = '34px'
+        this.torusWidget.style.left = '34px'
         break
     }
   }
 
+  _updateKeyBtnAddress(selectedAddress) {
+    this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
+  }
+
+  _showLoadingAndHideGoogleAndTorus() {
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+      this.torusLogin.style.display = 'none'
+    }
+  }
+
   _showTorusButtonAndHideGoogle() {
-    // torusIframeContainer.style.display = 'none'
-    this.torusMenuBtn.style.display = 'block'
-    this.torusLogin.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      // torusIframeContainer.style.display = 'none'
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusMenuBtn.style.display = 'block'
+      this.torusLogin.style.display = 'none'
+    }
   }
 
   _hideTorusButtonAndShowGoogle() {
-    this.torusLogin.style.display = 'block'
-    this.torusMenuBtn.style.display = 'none'
+    if (this.torusButtonVisibility) {
+      this.torusLoadingBtn.style.display = 'none'
+      this.torusLogin.style.display = 'block'
+      this.torusMenuBtn.style.display = 'none'
+    }
   }
 
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
+    this.torusButtonVisibility = false
+    this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
   }
@@ -192,6 +370,7 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
+    this.torusButtonVisibility = true
     if (this.isLoggedIn) this._showTorusButtonAndHideGoogle()
     else this._hideTorusButtonAndShowGoogle()
   }
@@ -239,35 +418,43 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
+      this._showLoadingAndHideGoogleAndTorus()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
         // If user is already logged in, we assume they have given access to the website
         this.web3.eth.getAccounts(
           function(err, res) {
+            const self = this
             if (err) {
-              setTimeout(function() {
+              setTimeout(() => {
+                self._showTorusButtonAndHideGoogle()
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
-              setTimeout(function() {
+              // If user is already rehydrated, resolve this
+              // else wait for something to be written to status stream
+              if (this.isRehydrated) {
                 resolve(res)
-              }, 50)
+                self._showTorusButtonAndHideGoogle()
+                this.isLoggedIn = true
+              } else {
+                const statusStream = this.communicationMux.getStream('status')
+                const statusStreamHandler = status => {
+                  if (status.loggedIn) {
+                    this.isRehydrated = true
+                    this.isLoggedIn = true
+                    resolve(res)
+                  } else reject(new Error('User has not logged in yet'))
+
+                  self._showTorusButtonAndHideGoogle()
+                  statusStream.removeListener('data', statusStreamHandler)
+                }
+                statusStream.on('data', statusStreamHandler)
+              }
             } else {
               // set up listener for login
-              var oauthStream = this.communicationMux.getStream('oauth')
-              var handler = function(data) {
-                var { err, selectedAddress } = data
-                if (err) {
-                  reject(err)
-                } else {
-                  // returns an array (cause accounts expects it)
-                  resolve([transformEthAddress(selectedAddress)])
-                }
-                oauthStream.removeListener('data', handler)
-              }
-              oauthStream.on('data', handler)
-              this._showLoginPopup(true)
+              this._showLoginPopup(true, resolve, reject)
             }
           }.bind(this)
         )
@@ -284,13 +471,19 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     var communicationMux = setupMultiplex(this.communicationStream)
+    communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
-      this.isLoggedIn = status.loggedIn
-      if (status.loggedIn) this._showTorusButtonAndHideGoogle()
+      // rehydration
+      if (status.rehydrate && status.loggedIn) this.isRehydrated = status.rehydrate
+      // normal login
+      else if (status.loggedIn) {
+        this.isLoggedIn = status.loggedIn
+        this._showTorusButtonAndHideGoogle()
+      } // logout
       else this._hideTorusButtonAndShowGoogle()
     })
     // if (typeof window.web3 !== 'undefined') {
@@ -312,30 +505,152 @@ class Torus {
     this.web3.currentProvider.isTorus = true
 
     inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
+    inpageProvider.publicConfigStore.subscribe(
+      function(state) {
+        this._updateKeyBtnAddress(state.selectedAddress)
+      }.bind(this)
+    )
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
 
   // Exposing login function, if called from embed, flag as true
-  _showLoginPopup(calledFromEmbed) {
+  _showLoginPopup(calledFromEmbed, resolve, reject) {
     var oauthStream = this.communicationMux.getStream('oauth')
+    const self = this
+    var handler = function(data) {
+      var { err, selectedAddress } = data
+      if (err) {
+        log.error(err)
+        self._hideTorusButtonAndShowGoogle()
+        if (reject) reject(err)
+      } else {
+        // returns an array (cause accounts expects it)
+        if (resolve) resolve([transformEthAddress(selectedAddress)])
+        self._showTorusButtonAndHideGoogle()
+      }
+      oauthStream.removeListener('data', handler)
+    }
+    oauthStream.on('data', handler)
     oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
   }
 
-  setProvider(network, type) {
-    var providerChangeStream = this.communicationMux.getStream('provider_change')
-    if (type === 'rpc' && !Object.prototype.hasOwnProperty.call(network, 'networkUrl'))
-      throw new Error('if provider is rpc, a json object {networkUrl, chainId, networkName} is expected as network')
-    providerChangeStream.write({ name: 'provider_change', data: { network, type } })
+  setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+      const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+      const handler = function(ev) {
+        var { err, success } = ev.data
+        if (err) {
+          log.error(err)
+          reject(err)
+        } else if (success) {
+          resolve()
+        } else reject(new Error('some error occured'))
+        providerChangeSuccess.removeListener('data', handler)
+      }
+      providerChangeSuccess.on('data', handler)
+      if (configuration.networkList.includes(host))
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            override: false
+          }
+        })
+      else
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            type: 'rpc'
+          },
+          override: false
+        })
+    })
   }
 
-  showWallet(calledFromEmbed) {
-    var showWalletStream = this.communicationMux.getStream('show_wallet')
-    showWalletStream.write({ name: 'show_wallet', data: { calledFromEmbed } })
+  _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+    return new Promise((resolve, reject) => {
+      if (!this.isInitalized) {
+        const providerChangeStream = this.communicationMux.getStream('show_provider_change')
+        const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+        const handler = function(ev) {
+          var { err, success } = ev.data
+          if (err) {
+            log.error(err)
+            reject(err)
+          } else if (success) {
+            resolve()
+          } else reject(new Error('some error occured'))
+          providerChangeSuccess.removeListener('data', handler)
+        }
+        providerChangeSuccess.on('data', handler)
+        if (configuration.networkList.includes(host))
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              override: true
+            }
+          })
+        else
+          providerChangeStream.write({
+            name: 'show_provider_change',
+            data: {
+              network: {
+                host,
+                chainId,
+                networkName
+              },
+              type: 'rpc',
+              override: true
+            }
+          })
+      } else reject(new Error('Already initialized'))
+    })
   }
 
   /**
-   * Expose the getPublicAddress API to the Dapp through torus object
+   * Shows the wallet popup
+   * @param {boolean} calledFromEmbed if called from dapp context
+   * @param {string} path the route to open
+   */
+  showWallet(path) {
+    var showWalletStream = this.communicationMux.getStream('show_wallet')
+    const finalPath = path ? `/${path}` : ''
+    showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
+  }
+
+  _toggleSpeedDial() {
+    this.torusMenuBtn.classList.toggle('active')
+    const isActive = this.torusMenuBtn.classList.contains('active')
+
+    var torusSpeedDial = this.torusSpeedDial
+    torusSpeedDial.classList.toggle('active')
+    setTimeout(function() {
+      let time = isActive ? 0.05 : 0.15
+      Object.values(torusSpeedDial.children).forEach(element => {
+        element.style.transitionDelay = time + 's'
+        time += isActive ? 0.05 : -0.05
+      })
+    }, 200)
+  }
+
+  /**
+   * Gets the public address of an user with email
    * @param {String} email Email address of the user
    */
   getPublicAddress(email) {
@@ -378,15 +693,14 @@ class Torus {
   }
 
   /**
-   * Expose the loggedin user info to the Dapp through torus object
+   * Exposes the loggedin user info to the Dapp
    */
   getUserInfo() {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
         const userInfoStream = this.communicationMux.getStream('user_info')
         userInfoStream.write({ name: 'user_info_request' })
-        userInfoStream.on('data', function(chunk) {
-          resolve(chunk)
+        const userInfoHandler = chunk => {
           if (chunk.name === 'user_info_response') {
             if (chunk.data.approved) {
               resolve(chunk.data.payload)
@@ -394,7 +708,9 @@ class Torus {
               reject(new Error('User rejected the request'))
             }
           }
-        })
+          userInfoStream.removeListener('data', userInfoHandler)
+        }
+        userInfoStream.on('data', userInfoHandler)
       } else reject(new Error('User has not logged in yet'))
     })
   }
@@ -411,11 +727,11 @@ var __define
  * AMD's define function
  */
 function cleanContextForImports() {
-  __define = global.define
   try {
+    __define = global.define
     global.define = undefined
   } catch (_) {
-    log.warn('MetaMask - global.define could not be deleted.')
+    log.warn('Torus - global.define could not be deleted.')
   }
 }
 
@@ -426,7 +742,7 @@ function restoreContextAfterImports() {
   try {
     global.define = __define
   } catch (_) {
-    log.warn('MetaMask - global.define could not be overwritten.')
+    log.warn('Torus - global.define could not be overwritten.')
   }
 }
 

@@ -1,28 +1,47 @@
 import Web3 from 'web3'
 
 export default class Torus {
+  constructor(args: TorusCtorArgs);
   web3: Web3
   provider: Provider
   ethereum: Provider
   getPublicAddress(email: string): Promise<string>;
-  setProvider(network: string | { networkUrl: string, chainId: number, networkName: string }, type?: "rpc")
-  showWallet(calledFromEmbed: boolean)
-  showTorusButton()
-  hideTorusButton()
-  getUserInfo(): Promise<UserInfo>;
-  init(buildEnv?: 'production' | 'development' | 'staging' | 'testing', enableLogging?: boolean): Promise<void>
+  setProvider(networkParams: NetworkInterface): Promise<void>;
+  showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
+  showTorusButton(): void
+  hideTorusButton(): void
+  getUserInfo(): Promise<UserInfo>
+  init(params: TorusParams): Promise<void>
   login(): Promise<string[]>
   logout(): Promise<void>
+  cleanUp(): Promise<void>
 }
 
 declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
 }
 
+interface TorusCtorArgs {
+  buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
+}
+
 interface UserInfo {
   email: string;
   name: string;
   profileImage: string;
+}
+
+interface TorusParams {
+  network?: NetworkInterface;
+  buildEnv?: 'production' | 'development' | 'staging' | 'testing';
+  enableLogging?: boolean;
+  showTorusButton?: boolean;
+}
+
+interface NetworkInterface {
+  host: 'mainnet' | 'rinkeby' | 'ropsten' | 'kovan' | 'goerli' | 'localhost' | 'matic' | string,
+  chainId?: number; 
+  networkName?: string;
 }
 
 interface JsonRPCResponse {
