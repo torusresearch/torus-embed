@@ -16,8 +16,7 @@ export default {
   name: 'app',
   data() {
     return {
-      publicAddress: '',
-      torus: {}
+      publicAddress: ''
     }
   },
   methods: {
@@ -27,7 +26,7 @@ export default {
           buttonPosition: 'bottom-left'
         });
         await torus.init({
-          buildEnv: 'production',
+          buildEnv: 'development',
           enableLogging: true,
           network: {
             host: 'kovan', // mandatory
@@ -38,14 +37,13 @@ export default {
         });
         await torus.login(); // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider);
+        window.torus = torus
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
-
           // For testing typed messages
-          // this.requestFakeSignature()
+          this.requestFakeSignature()
         })
-        window.torus = this.torus
       } catch (error) {
         console.error(error)
       }
@@ -64,41 +62,13 @@ export default {
         amount: 100,
         bidder: {
           userId: 323,
-          wallet: '0x33asdf3333333333333333333333333333333333333',
-          bidder2: {
-            userId: 323,
-            wallet: '0x33asdf3333333333333333333333333333333333333',
-            bidder: {
-              userId: 323,
-              wallet: '0x33asdf3333333333333333333333333333333333333',
-              bidder: {
-                userId: 323,
-                wallet: '0x33asdf3333333333333333333333333333333333333',
-                bidder: {
-                  userId: 323,
-                  wallet: '0x33asdf3333333333333333333333333333333333333'
-                }
-              },
-              bidder: {
-                userId: 323,
-                wallet: '0x33asdf3333333333333333333333333333333333333'
-              }
-            }
-          },
-          bidder: {
-            userId: 323,
-            wallet: '0x33asdf3333333333333333333333333333333333333'
-          },
-          bidder: {
-            userId: 323,
-            wallet: '0x33asdf3333333333333333333333333333333333333'
-          }
+          wallet: '0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3'
         }
       }
       const domainData = {
         name: 'My vuejs test dapp for torus',
         version: '1',
-        chainId: parseInt(this.torus.web3.version.network, 10),
+        chainId: parseInt(window.torus.web3.version.network, 10),
         verifyingContract: '0x1C56346CD2A2Bf3202F771f50d3D14a367B48070',
         salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558'
       }
@@ -114,11 +84,11 @@ export default {
         message: message
       })
 
-      this.torus.web3.currentProvider.sendAsync(
+      window.torus.web3.currentProvider.sendAsync(
         {
           method: 'eth_signTypedData_v3',
-          params: [this.torus.web3.eth.accounts[0], data],
-          from: this.torus.web3.eth.accounts[0]
+          params: [window.torus.web3.eth.accounts[0], data],
+          from: window.torus.web3.eth.accounts[0]
         },
         function(err, result) {
           if (err) {
