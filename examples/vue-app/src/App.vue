@@ -52,7 +52,7 @@ export default {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
           // For testing typed messages
-          this.requestFakeSignature()
+          // this.requestFakeSignature()
         })
       } catch (error) {
         console.error(error)
@@ -112,7 +112,7 @@ export default {
         domain: {
           name: 'Ether Mail',
           version: '1',
-          chainId: 1,
+          chainId: 4,
           verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
         },
         message: {
@@ -127,17 +127,17 @@ export default {
           contents: 'Hello, Bob!'
         }
       }
-      this.torus.web3.currentProvider.sendAsync(
+      window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
-          params: [this.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-          from: this.torus.web3.eth.accounts[0]
+          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
+          from: window.torus.web3.eth.accounts[0]
         },
         function(err, result) {
           if (err) {
             return console.error(err)
           }
-          console.log(result)
+          // this.torus.console('sign typed message v3 => true')
           const signature = result.result.substring(2)
           const r = '0x' + signature.substring(0, 64)
           const s = '0x' + signature.substring(64, 128)
@@ -146,54 +146,58 @@ export default {
         }
       )
     },
-    signTypedData_v4() {},
-    requestFakeSignature() {
-      const domain = [
-        { name: 'name', type: 'string' },
-        { name: 'version', type: 'string' },
-        { name: 'chainId', type: 'uint256' },
-        { name: 'verifyingContract', type: 'address' },
-        { name: 'salt', type: 'bytes32' }
-      ]
-      const bid = [{ name: 'amount', type: 'uint256' }, { name: 'bidder', type: 'Identity' }]
-      const identity = [{ name: 'userId', type: 'uint256' }, { name: 'wallet', type: 'address' }]
-      var message = {
-        amount: 100,
-        bidder: {
-          userId: 323,
-          wallet: '0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3'
+    signTypedData_v4() {
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' }
+          ],
+          Person: [{ name: 'name', type: 'string' }, { name: 'wallets', type: 'address[]' }],
+          Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person[]' }, { name: 'contents', type: 'string' }],
+          Group: [{ name: 'name', type: 'string' }, { name: 'members', type: 'Person[]' }]
+        },
+        domain: {
+          name: 'Ether Mail',
+          version: '1',
+          chainId: 4,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
+        },
+        primaryType: 'Mail',
+        message: {
+          from: {
+            name: 'Cow',
+            wallets: ['0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826', '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF']
+          },
+          to: [
+            {
+              name: 'Bob',
+              wallets: [
+                '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
+                '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
+                '0xB0B0b0b0b0b0B000000000000000000000000000'
+              ]
+            }
+          ],
+          contents: 'Hello, Bob!'
         }
       }
-      const domainData = {
-        name: 'My vuejs test dapp for torus',
-        version: '1',
-        chainId: parseInt(window.torus.web3.version.network, 10),
-        verifyingContract: '0x1C56346CD2A2Bf3202F771f50d3D14a367B48070',
-        salt: '0xf2d857f4a3edcb9b78b4d503bfe733db1e3f6cdc2b7971ee739626c97e86a558'
-      }
 
-      const data = JSON.stringify({
-        types: {
-          EIP712Domain: domain,
-          Bid: bid,
-          Identity: identity
-        },
-        domain: domainData,
-        primaryType: 'Bid',
-        message: message
-      })
-
-      window.torus.web3.currentProvider.sendAsync(
+      window.torus.web3.currentProvider.send(
         {
-          method: 'eth_signTypedData_v3',
-          params: [window.torus.web3.eth.accounts[0], data],
+          method: 'signTypedData_v4',
+          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
           from: window.torus.web3.eth.accounts[0]
         },
         function(err, result) {
           if (err) {
             return console.error(err)
           }
-          console.log(result)
+          // console.log(result)
+          this.console('sign typed message v3 => true')
+
           const signature = result.result.substring(2)
           const r = '0x' + signature.substring(0, 64)
           const s = '0x' + signature.substring(64, 128)
