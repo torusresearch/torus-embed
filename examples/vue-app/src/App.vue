@@ -39,7 +39,7 @@ export default {
           buildEnv: 'development',
           enableLogging: true,
           network: {
-            host: 'kovan', // mandatory
+            host: 'rinkeby', // mandatory
             // chainId: 1, // optional
             networkName: 'kovan' // optional
           },
@@ -130,7 +130,7 @@ export default {
       this.torus.web3.currentProvider.sendAsync(
         {
           method: 'eth_signTypedData_v3',
-          params: [this.torus.web3.eth.accounts[0], data],
+          params: [this.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
           from: this.torus.web3.eth.accounts[0]
         },
         function(err, result) {
