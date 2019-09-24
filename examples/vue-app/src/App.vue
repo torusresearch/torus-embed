@@ -127,6 +127,7 @@ export default {
           contents: 'Hello, Bob!'
         }
       }
+      const self = this
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
@@ -137,7 +138,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          // this.torus.console('sign typed message v3 => true')
+          self.console('sign typed message v3 => true')
           const signature = result.result.substring(2)
           const r = '0x' + signature.substring(0, 64)
           const s = '0x' + signature.substring(64, 128)
@@ -184,10 +185,10 @@ export default {
           contents: 'Hello, Bob!'
         }
       }
-
+      const self = this
       window.torus.web3.currentProvider.send(
         {
-          method: 'signTypedData_v4',
+          method: 'eth_signTypedData_v4',
           params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
           from: window.torus.web3.eth.accounts[0]
         },
@@ -196,7 +197,7 @@ export default {
             return console.error(err)
           }
           // console.log(result)
-          this.console('sign typed message v3 => true')
+          self.console('sign typed message v4 => true')
 
           const signature = result.result.substring(2)
           const r = '0x' + signature.substring(0, 64)
