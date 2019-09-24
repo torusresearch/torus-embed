@@ -21,6 +21,7 @@
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
 import sigUtil from 'eth-sig-util'
+import { type } from 'os'
 
 export default {
   name: 'app',
@@ -62,22 +63,24 @@ export default {
       document.querySelector('#console>p').innerHTML = text
     },
     signMessage() {
-      const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
-      const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
-      const privKey = Buffer.from(privKeyHex, 'hex')
-      const message = 'Hello, world!'
-      const msgParams = { data: message }
-
-      const signed = sigUtil.personalSign(privKey, msgParams)
-      msgParams.sig = signed
-      const recovered = sigUtil.recoverPersonalSignature(msgParams)
-      console.log(recovered == address)
-      this.console('sign message => ' + (recovered == address))
+      const self = this
+      // hex message
+      const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
+      window.torus.web3.currentProvider.send(
+        {
+          method: 'eth_sign',
+          params: [window.torus.web3.eth.accounts[0], message],
+          from: window.torus.web3.eth.accounts[0]
+        },
+        function(err, result) {
+          if (err) {
+            return console.error(err)
+          }
+          self.console('sign message => true')
+        }
+      )
     },
     signTypedData_v1() {
-      const address = '0x29c76e6ad8f28bb1004902578fb108c507be341b'
-      const privKeyHex = '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0'
-      const privKey = Buffer.from(privKeyHex, 'hex')
       const typedData = [
         {
           type: 'string',
@@ -90,10 +93,20 @@ export default {
           value: 10
         }
       ]
-      const msgParams = { data: typedData }
-      const signature = sigUtil.signTypedDataLegacy(privKey, msgParams)
-      const recovered = sigUtil.recoverTypedSignatureLegacy({ data: msgParams.data, sig: signature })
-      this.console('sign typed message v1 => ' + (recovered == address))
+      const self = this
+      window.torus.web3.currentProvider.send(
+        {
+          method: 'eth_signTypedData',
+          params: [typedData, window.torus.web3.eth.accounts[0]],
+          from: window.torus.web3.eth.accounts[0]
+        },
+        function(err, result) {
+          if (err) {
+            return console.error(err)
+          }
+          self.console('sign typed message v1 => true')
+        }
+      )
     },
 
     signTypedData_v3() {
@@ -139,11 +152,6 @@ export default {
             return console.error(err)
           }
           self.console('sign typed message v3 => true')
-          const signature = result.result.substring(2)
-          const r = '0x' + signature.substring(0, 64)
-          const s = '0x' + signature.substring(64, 128)
-          const v = parseInt(signature.substring(128, 130), 16)
-          // The signature is now comprised of r, s, and v.
         }
       )
     },
@@ -198,12 +206,6 @@ export default {
           }
           // console.log(result)
           self.console('sign typed message v4 => true')
-
-          const signature = result.result.substring(2)
-          const r = '0x' + signature.substring(0, 64)
-          const s = '0x' + signature.substring(64, 128)
-          const v = parseInt(signature.substring(128, 130), 16)
-          // The signature is now comprised of r, s, and v.
         }
       )
     },
