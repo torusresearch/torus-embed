@@ -21,7 +21,6 @@
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
 import sigUtil from 'eth-sig-util'
-import { type } from 'os'
 
 export default {
   name: 'app',
@@ -37,7 +36,7 @@ export default {
           buttonPosition: 'bottom-left'
         })
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: 'production',
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
