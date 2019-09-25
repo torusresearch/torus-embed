@@ -27,6 +27,8 @@ class Torus {
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
     this.torusButtonVisibility = true
+    this.requestedVerifier = ''
+    this.currentVerifier = ''
     this.Web3 = Web3
   }
 
@@ -118,11 +120,16 @@ class Torus {
   /**
    * Logs the user in
    */
-  login() {
+  login({ verifier }) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
-    else {
+    if (!verifier) {
+      // Show UI to select verifier
+    } else if (configuration.verifierList.includes(verifier)) {
+      this.requestedVerifier = verifier
       return this.ethereum.enable()
+    } else {
+      throw new Error('Unsupported verifier')
     }
   }
 
@@ -140,6 +147,8 @@ class Torus {
           if (!status.loggedIn) {
             this.isLoggedIn = false
             this.isRehydrated = false
+            this.currentVerifier = ''
+            this.requestedVerifier = ''
             resolve()
           } else reject(new Error('Some Error Occured'))
           statusStream.removeListener('data', statusStreamHandler)
@@ -435,16 +444,33 @@ class Torus {
               // If user is already rehydrated, resolve this
               // else wait for something to be written to status stream
               if (this.isRehydrated) {
-                resolve(res)
-                self._showTorusButtonAndHideGoogle()
                 this.isLoggedIn = true
+                if (this.currentVerifier !== this.requestedVerifier) {
+                  const requestedVerifier = this.requestedVerifier
+                  this.logout()
+                    .then(_ => {
+                      this.requestedVerifier = requestedVerifier
+                      this._showLoginPopup(true, resolve, reject)
+                    })
+                    .catch(err => reject(err))
+                } else resolve(res)
+                self._showTorusButtonAndHideGoogle()
               } else {
                 const statusStream = this.communicationMux.getStream('status')
                 const statusStreamHandler = status => {
-                  if (status.loggedIn) {
-                    this.isRehydrated = true
-                    this.isLoggedIn = true
-                    resolve(res)
+                  if (status.loggedIn && status.rehydrate) {
+                    this.isRehydrated = status.rehydrate
+                    this.isLoggedIn = status.loggedIn
+                    this.currentVerifier = status.verifier
+                    if (this.currentVerifier !== this.requestedVerifier) {
+                      const requestedVerifier = this.requestedVerifier
+                      this.logout()
+                        .then(_ => {
+                          this.requestedVerifier = requestedVerifier
+                          this._showLoginPopup(true, resolve, reject)
+                        })
+                        .catch(err => reject(err))
+                    } else resolve(res)
                   } else reject(new Error('User has not logged in yet'))
 
                   self._showTorusButtonAndHideGoogle()
@@ -478,10 +504,14 @@ class Torus {
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
       // rehydration
-      if (status.rehydrate && status.loggedIn) this.isRehydrated = status.rehydrate
+      if (status.rehydrate && status.loggedIn) {
+        this.isRehydrated = status.rehydrate
+        this.currentVerifier = status.verifier
+      }
       // normal login
       else if (status.loggedIn) {
         this.isLoggedIn = status.loggedIn
+        this.currentVerifier = status.verifier
         this._showTorusButtonAndHideGoogle()
       } // logout
       else this._hideTorusButtonAndShowGoogle()
@@ -532,7 +562,7 @@ class Torus {
       oauthStream.removeListener('data', handler)
     }
     oauthStream.on('data', handler)
-    oauthStream.write({ name: 'oauth', data: { calledFromEmbed } })
+    oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
   }
 
   setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {

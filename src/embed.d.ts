@@ -12,13 +12,17 @@ export default class Torus {
   hideTorusButton(): void
   getUserInfo(): Promise<UserInfo>
   init(params: TorusParams): Promise<void>
-  login(): Promise<string[]>
+  login(params: LoginParams): Promise<string[]>
   logout(): Promise<void>
   cleanUp(): Promise<void>
 }
 
 declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
+}
+
+interface LoginParams {
+  verifier?: 'google' | 'facebook'
 }
 
 interface TorusCtorArgs {
