@@ -6,5 +6,6 @@ export default {
     'https://torus-main-2.torusnode.com/jrpc',
     'https://etc-main-2.tor.us/jrpc'
   ],
-  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic']
+  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
+  verifierList: ['google', 'facebook']
 }
