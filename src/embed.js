@@ -23,6 +23,7 @@ class Torus {
     this.torusLoadingBtn = {}
     this.torusIframe = {}
     this.styleLink = {}
+    this.torusLoginModal = {}
     this.isRehydrated = false // rehydrated
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
@@ -124,7 +125,7 @@ class Torus {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     if (!verifier) {
-      // Show UI to select verifier
+      this.torusLoginModal.classList.add('active')
     } else if (configuration.verifierList.includes(verifier)) {
       this.requestedVerifier = verifier
       return this.ethereum.enable()
@@ -261,6 +262,16 @@ class Torus {
     this.torusSpeedDial.appendChild(this.transferBtn)
 
     this.torusWidget.prepend(this.torusSpeedDial)
+
+    this.torusLoginModal = htmlToElement('<div id="login-modal" class="login-modal"></div>')
+    const loginList = htmlToElement('<ul></ul>')
+    const googleLogin = htmlToElement('<li><button id="login-google" class="login-btn">Google</button></li>')
+    const facebookLogin = htmlToElement('<li><button id="login-facebook" class="login-btn">Facebook</button></li>')
+    loginList.appendChild(googleLogin)
+    loginList.appendChild(facebookLogin)
+    this.torusLoginModal.appendChild(loginList)
+
+    this.torusWidget.appendChild(this.torusLoginModal)
 
     // Iframe code
     this.torusIframe = htmlToElement('<iframe id="torusIframe" frameBorder="0" src="' + torusUrl + '/popup"></iframe>')
