@@ -251,7 +251,8 @@ class Torus {
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
+    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list" style="transition-delay: 0.05s">')
+    this.torusSpeedDial.style.opacity = '0'
     const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
 
     const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
@@ -271,15 +272,52 @@ class Torus {
 
     this.torusWidget.prepend(this.torusSpeedDial)
 
+    // Multiple login modal
     this.torusLoginModal = htmlToElement('<div id="login-modal" class="login-modal"></div>')
     this.torusLoginModal.style.display = 'none'
-    const loginList = htmlToElement('<ul></ul>')
-    this.googleLogin = htmlToElement('<li><button id="login-google" class="login-btn">Google</button></li>')
-    this.facebookLogin = htmlToElement('<li><button id="login-facebook" class="login-btn">Facebook</button></li>')
-    loginList.appendChild(this.googleLogin)
-    loginList.appendChild(this.facebookLogin)
-    this.torusLoginModal.appendChild(loginList)
+    const modalContainer = htmlToElement(
+      '<div class="modal-container"><div class="close-container"><span id="close" class="close">&times;</span></div></div>'
+    )
 
+    const modalContent = htmlToElement(
+      '<div class="modal-content">' +
+        '<div class="logo-container"><img src="' +
+        torusUrl +
+        '/images/torus-logo-blue.svg' +
+        '"></div>' +
+        '<div><h1 class="login-header">Login to Torus</h1>' +
+        '<p class="login-subtitle">You are just one step away from getting your digital wallet for your cryptocurrencies</p></div>' +
+        '</div>'
+    )
+
+    this.googleLogin = htmlToElement(
+      '<button id="login-google" class="login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign up/in with Google</button>'
+    )
+    const otherAccount = htmlToElement('<div>Or, use another account:</div>')
+
+    // List for other logins
+    const loginList = htmlToElement('<ul id="login-list" class="login-list"></ul>')
+    this.facebookLogin = htmlToElement(
+      '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
+    )
+
+    loginList.appendChild(this.facebookLogin)
+
+    modalContent.appendChild(this.googleLogin)
+    modalContent.appendChild(otherAccount)
+    modalContent.appendChild(loginList)
+
+    const loginNote = htmlToElement(
+      '<div class="login-note">By clicking Login, you accept our ' +
+        '<a href="https://docs.tor.us/legal/terms-and-conditions" target="_blank">Terms and Conditions</a></div>'
+    )
+
+    modalContent.appendChild(loginNote)
+
+    modalContainer.appendChild(modalContent)
+    this.torusLoginModal.appendChild(modalContainer)
+
+    // Append login codes to widget
     this.torusWidget.appendChild(this.torusLoginModal)
 
     // Iframe code
@@ -323,6 +361,15 @@ class Torus {
       this.torusMenuBtn.addEventListener('click', () => {
         this._toggleSpeedDial()
       })
+
+      // Login Modal Listeners
+      modalContainer.querySelector('#close').addEventListener('click', () => {
+        this.torusLoginModal.style.display = 'none'
+      })
+
+      window.addEventListener('click', () => {
+        this.torusLoginModal.style.display = 'none'
+      })
     }
 
     const attachOnLoad = () => {
@@ -363,6 +410,7 @@ class Torus {
     this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
     this.torusLoadingBtn.style.display = 'none'
     this.torusLoginModal.style.display = 'none'
+    this.torusSpeedDial.style.opacity = '0'
   }
 
   _showLoggingIn() {
@@ -387,7 +435,7 @@ class Torus {
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
     this.torusLoadingBtn.style.display = 'none'
-    this.torusSpeedDial.style.display = 'none'
+    this.torusSpeedDial.style.opacity = '0'
   }
 
   /**
@@ -690,7 +738,11 @@ class Torus {
     const isActive = this.torusMenuBtn.classList.contains('active')
 
     var torusSpeedDial = this.torusSpeedDial
+    torusSpeedDial.style.opacity = torusSpeedDial.style.opacity === '0' ? '1' : '0'
     torusSpeedDial.classList.toggle('active')
+    var mainTime = isActive ? 0.05 : 1.2
+    torusSpeedDial.style.transitionDelay = mainTime + 's'
+
     setTimeout(function() {
       let time = isActive ? 0.05 : 0.15
       Object.values(torusSpeedDial.children).forEach(element => {
