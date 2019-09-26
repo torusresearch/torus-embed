@@ -291,7 +291,7 @@ class Torus {
     )
 
     this.googleLogin = htmlToElement(
-      '<button id="login-google" class="login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign up/in with Google</button>'
+      '<button id="login-google" class="login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign in with Google</button>'
     )
     const otherAccount = htmlToElement('<div>Or, use another account:</div>')
 
@@ -365,6 +365,8 @@ class Torus {
       // Login Modal Listeners
       modalContainer.querySelector('#close').addEventListener('click', () => {
         this.torusLoginModal.style.display = 'none'
+        if (this.modalCloseHandler) this.modalCloseHandler()
+        delete this.modalCloseHandler
       })
     }
 
@@ -597,6 +599,10 @@ class Torus {
   _showLoginPopup(calledFromEmbed, resolve, reject) {
     this._showLoggingIn()
     if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+      this.modalCloseHandler = () => {
+        this._showLoggedOut()
+        reject(new Error('Modal has been closed'))
+      }
       const googleHandler = () => {
         this.requestedVerifier = 'google'
         this.googleLogin.removeEventListener('click', googleHandler)
