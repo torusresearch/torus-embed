@@ -22,8 +22,10 @@ class Torus {
     this.torusLogin = {}
     this.torusLoadingBtn = {}
     this.torusIframe = {}
-    this.styleLink = {}
     this.torusLoginModal = {}
+    this.torusSpeedDial = {}
+    this.keyBtn = {}
+    this.styleLink = {}
     this.isRehydrated = false // rehydrated
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
@@ -121,11 +123,12 @@ class Torus {
   /**
    * Logs the user in
    */
-  login({ verifier }) {
+  login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     if (!verifier) {
-      this.torusLoginModal.classList.add('active')
+      this.requestedVerifier = ''
+      return this.ethereum.enable()
     } else if (configuration.verifierList.includes(verifier)) {
       this.requestedVerifier = verifier
       return this.ethereum.enable()
@@ -196,6 +199,7 @@ class Torus {
       this.torusLogin = {}
       this.torusMenuBtn = {}
       this.torusLoadingBtn = {}
+      this.torusLoginModal = {}
     }
     if (isElement(this.torusIframe)) {
       window.document.body.removeChild(this.torusIframe)
@@ -244,31 +248,32 @@ class Torus {
 
     // Speed dial list
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list">')
-    this.homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
+    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
 
     const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
     const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
     this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
-    this.keyContainer = htmlToElement('<li class="tooltip"></li>')
+    const keyContainer = htmlToElement('<li class="tooltip"></li>')
 
-    this.keyContainer.appendChild(this.keyBtn)
-    this.keyContainer.appendChild(tooltipNote)
-    this.keyContainer.appendChild(tooltipCopied)
+    keyContainer.appendChild(this.keyBtn)
+    keyContainer.appendChild(tooltipNote)
+    keyContainer.appendChild(tooltipCopied)
 
-    this.transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
+    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
 
-    this.torusSpeedDial.appendChild(this.homeBtn)
-    this.torusSpeedDial.appendChild(this.keyContainer)
-    this.torusSpeedDial.appendChild(this.transferBtn)
+    this.torusSpeedDial.appendChild(homeBtn)
+    this.torusSpeedDial.appendChild(keyContainer)
+    this.torusSpeedDial.appendChild(transferBtn)
 
     this.torusWidget.prepend(this.torusSpeedDial)
 
     this.torusLoginModal = htmlToElement('<div id="login-modal" class="login-modal"></div>')
+    this.torusLoginModal.style.display = 'none'
     const loginList = htmlToElement('<ul></ul>')
-    const googleLogin = htmlToElement('<li><button id="login-google" class="login-btn">Google</button></li>')
-    const facebookLogin = htmlToElement('<li><button id="login-facebook" class="login-btn">Facebook</button></li>')
-    loginList.appendChild(googleLogin)
-    loginList.appendChild(facebookLogin)
+    this.googleLogin = htmlToElement('<li><button id="login-google" class="login-btn">Google</button></li>')
+    this.facebookLogin = htmlToElement('<li><button id="login-facebook" class="login-btn">Facebook</button></li>')
+    loginList.appendChild(this.googleLogin)
+    loginList.appendChild(this.facebookLogin)
     this.torusLoginModal.appendChild(loginList)
 
     this.torusWidget.appendChild(this.torusLoginModal)
@@ -278,16 +283,15 @@ class Torus {
     // Setup on load code
     const bindOnLoad = () => {
       this.torusLogin.addEventListener('click', () => {
-        this._showLoadingAndHideGoogleAndTorus()
         this._showLoginPopup(false)
       })
 
-      this.homeBtn.addEventListener('click', () => {
+      homeBtn.addEventListener('click', () => {
         this.showWallet()
         this._toggleSpeedDial()
       })
 
-      this.transferBtn.addEventListener('click', () => {
+      transferBtn.addEventListener('click', () => {
         this.showWallet('transfer')
         this._toggleSpeedDial()
       })
@@ -350,29 +354,25 @@ class Torus {
     this.keyBtn.innerText = selectedAddress && selectedAddress.slice(0, 4) + '..'
   }
 
-  _showLoadingAndHideGoogleAndTorus() {
-    if (this.torusButtonVisibility) {
-      this.torusLoadingBtn.style.display = 'block'
-      this.torusMenuBtn.style.display = 'none'
-      this.torusLogin.style.display = 'none'
-    }
+  _showLoggedOut() {
+    this.torusMenuBtn.style.display = 'none'
+    this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    this.torusLoadingBtn.style.display = 'none'
+    this.torusLoginModal.style.display = 'none'
   }
 
-  _showTorusButtonAndHideGoogle() {
-    if (this.torusButtonVisibility) {
-      // torusIframeContainer.style.display = 'none'
-      this.torusLoadingBtn.style.display = 'none'
-      this.torusMenuBtn.style.display = 'block'
-      this.torusLogin.style.display = 'none'
-    }
+  _showLoggingIn() {
+    this.torusMenuBtn.style.display = 'none'
+    this.torusLogin.style.display = 'none'
+    this.torusLoadingBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    this.torusLoginModal.style.display = this.requestedVerifier === '' ? 'block' : 'none'
   }
 
-  _hideTorusButtonAndShowGoogle() {
-    if (this.torusButtonVisibility) {
-      this.torusLoadingBtn.style.display = 'none'
-      this.torusLogin.style.display = 'block'
-      this.torusMenuBtn.style.display = 'none'
-    }
+  _showLoggedIn() {
+    this.torusMenuBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    this.torusLogin.style.display = 'none'
+    this.torusLoadingBtn.style.display = 'none'
+    this.torusLoginModal.style.display = 'none'
   }
 
   /**
@@ -380,9 +380,10 @@ class Torus {
    */
   hideTorusButton() {
     this.torusButtonVisibility = false
-    this.torusLoadingBtn.style.display = 'none'
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
+    this.torusLoadingBtn.style.display = 'none'
+    this.torusSpeedDial.style.display = 'none'
   }
 
   /**
@@ -391,8 +392,8 @@ class Torus {
    */
   showTorusButton() {
     this.torusButtonVisibility = true
-    if (this.isLoggedIn) this._showTorusButtonAndHideGoogle()
-    else this._hideTorusButtonAndShowGoogle()
+    if (this.isLoggedIn) this._showLoggedIn()
+    else this._showLoggedOut()
   }
 
   _setupWeb3() {
@@ -438,7 +439,7 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
-      this._showLoadingAndHideGoogleAndTorus()
+      this._showLoggingIn()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
@@ -448,7 +449,7 @@ class Torus {
             const self = this
             if (err) {
               setTimeout(() => {
-                self._showTorusButtonAndHideGoogle()
+                self._showLoggedOut()
                 reject(err)
               }, 50)
             } else if (Array.isArray(res) && res.length > 0) {
@@ -456,7 +457,7 @@ class Torus {
               // else wait for something to be written to status stream
               if (this.isRehydrated) {
                 this.isLoggedIn = true
-                if (this.currentVerifier !== this.requestedVerifier) {
+                if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
                   const requestedVerifier = this.requestedVerifier
                   this.logout()
                     .then(_ => {
@@ -464,8 +465,10 @@ class Torus {
                       this._showLoginPopup(true, resolve, reject)
                     })
                     .catch(err => reject(err))
-                } else resolve(res)
-                self._showTorusButtonAndHideGoogle()
+                } else {
+                  self._showLoggedIn()
+                  resolve(res)
+                }
               } else {
                 const statusStream = this.communicationMux.getStream('status')
                 const statusStreamHandler = status => {
@@ -473,7 +476,7 @@ class Torus {
                     this.isRehydrated = status.rehydrate
                     this.isLoggedIn = status.loggedIn
                     this.currentVerifier = status.verifier
-                    if (this.currentVerifier !== this.requestedVerifier) {
+                    if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
                       const requestedVerifier = this.requestedVerifier
                       this.logout()
                         .then(_ => {
@@ -484,7 +487,7 @@ class Torus {
                     } else resolve(res)
                   } else reject(new Error('User has not logged in yet'))
 
-                  self._showTorusButtonAndHideGoogle()
+                  self._showLoggedIn()
                   statusStream.removeListener('data', statusStreamHandler)
                 }
                 statusStream.on('data', statusStreamHandler)
@@ -523,9 +526,9 @@ class Torus {
       else if (status.loggedIn) {
         this.isLoggedIn = status.loggedIn
         this.currentVerifier = status.verifier
-        this._showTorusButtonAndHideGoogle()
+        this._showLoggedIn()
       } // logout
-      else this._hideTorusButtonAndShowGoogle()
+      else this._showLoggedOut()
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
@@ -557,23 +560,39 @@ class Torus {
 
   // Exposing login function, if called from embed, flag as true
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    var oauthStream = this.communicationMux.getStream('oauth')
-    const self = this
-    var handler = function(data) {
-      var { err, selectedAddress } = data
-      if (err) {
-        log.error(err)
-        self._hideTorusButtonAndShowGoogle()
-        if (reject) reject(err)
-      } else {
-        // returns an array (cause accounts expects it)
-        if (resolve) resolve([transformEthAddress(selectedAddress)])
-        self._showTorusButtonAndHideGoogle()
+    this._showLoggingIn()
+    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+      const googleHandler = () => {
+        this.requestedVerifier = 'google'
+        this.googleLogin.removeEventListener('click', googleHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
-      oauthStream.removeListener('data', handler)
+      this.googleLogin.addEventListener('click', googleHandler)
+      const facebookHandler = () => {
+        this.requestedVerifier = 'facebook'
+        this.facebookLogin.removeEventListener('click', facebookHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.facebookLogin.addEventListener('click', facebookHandler)
+    } else {
+      var oauthStream = this.communicationMux.getStream('oauth')
+      const self = this
+      var handler = function(data) {
+        var { err, selectedAddress } = data
+        if (err) {
+          log.error(err)
+          self._showLoggedOut()
+          if (reject) reject(err)
+        } else {
+          // returns an array (cause accounts expects it)
+          if (resolve) resolve([transformEthAddress(selectedAddress)])
+          self._showLoggedIn()
+        }
+        oauthStream.removeListener('data', handler)
+      }
+      oauthStream.on('data', handler)
+      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
     }
-    oauthStream.on('data', handler)
-    oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
   }
 
   setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
