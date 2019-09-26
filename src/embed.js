@@ -92,10 +92,12 @@ class Torus {
               runOnLoad(attachIFrame.bind(this))
               runOnLoad(() => this._setupWeb3())
               runOnLoad(() =>
-                this._setProvider(network).then(() => {
-                  this.isInitalized = true
-                  resolve()
-                })
+                this._setProvider(network)
+                  .then(() => {
+                    this.isInitalized = true
+                    resolve()
+                  })
+                  .catch(err => reject(err))
               )
             } else {
               try {
@@ -111,10 +113,12 @@ class Torus {
         runOnLoad(attachIFrame.bind(this))
         runOnLoad(() => this._setupWeb3())
         runOnLoad(() =>
-          this._setProvider(network).then(() => {
-            this.isInitalized = true
-            resolve()
-          })
+          this._setProvider(network)
+            .then(() => {
+              this.isInitalized = true
+              resolve()
+            })
+            .catch(err => reject(err))
         )
       }
     })
@@ -455,7 +459,7 @@ class Torus {
             } else if (Array.isArray(res) && res.length > 0) {
               // If user is already rehydrated, resolve this
               // else wait for something to be written to status stream
-              if (this.isRehydrated) {
+              const handleRehydration = () => {
                 this.isLoggedIn = true
                 if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
                   const requestedVerifier = this.requestedVerifier
@@ -469,28 +473,11 @@ class Torus {
                   self._showLoggedIn()
                   resolve(res)
                 }
+              }
+              if (this.isRehydrated) {
+                handleRehydration()
               } else {
-                const statusStream = this.communicationMux.getStream('status')
-                const statusStreamHandler = status => {
-                  if (status.loggedIn && status.rehydrate) {
-                    this.isRehydrated = status.rehydrate
-                    this.isLoggedIn = status.loggedIn
-                    this.currentVerifier = status.verifier
-                    if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
-                      const requestedVerifier = this.requestedVerifier
-                      this.logout()
-                        .then(_ => {
-                          this.requestedVerifier = requestedVerifier
-                          this._showLoginPopup(true, resolve, reject)
-                        })
-                        .catch(err => reject(err))
-                    } else resolve(res)
-                  } else reject(new Error('User has not logged in yet'))
-
-                  self._showLoggedIn()
-                  statusStream.removeListener('data', statusStreamHandler)
-                }
-                statusStream.on('data', statusStreamHandler)
+                this.isRehydratedCallback = handleRehydration
               }
             } else {
               // set up listener for login
@@ -521,6 +508,10 @@ class Torus {
       if (status.rehydrate && status.loggedIn) {
         this.isRehydrated = status.rehydrate
         this.currentVerifier = status.verifier
+        if (this.isRehydratedCallback) {
+          this.isRehydratedCallback()
+          delete this.isRehydratedCallback
+        }
       }
       // normal login
       else if (status.loggedIn) {
