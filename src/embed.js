@@ -366,10 +366,6 @@ class Torus {
       modalContainer.querySelector('#close').addEventListener('click', () => {
         this.torusLoginModal.style.display = 'none'
       })
-
-      window.addEventListener('click', () => {
-        this.torusLoginModal.style.display = 'none'
-      })
     }
 
     const attachOnLoad = () => {
