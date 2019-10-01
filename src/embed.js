@@ -301,10 +301,10 @@ class Torus {
       '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
     )
     this.twitchLogin = htmlToElement(
-      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.svg' + '"></button></li>'
+      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.png' + '"></button></li>'
     )
     this.redditLogin = htmlToElement(
-      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.svg' + '"></button></li>'
+      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.png' + '"></button></li>'
     )
 
     loginList.appendChild(this.facebookLogin)
