@@ -253,7 +253,7 @@ class Torus {
     // Speed dial list
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list" style="transition-delay: 0.05s">')
     this.torusSpeedDial.style.opacity = '0'
-    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
+    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
     const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
     const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
@@ -264,7 +264,7 @@ class Torus {
     keyContainer.appendChild(tooltipNote)
     keyContainer.appendChild(tooltipCopied)
 
-    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
+    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer" title="Wallet Transfer Page"></button></li>')
 
     this.torusSpeedDial.appendChild(homeBtn)
     this.torusSpeedDial.appendChild(keyContainer)
@@ -298,16 +298,28 @@ class Torus {
     // List for other logins
     const loginList = htmlToElement('<ul id="login-list" class="login-list"></ul>')
     this.facebookLogin = htmlToElement(
-      '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
+      '<li><button id="login-facebook" class="login-btn login-btn--facebook" title="Login with Facebook"><img src="' +
+        torusUrl +
+        '/img/icons/facebook.svg' +
+        '"></button></li>'
     )
     this.twitchLogin = htmlToElement(
-      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.svg' + '"></button></li>'
+      '<li><button id="login-twitch" class="login-btn login-btn--twitch" title="Login with Twitch"><img src="' +
+        torusUrl +
+        '/img/icons/twitch.svg' +
+        '"></button></li>'
     )
     this.redditLogin = htmlToElement(
-      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.svg' + '"></button></li>'
+      '<li><button id="login-reddit" class="login-btn login-btn--reddit" title="Login with Reddit"><img src="' +
+        torusUrl +
+        '/img/icons/reddit.svg' +
+        '"></button></li>'
     )
     this.discordLogin = htmlToElement(
-      '<li><button id="login-discord" class="login-btn login-btn--discord"><img src="' + torusUrl + '/img/icons/discord.svg' + '"></button></li>'
+      '<li><button id="login-discord" class="login-btn login-btn--discord" title="Login with Discord"><img src="' +
+        torusUrl +
+        '/img/icons/discord.svg' +
+        '"></button></li>'
     )
 
     loginList.appendChild(this.facebookLogin)
