@@ -301,15 +301,19 @@ class Torus {
       '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
     )
     this.twitchLogin = htmlToElement(
-      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.png' + '"></button></li>'
+      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.svg' + '"></button></li>'
     )
     this.redditLogin = htmlToElement(
-      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.png' + '"></button></li>'
+      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.svg' + '"></button></li>'
+    )
+    this.discordLogin = htmlToElement(
+      '<li><button id="login-discord" class="login-btn login-btn--discord"><img src="' + torusUrl + '/img/icons/discord.svg' + '"></button></li>'
     )
 
     loginList.appendChild(this.facebookLogin)
     loginList.appendChild(this.twitchLogin)
     loginList.appendChild(this.redditLogin)
+    loginList.appendChild(this.discordLogin)
 
     modalContent.appendChild(this.googleLogin)
     modalContent.appendChild(otherAccount)
