@@ -1,3 +1,10 @@
+const enums = {
+  GOOGLE: 'google',
+  FACEBOOK: 'facebook',
+  TWITCH: 'twitch',
+  REDDIT: 'reddit'
+}
+const verifierList = Object.values(enums)
 export default {
   torusNodeEndpoints: [
     'https://binancelabs-main-2.tor.us/jrpc',
@@ -7,5 +14,6 @@ export default {
     'https://etc-main-2.tor.us/jrpc'
   ],
   networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
-  verifierList: ['google', 'facebook']
+  enums: enums,
+  verifierList: verifierList
 }

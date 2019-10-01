@@ -300,8 +300,16 @@ class Torus {
     this.facebookLogin = htmlToElement(
       '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
     )
+    this.twitchLogin = htmlToElement(
+      '<li><button id="login-twitch" class="login-btn login-btn--twitch"><img src="' + torusUrl + '/img/icons/twitch.svg' + '"></button></li>'
+    )
+    this.redditLogin = htmlToElement(
+      '<li><button id="login-reddit" class="login-btn login-btn--reddit"><img src="' + torusUrl + '/img/icons/reddit.svg' + '"></button></li>'
+    )
 
     loginList.appendChild(this.facebookLogin)
+    loginList.appendChild(this.twitchLogin)
+    loginList.appendChild(this.redditLogin)
 
     modalContent.appendChild(this.googleLogin)
     modalContent.appendChild(otherAccount)
@@ -604,17 +612,29 @@ class Torus {
         reject(new Error('Modal has been closed'))
       }
       const googleHandler = () => {
-        this.requestedVerifier = 'google'
+        this.requestedVerifier = configuration.enums.GOOGLE
         this.googleLogin.removeEventListener('click', googleHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.googleLogin.addEventListener('click', googleHandler)
       const facebookHandler = () => {
-        this.requestedVerifier = 'facebook'
+        this.requestedVerifier = configuration.enums.FACEBOOK
         this.facebookLogin.removeEventListener('click', facebookHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.facebookLogin.addEventListener('click', facebookHandler)
+      const twitchHandler = () => {
+        this.requestedVerifier = configuration.enums.TWITCH
+        this.twitchLogin.removeEventListener('click', twitchHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.twitchLogin.addEventListener('click', twitchHandler)
+      const redditHandler = () => {
+        this.requestedVerifier = configuration.enums.REDDIT
+        this.redditLogin.removeEventListener('click', redditHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.redditLogin.addEventListener('click', redditHandler)
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
@@ -767,7 +787,7 @@ class Torus {
       post(
         node,
         generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: 'google',
+          verifier: configuration.enums.GOOGLE,
           verifier_id: email.toLowerCase()
         })
       )
@@ -777,7 +797,7 @@ class Torus {
             return post(
               node,
               generateJsonRPCObject('KeyAssign', {
-                verifier: 'google',
+                verifier: configuration.enums.GOOGLE,
                 verifier_id: email.toLowerCase()
               })
             )
