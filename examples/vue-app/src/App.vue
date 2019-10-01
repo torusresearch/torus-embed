@@ -45,7 +45,7 @@ export default {
           },
           showTorusButton: true
         })
-        await torus.login({ verifier: 'google' }) // await torus.ethereum.enable()
+        await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
         window.torus = torus
         web3.eth.getAccounts().then(accounts => {

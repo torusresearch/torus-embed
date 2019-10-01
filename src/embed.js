@@ -609,7 +609,7 @@ class Torus {
     if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
       this.modalCloseHandler = () => {
         this._showLoggedOut()
-        reject(new Error('Modal has been closed'))
+        if (reject) reject(new Error('Modal has been closed'))
       }
       const googleHandler = () => {
         this.requestedVerifier = configuration.enums.GOOGLE
