@@ -2,7 +2,8 @@ const enums = {
   GOOGLE: 'google',
   FACEBOOK: 'facebook',
   TWITCH: 'twitch',
-  REDDIT: 'reddit'
+  REDDIT: 'reddit',
+  DISCORD: 'discord'
 }
 const verifierList = Object.values(enums)
 export default {

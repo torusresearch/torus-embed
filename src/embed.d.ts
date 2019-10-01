@@ -22,7 +22,7 @@ declare class Provider {
 }
 
 interface LoginParams {
-  verifier?: 'google' | 'facebook' | 'twitch' | 'reddit'
+  verifier?: 'google' | 'facebook' | 'twitch' | 'reddit' | 'discord'
 }
 
 interface TorusCtorArgs {

@@ -639,6 +639,12 @@ class Torus {
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.redditLogin.addEventListener('click', redditHandler)
+      const discordHandler = () => {
+        this.requestedVerifier = configuration.enums.DISCORD
+        this.discordLogin.removeEventListener('click', discordHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.discordLogin.addEventListener('click', discordHandler)
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
