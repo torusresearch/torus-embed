@@ -798,42 +798,43 @@ class Torus {
 
   /**
    * Gets the public address of an user with email
-   * @param {String} email Email address of the user
+   * @param {String} verifier Oauth Provider
+   * @param {String} verifierId Unique idenfier of oauth provider
    */
-  getPublicAddress(email) {
+  getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
-
     return new Promise((resolve, reject) => {
+      if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
       post(
         node,
         generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: configuration.enums.GOOGLE,
-          verifier_id: email.toLowerCase()
+          verifier: verifier,
+          verifier_id: verifierId.toString().toLowerCase()
         })
       )
-        .catch(err => console.error(err))
+        .catch(err => log.error(err))
         .then(lookupShare => {
           if (lookupShare.error) {
             return post(
               node,
               generateJsonRPCObject('KeyAssign', {
-                verifier: configuration.enums.GOOGLE,
-                verifier_id: email.toLowerCase()
+                verifier: verifier,
+                verifier_id: verifierId.toString().toLowerCase()
               })
             )
           } else if (lookupShare.result) {
             return getLookupPromise(lookupShare)
           }
         })
-        .catch(err => console.error(err))
+        .catch(err => log.error(err))
         .then(lookupShare => {
           var ethAddress = lookupShare.result.keys[0].address
           resolve(ethAddress)
         })
         .catch(err => {
-          console.error(err)
+          log.error(err)
           reject(err)
         })
     })

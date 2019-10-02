@@ -16,5 +16,6 @@ export default {
   ],
   networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
   enums: enums,
-  verifierList: verifierList
+  verifierList: verifierList,
+  supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD]
 }
