@@ -10,6 +10,7 @@
   "dependencies": {
     "@toruslabs/torus-embed": "^0.1.2",
     "core-js": "^2.6.5",
+    "eth-sig-util": "^2.4.4",
     "vue": "^2.6.10",
     "web3": "^1.2.1"
   },
