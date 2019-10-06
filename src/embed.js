@@ -253,7 +253,7 @@ class Torus {
     // Speed dial list
     this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list" style="transition-delay: 0.05s">')
     this.torusSpeedDial.style.opacity = '0'
-    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home"></button></li>')
+    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
     const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
     const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
@@ -264,7 +264,7 @@ class Torus {
     keyContainer.appendChild(tooltipNote)
     keyContainer.appendChild(tooltipCopied)
 
-    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer"></button></li>')
+    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer" title="Wallet Transfer Page"></button></li>')
 
     this.torusSpeedDial.appendChild(homeBtn)
     this.torusSpeedDial.appendChild(keyContainer)
@@ -298,10 +298,34 @@ class Torus {
     // List for other logins
     const loginList = htmlToElement('<ul id="login-list" class="login-list"></ul>')
     this.facebookLogin = htmlToElement(
-      '<li><button id="login-facebook" class="login-btn login-btn--facebook"><img src="' + torusUrl + '/img/icons/facebook.svg' + '"></button></li>'
+      '<li><button id="login-facebook" class="login-btn login-btn--facebook" title="Login with Facebook"><img src="' +
+        torusUrl +
+        '/img/icons/facebook.svg' +
+        '"></button></li>'
+    )
+    this.twitchLogin = htmlToElement(
+      '<li><button id="login-twitch" class="login-btn login-btn--twitch" title="Login with Twitch"><img src="' +
+        torusUrl +
+        '/img/icons/twitch.svg' +
+        '"></button></li>'
+    )
+    this.redditLogin = htmlToElement(
+      '<li><button id="login-reddit" class="login-btn login-btn--reddit" title="Login with Reddit"><img src="' +
+        torusUrl +
+        '/img/icons/reddit.svg' +
+        '"></button></li>'
+    )
+    this.discordLogin = htmlToElement(
+      '<li><button id="login-discord" class="login-btn login-btn--discord" title="Login with Discord"><img src="' +
+        torusUrl +
+        '/img/icons/discord.svg' +
+        '"></button></li>'
     )
 
     loginList.appendChild(this.facebookLogin)
+    loginList.appendChild(this.twitchLogin)
+    loginList.appendChild(this.redditLogin)
+    loginList.appendChild(this.discordLogin)
 
     modalContent.appendChild(this.googleLogin)
     modalContent.appendChild(otherAccount)
@@ -601,20 +625,38 @@ class Torus {
     if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
       this.modalCloseHandler = () => {
         this._showLoggedOut()
-        reject(new Error('Modal has been closed'))
+        if (reject) reject(new Error('Modal has been closed'))
       }
       const googleHandler = () => {
-        this.requestedVerifier = 'google'
+        this.requestedVerifier = configuration.enums.GOOGLE
         this.googleLogin.removeEventListener('click', googleHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.googleLogin.addEventListener('click', googleHandler)
       const facebookHandler = () => {
-        this.requestedVerifier = 'facebook'
+        this.requestedVerifier = configuration.enums.FACEBOOK
         this.facebookLogin.removeEventListener('click', facebookHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.facebookLogin.addEventListener('click', facebookHandler)
+      const twitchHandler = () => {
+        this.requestedVerifier = configuration.enums.TWITCH
+        this.twitchLogin.removeEventListener('click', twitchHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.twitchLogin.addEventListener('click', twitchHandler)
+      const redditHandler = () => {
+        this.requestedVerifier = configuration.enums.REDDIT
+        this.redditLogin.removeEventListener('click', redditHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.redditLogin.addEventListener('click', redditHandler)
+      const discordHandler = () => {
+        this.requestedVerifier = configuration.enums.DISCORD
+        this.discordLogin.removeEventListener('click', discordHandler)
+        this._showLoginPopup(calledFromEmbed, resolve, reject)
+      }
+      this.discordLogin.addEventListener('click', discordHandler)
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
@@ -756,42 +798,43 @@ class Torus {
 
   /**
    * Gets the public address of an user with email
-   * @param {String} email Email address of the user
+   * @param {String} verifier Oauth Provider
+   * @param {String} verifierId Unique idenfier of oauth provider
    */
-  getPublicAddress(email) {
+  getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
     const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
     const node = configuration.torusNodeEndpoints[randomNumber]
-
     return new Promise((resolve, reject) => {
+      if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
       post(
         node,
         generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: 'google',
-          verifier_id: email.toLowerCase()
+          verifier: verifier,
+          verifier_id: verifierId.toString().toLowerCase()
         })
       )
-        .catch(err => console.error(err))
+        .catch(err => log.error(err))
         .then(lookupShare => {
           if (lookupShare.error) {
             return post(
               node,
               generateJsonRPCObject('KeyAssign', {
-                verifier: 'google',
-                verifier_id: email.toLowerCase()
+                verifier: verifier,
+                verifier_id: verifierId.toString().toLowerCase()
               })
             )
           } else if (lookupShare.result) {
             return getLookupPromise(lookupShare)
           }
         })
-        .catch(err => console.error(err))
+        .catch(err => log.error(err))
         .then(lookupShare => {
           var ethAddress = lookupShare.result.keys[0].address
           resolve(ethAddress)
         })
         .catch(err => {
-          console.error(err)
+          log.error(err)
           reject(err)
         })
     })

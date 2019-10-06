@@ -5,7 +5,7 @@ export default class Torus {
   web3: Web3
   provider: Provider
   ethereum: Provider
-  getPublicAddress(email: string): Promise<string>;
+  getPublicAddress(verifierArgs: VerifierArgs): Promise<string>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
   showTorusButton(): void
@@ -21,8 +21,13 @@ declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
 }
 
+interface VerifierArgs {
+  verifier: 'google' | 'reddit' | 'discord'
+  verifierId: string
+}
+
 interface LoginParams {
-  verifier?: 'google' | 'facebook'
+  verifier?: 'google' | 'facebook' | 'twitch' | 'reddit' | 'discord'
 }
 
 interface TorusCtorArgs {
