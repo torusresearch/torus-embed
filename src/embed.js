@@ -10,7 +10,7 @@ import Web3 from 'web3'
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-Ih6mV/6NiTA0ps1QICuJ5PyIQeyTENqUyvvm3GUr/vhqu1v/Sfm3eouFmtXX1bfK'
+const iframeIntegrity = 'sha384-qiLcAzV8iUsOUu3Luy/X4+BcmHWS5b3Wbu6cssNWJumpbyx9j8otTF6dG+Y9iF1f'
 
 restoreContextAfterImports()
 
@@ -63,7 +63,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.2.1'
+          torusUrl = 'https://app.tor.us/v0.2.2'
           logLevel = 'error'
           break
       }
