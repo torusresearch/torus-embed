@@ -10,7 +10,7 @@ export default class Torus {
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
   showTorusButton(): void
   hideTorusButton(): void
-  getUserInfo(): Promise<UserInfo>
+  getUserInfo(message: string): Promise<UserInfo>
   init(params: TorusParams): Promise<void>
   login(params: LoginParams): Promise<string[]>
   logout(): Promise<void>
