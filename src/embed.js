@@ -10,7 +10,7 @@ import Web3 from 'web3'
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-qRzrb3+BvNdUdclRzy68s/YntoRL3szmAW/y46KtER5feGtN94RbNkZn4H+1lByn'
+const iframeIntegrity = 'sha384-QnOqOsinR+o2RyZI3HEXDuYzjJayzvkOoyfTjr9qmejlIqUJUMMtNe8KSFLgu/NE'
 
 restoreContextAfterImports()
 
@@ -63,7 +63,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.1.2'
+          torusUrl = 'https://app.tor.us/v0.2.3'
           logLevel = 'error'
           break
       }
@@ -842,12 +842,13 @@ class Torus {
 
   /**
    * Exposes the loggedin user info to the Dapp
+   * @param {String} message Message to be displayed to the user
    */
-  getUserInfo() {
+  getUserInfo(message) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
         const userInfoStream = this.communicationMux.getStream('user_info')
-        userInfoStream.write({ name: 'user_info_request' })
+        userInfoStream.write({ name: 'user_info_request', data: { message: message } })
         const userInfoHandler = chunk => {
           if (chunk.name === 'user_info_response') {
             if (chunk.data.approved) {
