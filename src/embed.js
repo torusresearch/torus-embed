@@ -11,6 +11,7 @@ import Web3 from 'web3'
 cleanContextForImports()
 
 const iframeIntegrity = 'sha384-QnOqOsinR+o2RyZI3HEXDuYzjJayzvkOoyfTjr9qmejlIqUJUMMtNe8KSFLgu/NE'
+const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
 
@@ -77,9 +78,14 @@ class Torus {
       }
       if (buildEnv !== 'testing' && buildEnv !== 'development') {
         // hacky solution to check for iframe integrity
-        const fetchUrl = torusUrl + '/index.html'
-        fetch(fetchUrl)
-          .then(resp => resp.text())
+        const fetchUrl = torusUrl + '/popup'
+        fetch(fetchUrl, { cache: 'reload' })
+          .then(resp => {
+            if (resp.headers.get('Cache-Control') !== expectedCacheControlHeader) {
+              throw new Error('Unexpected Cache-Control headers, got ' + resp.headers.get('Cache-Control'))
+            }
+            return resp.text()
+          })
           .then(response => {
             const integrity = sriToolbox.generate(
               {
