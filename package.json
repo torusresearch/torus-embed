@@ -93,7 +93,7 @@
     "not ie <= 8"
   ],
   "engines": {
-    "node": "10.x"
+    "node": ">=8.0.0"
   },
   "husky": {
     "hooks": {
