@@ -147,7 +147,7 @@ class Torus {
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
-    if (!this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
+    if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
       this.requestedVerifier = ''
       return this.ethereum.enable()
