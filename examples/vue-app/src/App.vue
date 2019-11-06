@@ -37,6 +37,9 @@ export default {
         })
         await torus.init({
           buildEnv: 'development',
+          enabledVerifiers: {
+            twitch: false
+          },
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory

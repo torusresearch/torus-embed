@@ -10,7 +10,7 @@ export default class Torus {
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
   showTorusButton(): void
   hideTorusButton(): void
-  getUserInfo(): Promise<UserInfo>
+  getUserInfo(message: string): Promise<UserInfo>
   init(params: TorusParams): Promise<void>
   login(params: LoginParams): Promise<string[]>
   logout(): Promise<void>
@@ -38,6 +38,8 @@ interface UserInfo {
   email: string;
   name: string;
   profileImage: string;
+  verifier: string;
+  verifierId: string;
 }
 
 interface TorusParams {
@@ -45,6 +47,15 @@ interface TorusParams {
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   enableLogging?: boolean;
   showTorusButton?: boolean;
+  enabledVerifiers?: VerifierStatus
+}
+
+interface VerifierStatus {
+  google?: boolean;
+  facebook?: boolean;
+  reddit?: boolean;
+  twitch?: boolean;
+  discord?: boolean;
 }
 
 interface NetworkInterface {
