@@ -37,34 +37,34 @@
     "web3": "0.20.7"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.4",
-    "@babel/core": "^7.6.4",
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
-    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-env": "^7.7.1",
     "assert": "^2.0.0",
     "browserify": "^16.5.0",
     "cross-env": "^6.0.3",
     "discify": "^1.6.3",
     "envify": "^4.1.0",
-    "eslint": "^6.5.1",
+    "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.4.0",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-flowtype": "^4.3.0",
     "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-mocha": "^6.1.1",
+    "eslint-plugin-mocha": "^6.2.1",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "express": "^4.17.1",
-    "husky": "^3.0.8",
+    "husky": "^3.0.9",
     "lint-staged": "^9.4.2",
-    "mocha": "^6.2.1",
+    "mocha": "^6.2.2",
     "mocha-eslint": "^5.0.0",
     "prettier": "^1.18.2",
-    "puppeteer": "^1.20.0",
+    "puppeteer": "^2.0.0",
     "rimraf": "^3.0.0",
     "uglifyify": "^5.0.2"
   },
@@ -93,7 +93,7 @@
     "not ie <= 8"
   ],
   "engines": {
-    "node": "10.x"
+    "node": ">=8.0.0"
   },
   "husky": {
     "hooks": {
