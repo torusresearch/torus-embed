@@ -8,6 +8,14 @@ import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpe
 import configuration from './config'
 import Web3 from 'web3'
 
+const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
+const defaultVerifiers = {
+  [GOOGLE]: true,
+  [FACEBOOK]: true,
+  [REDDIT]: true,
+  [TWITCH]: true,
+  [DISCORD]: true
+}
 cleanContextForImports()
 
 const iframeIntegrity = 'sha384-QnOqOsinR+o2RyZI3HEXDuYzjJayzvkOoyfTjr9qmejlIqUJUMMtNe8KSFLgu/NE'
@@ -33,12 +41,14 @@ class Torus {
     this.torusButtonVisibility = true
     this.requestedVerifier = ''
     this.currentVerifier = ''
+    this.enabledVerifiers = {}
     this.Web3 = Web3
   }
 
   init({
     buildEnv = 'production',
     enableLogging = false,
+    enabledVerifiers = defaultVerifiers,
     network = {
       host: 'mainnet',
       chainId: 1,
@@ -68,6 +78,7 @@ class Torus {
           logLevel = 'error'
           break
       }
+      this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
       else log.disableAll()
@@ -136,6 +147,7 @@ class Torus {
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
+    if (!this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
       this.requestedVerifier = ''
       return this.ethereum.enable()
@@ -328,13 +340,15 @@ class Torus {
         '"></button></li>'
     )
 
-    loginList.appendChild(this.facebookLogin)
-    loginList.appendChild(this.twitchLogin)
-    loginList.appendChild(this.redditLogin)
-    loginList.appendChild(this.discordLogin)
+    if (this.enabledVerifiers[FACEBOOK]) loginList.appendChild(this.facebookLogin)
+    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
+    if (this.enabledVerifiers[REDDIT]) loginList.appendChild(this.redditLogin)
+    if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
 
-    modalContent.appendChild(this.googleLogin)
-    modalContent.appendChild(otherAccount)
+    if (this.enabledVerifiers[GOOGLE]) {
+      modalContent.appendChild(this.googleLogin)
+      modalContent.appendChild(otherAccount)
+    }
     modalContent.appendChild(loginList)
 
     const loginNote = htmlToElement(
@@ -634,31 +648,31 @@ class Torus {
         if (reject) reject(new Error('Modal has been closed'))
       }
       const googleHandler = () => {
-        this.requestedVerifier = configuration.enums.GOOGLE
+        this.requestedVerifier = GOOGLE
         this.googleLogin.removeEventListener('click', googleHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.googleLogin.addEventListener('click', googleHandler)
       const facebookHandler = () => {
-        this.requestedVerifier = configuration.enums.FACEBOOK
+        this.requestedVerifier = FACEBOOK
         this.facebookLogin.removeEventListener('click', facebookHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.facebookLogin.addEventListener('click', facebookHandler)
       const twitchHandler = () => {
-        this.requestedVerifier = configuration.enums.TWITCH
+        this.requestedVerifier = TWITCH
         this.twitchLogin.removeEventListener('click', twitchHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.twitchLogin.addEventListener('click', twitchHandler)
       const redditHandler = () => {
-        this.requestedVerifier = configuration.enums.REDDIT
+        this.requestedVerifier = REDDIT
         this.redditLogin.removeEventListener('click', redditHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       this.redditLogin.addEventListener('click', redditHandler)
       const discordHandler = () => {
-        this.requestedVerifier = configuration.enums.DISCORD
+        this.requestedVerifier = DISCORD
         this.discordLogin.removeEventListener('click', discordHandler)
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
