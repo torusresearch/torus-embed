@@ -38,6 +38,8 @@ interface UserInfo {
   email: string;
   name: string;
   profileImage: string;
+  verifier: string;
+  verifierId: string;
 }
 
 interface TorusParams {
