@@ -869,6 +869,31 @@ class Torus {
       } else reject(new Error('User has not logged in yet'))
     })
   }
+
+  /**
+   * Requests the user for permissions to enable no popup scenarios
+   * This is a beta feature we are testing to gauge user traction
+   * @param {Object} scope Scope of the permissions to be displayed to the user
+   */
+  requestPermissions(scope) {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const permissionsStream = this.communicationMux.getStream('permissions')
+        permissionsStream.write({ name: 'permissions_request', data: scope })
+        const permissionsHandler = chunk => {
+          if (chunk.name === 'permissions_response') {
+            if (chunk.data.approved) {
+              resolve()
+            } else {
+              reject(new Error(chunk.data.message))
+            }
+          }
+          permissionsStream.removeListener('data', permissionsHandler)
+        }
+        permissionsStream.on('data', permissionsHandler)
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
 }
 
 // need to make sure we aren't affected by overlapping namespaces

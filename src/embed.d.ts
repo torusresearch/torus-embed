@@ -11,6 +11,7 @@ export default class Torus {
   showTorusButton(): void
   hideTorusButton(): void
   getUserInfo(message: string): Promise<UserInfo>
+  requestPermissions(scope: Scope): Promise<void>
   init(params: TorusParams): Promise<void>
   login(params: LoginParams): Promise<string[]>
   logout(): Promise<void>
@@ -38,6 +39,19 @@ interface UserInfo {
   email: string;
   name: string;
   profileImage: string;
+  verifier: string;
+  verifierId: string;
+}
+
+interface Scope {
+  userInfo?: string;
+  networkChange?: string;
+  transaction?: Array<TransactionScope>;
+}
+
+interface TransactionScope {
+  contract: string;
+  timeInSeconds?: Number;
 }
 
 interface TorusParams {
