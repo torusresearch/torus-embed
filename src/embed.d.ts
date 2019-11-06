@@ -47,6 +47,15 @@ interface TorusParams {
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   enableLogging?: boolean;
   showTorusButton?: boolean;
+  enabledVerifiers?: VerifierStatus
+}
+
+interface VerifierStatus {
+  google?: boolean;
+  facebook?: boolean;
+  reddit?: boolean;
+  twitch?: boolean;
+  discord?: boolean;
 }
 
 interface NetworkInterface {
