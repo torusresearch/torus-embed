@@ -20,7 +20,6 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
-import sigUtil from 'eth-sig-util'
 
 export default {
   name: 'app',
@@ -36,7 +35,7 @@ export default {
           buttonPosition: 'bottom-left'
         })
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: 'production',
           enabledVerifiers: {
             twitch: false
           },
@@ -78,7 +77,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign message => true')
+          self.console('sign message => true \n', result)
         }
       )
     },
@@ -106,7 +105,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v1 => true')
+          self.console('sign typed message v1 => true \n', result)
         }
       )
     },
@@ -153,7 +152,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v3 => true')
+          self.console('sign typed message v3 => true \n', result)
         }
       )
     },
@@ -206,8 +205,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          // console.log(result)
-          self.console('sign typed message v4 => true')
+          self.console('sign typed message v4 => true \n', result)
         }
       )
     },
