@@ -700,8 +700,16 @@ class Torus {
       const windowStream = this.communicationMux.getStream('window')
 
       const preopenHandler = function({ preopenInstanceId }) {
+        var prevPreopenInstanceId = preopenInstanceId
         var windowRef = window.open(self.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
         windowStream.removeListener('data', preopenHandler)
+        var closeHandler = function({ preopenInstanceId, close }) {
+          if (preopenInstanceId === prevPreopenInstanceId && close === true) {
+            windowRef.close()
+          }
+          windowStream.removeListener('data', closeHandler)
+        }
+        windowStream.on('data', closeHandler)
         var checkWindowClose = setInterval(function() {
           try {
             if (windowRef && windowRef.closed) {
@@ -718,7 +726,7 @@ class Torus {
             log.error(err)
             clearInterval(checkWindowClose)
           }
-        }, 500)
+        }, 200)
       }
       windowStream.on('data', preopenHandler)
       oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
