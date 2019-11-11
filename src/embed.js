@@ -30,6 +30,7 @@ class Torus {
     this.torusMenuBtn = {}
     this.torusLogin = {}
     this.torusLoadingBtn = {}
+    this.torusUrl = ''
     this.torusIframe = {}
     this.torusLoginModal = {}
     this.torusSpeedDial = {}
@@ -78,6 +79,7 @@ class Torus {
           logLevel = 'error'
           break
       }
+      this.torusUrl = torusUrl
       this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
@@ -680,7 +682,7 @@ class Torus {
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
-      var handler = function(data) {
+      var loginHandler = function(data) {
         var { err, selectedAddress } = data
         if (err) {
           log.error(err)
@@ -691,9 +693,29 @@ class Torus {
           if (resolve) resolve([transformEthAddress(selectedAddress)])
           self._showLoggedIn()
         }
-        oauthStream.removeListener('data', handler)
+        oauthStream.removeListener('data', loginHandler)
       }
-      oauthStream.on('data', handler)
+      oauthStream.on('data', loginHandler)
+
+      var windowStream = this.communicationMux.getStream('window')
+
+      var preopenHandler = function({ preopenInstanceId }) {
+        var windowRef = window.open(self.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
+        windowStream.removeListener('data', preopenHandler)
+        var checkWindowClose = setInterval(function() {
+          if (windowRef && windowRef.closed) {
+            windowStream.postMessage({
+              data: {
+                preopenInstanceId,
+                closed: true
+              }
+            })
+            clearInterval(checkWindowClose)
+          }
+        }, 500)
+      }
+
+      windowStream.on('data', preopenHandler)
       oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
     }
   }
