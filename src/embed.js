@@ -703,13 +703,19 @@ class Torus {
         var windowRef = window.open(self.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
         windowStream.removeListener('data', preopenHandler)
         var checkWindowClose = setInterval(function() {
-          if (windowRef && windowRef.closed) {
-            windowStream.postMessage({
-              data: {
-                preopenInstanceId,
-                closed: true
-              }
-            })
+          try {
+            if (windowRef && windowRef.closed) {
+              windowStream.write({
+                data: {
+                  preopenInstanceId,
+                  closed: true
+                }
+              })
+              clearInterval(checkWindowClose)
+            }
+            return
+          } catch (err) {
+            log.error(err)
             clearInterval(checkWindowClose)
           }
         }, 500)
