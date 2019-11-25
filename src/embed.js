@@ -883,6 +883,34 @@ class Torus {
       } else reject(new Error('User has not logged in yet'))
     })
   }
+
+  /**
+   * Exposes the topup api of torus
+   * Allows the dapp to trigger a payment method directly
+   * If no params are provided, it defaults to { fiatValue = MIN_FOR_PROVIDER; selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
+   * @param {Enum} provider Supported options are simplex, moonpay, wyre and coindirect
+   * @param {PaymentParams} params PaymentParams is { fiatValue?: Number; selectedCurrency?: string; selectedCryptoCurrency?: string; }
+   * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
+   */
+  initiateTopup(provider, params) {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const topupStream = this.communicationMux.getStream('topup')
+        topupStream.write({ name: 'topup_request', data: { provider: provider, params: params } })
+        const topupHandler = chunk => {
+          if (chunk.name === 'topup_response') {
+            if (chunk.data.success) {
+              resolve(chunk.data.success)
+            } else {
+              reject(new Error(chunk.data.error))
+            }
+          }
+          topupStream.removeListener('data', topupHandler)
+        }
+        topupStream.on('data', topupHandler)
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
 }
 
 // need to make sure we aren't affected by overlapping namespaces
