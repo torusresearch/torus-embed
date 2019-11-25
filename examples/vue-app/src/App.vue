@@ -5,6 +5,7 @@
     <button v-if="publicAddress === ''" @click="login">Login</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
+    <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
@@ -62,6 +63,9 @@ export default {
     },
     console(text) {
       document.querySelector('#console>p').innerHTML = text
+    },
+    createPaymentTx() {
+      window.torus.initiateTopup('moonpay').then(console.log).catch(console.log)
     },
     signMessage() {
       const self = this
