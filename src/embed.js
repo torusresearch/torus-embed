@@ -23,6 +23,20 @@ const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
 
+let thirdPartyCookiesSupported = true
+const receiveMessage = function(evt) {
+  if (evt.data === 'torus:3PCunsupported') {
+    thirdPartyCookiesSupported = false
+    window.removeEventListener('message', receiveMessage)
+  } else if (evt.data === 'torus:3PCsupported') {
+    thirdPartyCookiesSupported = true
+    window.removeEventListener('message', receiveMessage)
+  }
+}
+window.addEventListener('message', receiveMessage, false)
+
+// evt.data === 'torus:3PCunsupported'
+
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
     this.buttonPosition = buttonPosition
@@ -43,6 +57,8 @@ class Torus {
     this.currentVerifier = ''
     this.enabledVerifiers = {}
     this.Web3 = Web3
+
+    this.torusAlert = {}
   }
 
   init({
@@ -78,6 +94,7 @@ class Torus {
           logLevel = 'error'
           break
       }
+
       this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
@@ -141,10 +158,18 @@ class Torus {
     })
   }
 
+  _checkThirdPartyCookies() {
+    if (!thirdPartyCookiesSupported) {
+      this._createAlert(this.torusUrl)
+      throw new Error('Third party cookies not supported')
+    }
+  }
+
   /**
    * Logs the user in
    */
   login({ verifier } = {}) {
+    this._checkThirdPartyCookies()
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
@@ -227,6 +252,42 @@ class Torus {
       window.document.body.removeChild(this.torusIframe)
       this.torusIframe = {}
     }
+  }
+
+  /**
+   * Show alert for Cookies Required
+   */
+  _createAlert(torusUrl) {
+    var link = window.document.createElement('link')
+
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('type', 'text/css')
+    link.setAttribute('href', torusUrl + '/css/widget.css')
+
+    this.styleLink = link
+
+    this.torusAlert = htmlToElement(
+      '<div id="torusAlert" class="torus-alert">' +
+        '<h1>Cookies Required</h1>' +
+        '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
+    )
+
+    const closeAlert = htmlToElement('<span class="torus-alert-close">x<span>')
+    this.torusAlert.appendChild(closeAlert)
+
+    const bindOnLoad = () => {
+      closeAlert.addEventListener('click', () => {
+        this.torusAlert.remove()
+      })
+    }
+
+    const attachOnLoad = () => {
+      window.document.head.appendChild(link)
+      window.document.body.appendChild(this.torusAlert)
+    }
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
   }
 
   /**
@@ -533,6 +594,7 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
+      this._checkThirdPartyCookies()
       this._showLoggingIn()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)

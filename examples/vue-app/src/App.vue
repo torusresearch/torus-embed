@@ -36,7 +36,7 @@ export default {
           buttonPosition: 'bottom-left'
         })
         await torus.init({
-          buildEnv: 'production',
+          buildEnv: 'testing',
           enabledVerifiers: {
             twitch: false
           },
