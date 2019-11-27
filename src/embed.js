@@ -26,9 +26,11 @@ restoreContextAfterImports()
 let thirdPartyCookiesSupported = true
 const receiveMessage = function(evt) {
   if (evt.data === 'torus:3PCunsupported') {
+    log.info('unsupported 3rd party cookies')
     thirdPartyCookiesSupported = false
     window.removeEventListener('message', receiveMessage)
   } else if (evt.data === 'torus:3PCsupported') {
+    log.info('supported 3rd party cookies')
     thirdPartyCookiesSupported = true
     window.removeEventListener('message', receiveMessage)
   }
@@ -57,7 +59,7 @@ class Torus {
     this.currentVerifier = ''
     this.enabledVerifiers = {}
     this.Web3 = Web3
-
+    this.torusUrl = ''
     this.torusAlert = {}
   }
 
@@ -94,7 +96,7 @@ class Torus {
           logLevel = 'error'
           break
       }
-
+      this.torusUrl = torusUrl
       this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
@@ -169,7 +171,6 @@ class Torus {
    * Logs the user in
    */
   login({ verifier } = {}) {
-    this._checkThirdPartyCookies()
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
