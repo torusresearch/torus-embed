@@ -36,8 +36,9 @@ export default {
         const torus = new Torus({
           buttonPosition: 'bottom-left'
         })
+        window.torus = torus
         await torus.init({
-          buildEnv: 'testing',
+          buildEnv: 'production',
           enabledVerifiers: {
             twitch: false
           },
@@ -50,7 +51,6 @@ export default {
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
-        window.torus = torus
         window.web3 = web3
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]

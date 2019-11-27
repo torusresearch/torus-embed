@@ -59,7 +59,6 @@ class Torus {
     this.currentVerifier = ''
     this.enabledVerifiers = {}
     this.Web3 = Web3
-    this.torusUrl = ''
     this.torusAlert = {}
   }
 
@@ -96,7 +95,6 @@ class Torus {
           logLevel = 'error'
           break
       }
-      this.torusUrl = torusUrl
       this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
@@ -162,7 +160,7 @@ class Torus {
 
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
-      this._createAlert(this.torusUrl)
+      this._createAlert()
       throw new Error('Third party cookies not supported')
     }
   }
@@ -238,11 +236,11 @@ class Torus {
       return element instanceof Element || element instanceof HTMLDocument
     }
     if (isElement(this.styleLink) && window.document.body.contains(this.styleLink)) {
-      window.document.head.removeChild(this.styleLink)
+      this.styleLink.remove()
       this.styleLink = {}
     }
     if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
-      window.document.body.removeChild(this.torusWidget)
+      this.torusWidget.remove()
       this.torusWidget = {}
       this.torusLogin = {}
       this.torusMenuBtn = {}
@@ -250,23 +248,19 @@ class Torus {
       this.torusLoginModal = {}
     }
     if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
-      window.document.body.removeChild(this.torusIframe)
+      this.torusIframe.remove()
       this.torusIframe = {}
+    }
+    if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
+      this.torusAlert.remove()
+      this.torusAlert = {}
     }
   }
 
   /**
    * Show alert for Cookies Required
    */
-  _createAlert(torusUrl) {
-    var link = window.document.createElement('link')
-
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('type', 'text/css')
-    link.setAttribute('href', torusUrl + '/css/widget.css')
-
-    this.styleLink = link
-
+  _createAlert() {
     this.torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert">' +
         '<h1>Cookies Required</h1>' +
@@ -283,7 +277,6 @@ class Torus {
     }
 
     const attachOnLoad = () => {
-      window.document.head.appendChild(link)
       window.document.body.appendChild(this.torusAlert)
     }
 
