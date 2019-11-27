@@ -211,11 +211,11 @@ class Torus {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
     }
-    if (isElement(this.styleLink)) {
+    if (isElement(this.styleLink) && window.document.body.contains(this.styleLink)) {
       window.document.head.removeChild(this.styleLink)
       this.styleLink = {}
     }
-    if (isElement(this.torusWidget)) {
+    if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
       window.document.body.removeChild(this.torusWidget)
       this.torusWidget = {}
       this.torusLogin = {}
@@ -223,7 +223,7 @@ class Torus {
       this.torusLoadingBtn = {}
       this.torusLoginModal = {}
     }
-    if (isElement(this.torusIframe)) {
+    if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
       window.document.body.removeChild(this.torusIframe)
       this.torusIframe = {}
     }
