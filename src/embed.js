@@ -7,6 +7,7 @@ import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
 import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
 import Web3 from 'web3'
+import TorusChannelProvider from './channel-provider'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -564,6 +565,16 @@ class Torus {
       targetWindow: this.torusIframe.contentWindow
     })
     this.communicationStream.setMaxListeners(100)
+
+    // setup channel stream
+    this.channelStream = new LocalMessageDuplexStream({
+      name: 'embed_chan',
+      target: 'iframe_chan',
+      targetWindow: this.torusIframe.contentWindow
+    })
+    this.channelStream.setMaxListeners(100)
+
+    this.channelProvider = new TorusChannelProvider(this.channelStream)
 
     // Backward compatibility with Gotchi :)
     // window.metamaskStream = this.communicationStream
