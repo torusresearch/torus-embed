@@ -1,12 +1,13 @@
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
+import Web3 from 'web3'
+import randomId from 'random-id'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
-import Web3 from 'web3'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -36,8 +37,6 @@ const receiveMessage = function(evt) {
   }
 }
 window.addEventListener('message', receiveMessage, false)
-
-// evt.data === 'torus:3PCunsupported'
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
@@ -733,37 +732,33 @@ class Torus {
 
       const windowStream = this.communicationMux.getStream('window')
 
-      const preopenHandler = function({ preopenInstanceId }) {
-        var prevPreopenInstanceId = preopenInstanceId
-        var windowRef = window.open(self.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
-        windowStream.removeListener('data', preopenHandler)
-        var closeHandler = function({ preopenInstanceId, close }) {
-          if (preopenInstanceId === prevPreopenInstanceId && close === true) {
-            windowRef.close()
-          }
-          windowStream.removeListener('data', closeHandler)
+      const preopenInstanceId = randomId()
+      var windowRef = window.open(this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
+      var closeHandler = function({ preopenInstanceId: receivedId, close }) {
+        if (receivedId === preopenInstanceId && close === true) {
+          windowRef.close()
         }
-        windowStream.on('data', closeHandler)
-        var checkWindowClose = setInterval(function() {
-          try {
-            if (windowRef && windowRef.closed) {
-              windowStream.write({
-                data: {
-                  preopenInstanceId,
-                  closed: true
-                }
-              })
-              clearInterval(checkWindowClose)
-            }
-            return
-          } catch (err) {
-            log.error(err)
+      }
+      handleStream(windowStream, 'data', closeHandler)
+      var checkWindowClose = setInterval(function() {
+        try {
+          if (windowRef && windowRef.closed) {
+            windowStream.write({
+              data: {
+                preopenInstanceId,
+                closed: true
+              }
+            })
             clearInterval(checkWindowClose)
           }
-        }, 200)
-      }
-      windowStream.on('data', preopenHandler)
-      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
+          return
+        } catch (err) {
+          log.error(err)
+          clearInterval(checkWindowClose)
+        }
+      }, 200)
+
+      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
     }
   }
 
