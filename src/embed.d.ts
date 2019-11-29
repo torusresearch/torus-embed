@@ -8,6 +8,7 @@ export default class Torus {
   getPublicAddress(verifierArgs: VerifierArgs): Promise<string>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
+  initiateTopup(provider: 'simplex' | 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>
   showTorusButton(): void
   hideTorusButton(): void
   getUserInfo(message: string): Promise<UserInfo>
@@ -21,17 +22,23 @@ declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
 }
 
+interface PaymentParams {
+  selectedCurrency?: string;
+  fiatValue?: Number;
+  selectedCryptoCurrency?: string;  
+}
+
 interface VerifierArgs {
-  verifier: 'google' | 'reddit' | 'discord'
-  verifierId: string
+  verifier: 'google' | 'reddit' | 'discord';
+  verifierId: string;
 }
 
 interface LoginParams {
-  verifier?: 'google' | 'facebook' | 'twitch' | 'reddit' | 'discord'
+  verifier?: 'google' | 'facebook' | 'twitch' | 'reddit' | 'discord';
 }
 
 interface TorusCtorArgs {
-  buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
+  buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
 }
 
 interface UserInfo {
@@ -47,7 +54,7 @@ interface TorusParams {
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   enableLogging?: boolean;
   showTorusButton?: boolean;
-  enabledVerifiers?: VerifierStatus
+  enabledVerifiers?: VerifierStatus;
 }
 
 interface VerifierStatus {
@@ -60,7 +67,7 @@ interface VerifierStatus {
 
 interface NetworkInterface {
   host: 'mainnet' | 'rinkeby' | 'ropsten' | 'kovan' | 'goerli' | 'localhost' | 'matic' | string,
-  chainId?: number; 
+  chainId?: number;
   networkName?: string;
 }
 

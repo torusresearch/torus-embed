@@ -18,10 +18,26 @@ const defaultVerifiers = {
 }
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-AWWTymHWZUtXYB3gv2XBR0+IPgQJxTIH9qCDN1/lFzQJbH1VvjqZs5Y7QI8fNmhk'
+const iframeIntegrity = 'sha384-1SYzBoS8dq9Z5P0MpwjLID7T5h9YmPKWyx9lt670OFIU2NLMzF68JzXMj/ernwpc'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
+
+let thirdPartyCookiesSupported = true
+const receiveMessage = function(evt) {
+  if (evt.data === 'torus:3PCunsupported') {
+    log.info('unsupported 3rd party cookies')
+    thirdPartyCookiesSupported = false
+    window.removeEventListener('message', receiveMessage)
+  } else if (evt.data === 'torus:3PCsupported') {
+    log.info('supported 3rd party cookies')
+    thirdPartyCookiesSupported = true
+    window.removeEventListener('message', receiveMessage)
+  }
+}
+window.addEventListener('message', receiveMessage, false)
+
+// evt.data === 'torus:3PCunsupported'
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
@@ -44,6 +60,7 @@ class Torus {
     this.currentVerifier = ''
     this.enabledVerifiers = {}
     this.Web3 = Web3
+    this.torusAlert = {}
   }
 
   init({
@@ -63,7 +80,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.2.3'
+          torusUrl = 'https://staging.tor.us/v0.2.8'
           logLevel = 'info'
           break
         case 'testing':
@@ -75,7 +92,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.2.6'
+          torusUrl = 'https://app.tor.us/v0.2.8'
           logLevel = 'error'
           break
       }
@@ -141,6 +158,13 @@ class Torus {
         )
       }
     })
+  }
+
+  _checkThirdPartyCookies() {
+    if (!thirdPartyCookiesSupported) {
+      this._createAlert()
+      throw new Error('Third party cookies not supported')
+    }
   }
 
   /**
@@ -213,22 +237,53 @@ class Torus {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
     }
-    if (isElement(this.styleLink)) {
-      window.document.head.removeChild(this.styleLink)
+    if (isElement(this.styleLink) && window.document.body.contains(this.styleLink)) {
+      this.styleLink.remove()
       this.styleLink = {}
     }
-    if (isElement(this.torusWidget)) {
-      window.document.body.removeChild(this.torusWidget)
+    if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
+      this.torusWidget.remove()
       this.torusWidget = {}
       this.torusLogin = {}
       this.torusMenuBtn = {}
       this.torusLoadingBtn = {}
       this.torusLoginModal = {}
     }
-    if (isElement(this.torusIframe)) {
-      window.document.body.removeChild(this.torusIframe)
+    if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
+      this.torusIframe.remove()
       this.torusIframe = {}
     }
+    if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
+      this.torusAlert.remove()
+      this.torusAlert = {}
+    }
+  }
+
+  /**
+   * Show alert for Cookies Required
+   */
+  _createAlert() {
+    this.torusAlert = htmlToElement(
+      '<div id="torusAlert" class="torus-alert">' +
+        '<h1>Cookies Required</h1>' +
+        '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
+    )
+
+    const closeAlert = htmlToElement('<span class="torus-alert-close">x<span>')
+    this.torusAlert.appendChild(closeAlert)
+
+    const bindOnLoad = () => {
+      closeAlert.addEventListener('click', () => {
+        this.torusAlert.remove()
+      })
+    }
+
+    const attachOnLoad = () => {
+      window.document.body.appendChild(this.torusAlert)
+    }
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
   }
 
   /**
@@ -535,6 +590,7 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
+      this._checkThirdPartyCookies()
       this._showLoggingIn()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
@@ -915,6 +971,34 @@ class Torus {
           userInfoStream.removeListener('data', userInfoHandler)
         }
         userInfoStream.on('data', userInfoHandler)
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
+
+  /**
+   * Exposes the topup api of torus
+   * Allows the dapp to trigger a payment method directly
+   * If no params are provided, it defaults to { fiatValue = MIN_FOR_PROVIDER; selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
+   * @param {Enum} provider Supported options are simplex, moonpay, wyre and coindirect
+   * @param {PaymentParams} params PaymentParams is { fiatValue?: Number; selectedCurrency?: string; selectedCryptoCurrency?: string; }
+   * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
+   */
+  initiateTopup(provider, params) {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const topupStream = this.communicationMux.getStream('topup')
+        topupStream.write({ name: 'topup_request', data: { provider: provider, params: params } })
+        const topupHandler = chunk => {
+          if (chunk.name === 'topup_response') {
+            if (chunk.data.success) {
+              resolve(chunk.data.success)
+            } else {
+              reject(new Error(chunk.data.error))
+            }
+          }
+          topupStream.removeListener('data', topupHandler)
+        }
+        topupStream.on('data', topupHandler)
       } else reject(new Error('User has not logged in yet'))
     })
   }

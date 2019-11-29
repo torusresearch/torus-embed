@@ -4,6 +4,8 @@ This module generates the javascript to be included in a dapp via a script tag
 It creates an iframe that loads the Torus page, and sets up communication streams between
 the iframe and the dapp javascript context.
 
+Please refer to docs for API Reference available [here](https://docs.tor.us/developers/api-reference)
+
 ## Installation
 
 Torus has been designed for gradual adoption from the start. You can use Torus as a web3 provider dynamically (on demand) or by default

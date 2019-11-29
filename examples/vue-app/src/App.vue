@@ -5,6 +5,8 @@
     <button v-if="publicAddress === ''" @click="login">Login</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
+    <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
+    <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
@@ -20,7 +22,6 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
-import sigUtil from 'eth-sig-util'
 
 export default {
   name: 'app',
@@ -35,8 +36,9 @@ export default {
         const torus = new Torus({
           buttonPosition: 'bottom-left'
         })
+        window.torus = torus
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: 'production',
           enabledVerifiers: {
             twitch: false
           },
@@ -44,13 +46,12 @@ export default {
           network: {
             host: 'rinkeby', // mandatory
             // chainId: 1, // optional
-            networkName: 'kovan' // optional
           },
           showTorusButton: true
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
-        window.torus = torus
+        window.web3 = web3
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
@@ -63,6 +64,14 @@ export default {
     },
     console(text) {
       document.querySelector('#console>p').innerHTML = text
+    },
+    createPaymentTx() {
+      window.torus.initiateTopup('moonpay', {
+        selectedCurrency: "USD"
+      }).then(console.log).catch(console.error)
+    },
+    sendEth() {
+      window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
     },
     signMessage() {
       const self = this
@@ -78,7 +87,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign message => true')
+          self.console('sign message => true \n', result)
         }
       )
     },
@@ -106,7 +115,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v1 => true')
+          self.console('sign typed message v1 => true \n', result)
         }
       )
     },
@@ -153,7 +162,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v3 => true')
+          self.console('sign typed message v3 => true \n', result)
         }
       )
     },
@@ -206,8 +215,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          // console.log(result)
-          self.console('sign typed message v4 => true')
+          self.console('sign typed message v4 => true \n', result)
         }
       )
     },
