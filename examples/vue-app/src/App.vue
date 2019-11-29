@@ -66,7 +66,9 @@ export default {
       document.querySelector('#console>p').innerHTML = text
     },
     createPaymentTx() {
-      window.torus.initiateTopup('moonpay').then(console.log).catch(console.log)
+      window.torus.initiateTopup('moonpay', {
+        selectedCurrency: "USD"
+      }).then(console.log).catch(console.error)
     },
     sendEth() {
       window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
