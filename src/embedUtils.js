@@ -33,4 +33,20 @@ const transformEthAddress = ethAddress => {
   }
 }
 
-export { runOnLoad, runOnComplete, htmlToElement, transformEthAddress }
+const handleEvent = (handle, eventName, handler, handlerArgs) => {
+  const handlerWrapper = () => {
+    handler.apply(this, handlerArgs)
+    handle.removeEventListener(eventName, handlerWrapper)
+  }
+  handle.addEventListener(eventName, handlerWrapper)
+}
+
+const handleStream = (handle, eventName, handler) => {
+  const handlerWrapper = chunk => {
+    handler(chunk)
+    handle.removeListener(eventName, handlerWrapper)
+  }
+  handle.on(eventName, handlerWrapper)
+}
+
+export { runOnLoad, runOnComplete, htmlToElement, transformEthAddress, handleEvent, handleStream }

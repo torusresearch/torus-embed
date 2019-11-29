@@ -3,7 +3,7 @@ import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
-import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
+import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
 import Web3 from 'web3'
@@ -705,36 +705,15 @@ class Torus {
         this._showLoggedOut()
         if (reject) reject(new Error('Modal has been closed'))
       }
-      const googleHandler = () => {
-        this.requestedVerifier = GOOGLE
-        this.googleLogin.removeEventListener('click', googleHandler)
+      const loginHandler = verifier => {
+        this.requestedVerifier = verifier
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
-      this.googleLogin.addEventListener('click', googleHandler)
-      const facebookHandler = () => {
-        this.requestedVerifier = FACEBOOK
-        this.facebookLogin.removeEventListener('click', facebookHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.facebookLogin.addEventListener('click', facebookHandler)
-      const twitchHandler = () => {
-        this.requestedVerifier = TWITCH
-        this.twitchLogin.removeEventListener('click', twitchHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.twitchLogin.addEventListener('click', twitchHandler)
-      const redditHandler = () => {
-        this.requestedVerifier = REDDIT
-        this.redditLogin.removeEventListener('click', redditHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.redditLogin.addEventListener('click', redditHandler)
-      const discordHandler = () => {
-        this.requestedVerifier = DISCORD
-        this.discordLogin.removeEventListener('click', discordHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.discordLogin.addEventListener('click', discordHandler)
+      Object.keys(this.enabledVerifiers).forEach(verifier => {
+        if (this.enabledVerifiers[verifier]) {
+          handleEvent(this[`${verifier}Login`], 'click', loginHandler, [verifier])
+        }
+      })
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
@@ -749,9 +728,8 @@ class Torus {
           if (resolve) resolve([transformEthAddress(selectedAddress)])
           self._showLoggedIn()
         }
-        oauthStream.removeListener('data', loginHandler)
       }
-      oauthStream.on('data', loginHandler)
+      handleStream(oauthStream, 'data', loginHandler)
 
       const windowStream = this.communicationMux.getStream('window')
 
@@ -801,9 +779,8 @@ class Torus {
         } else if (success) {
           resolve()
         } else reject(new Error('some error occured'))
-        providerChangeSuccess.removeListener('data', handler)
       }
-      providerChangeSuccess.on('data', handler)
+      handleStream(providerChangeSuccess, 'data', handler)
       if (configuration.networkList.includes(host))
         providerChangeStream.write({
           name: 'show_provider_change',
@@ -845,9 +822,8 @@ class Torus {
           } else if (success) {
             resolve()
           } else reject(new Error('some error occured'))
-          providerChangeSuccess.removeListener('data', handler)
         }
-        providerChangeSuccess.on('data', handler)
+        handleStream(providerChangeSuccess, 'data', handler)
         if (configuration.networkList.includes(host))
           providerChangeStream.write({
             name: 'show_provider_change',
@@ -968,9 +944,8 @@ class Torus {
               reject(new Error('User rejected the request'))
             }
           }
-          userInfoStream.removeListener('data', userInfoHandler)
         }
-        userInfoStream.on('data', userInfoHandler)
+        handleStream(userInfoStream, 'data', userInfoHandler)
       } else reject(new Error('User has not logged in yet'))
     })
   }
@@ -996,9 +971,8 @@ class Torus {
               reject(new Error(chunk.data.error))
             }
           }
-          topupStream.removeListener('data', topupHandler)
         }
-        topupStream.on('data', topupHandler)
+        handleStream(topupStream, 'data', topupHandler)
       } else reject(new Error('User has not logged in yet'))
     })
   }
