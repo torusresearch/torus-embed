@@ -8,6 +8,7 @@ import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
+import PopupHandler from './PopupHandler'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -733,31 +734,23 @@ class Torus {
       const windowStream = this.communicationMux.getStream('window')
 
       const preopenInstanceId = randomId()
-      var windowRef = window.open(this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`)
-      var closeHandler = function({ preopenInstanceId: receivedId, close }) {
+      const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
+      const loginWindow = new PopupHandler({ url: finalUrl })
+      loginWindow.open()
+      const closeHandler = function({ preopenInstanceId: receivedId, close }) {
         if (receivedId === preopenInstanceId && close === true) {
-          windowRef.close()
+          loginWindow.close()
         }
       }
       handleStream(windowStream, 'data', closeHandler)
-      var checkWindowClose = setInterval(function() {
-        try {
-          if (windowRef && windowRef.closed) {
-            windowStream.write({
-              data: {
-                preopenInstanceId,
-                closed: true
-              }
-            })
-            clearInterval(checkWindowClose)
+      loginWindow.once('close', () => {
+        windowStream.write({
+          data: {
+            preopenInstanceId: preopenInstanceId,
+            closed: true
           }
-          return
-        } catch (err) {
-          log.error(err)
-          clearInterval(checkWindowClose)
-        }
-      }, 200)
-
+        })
+      })
       oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
     }
   }
