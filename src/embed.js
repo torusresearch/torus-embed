@@ -203,9 +203,8 @@ class Torus {
             this.requestedVerifier = ''
             resolve()
           } else reject(new Error('Some Error Occured'))
-          statusStream.removeListener('data', statusStreamHandler)
         }
-        statusStream.on('data', statusStreamHandler)
+        handleStream(statusStream, 'data', statusStreamHandler)
       }
     })
   }
@@ -730,113 +729,69 @@ class Torus {
         }
       }
       handleStream(oauthStream, 'data', loginHandler)
-
-      const windowStream = this.communicationMux.getStream('window')
-
       const preopenInstanceId = randomId()
-      const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
-      const loginWindow = new PopupHandler({ url: finalUrl })
-      loginWindow.open()
-      const closeHandler = function({ preopenInstanceId: receivedId, close }) {
-        if (receivedId === preopenInstanceId && close === true) {
-          loginWindow.close()
-        }
-      }
-      handleStream(windowStream, 'data', closeHandler)
-      loginWindow.once('close', () => {
-        windowStream.write({
-          data: {
-            preopenInstanceId: preopenInstanceId,
-            closed: true
-          }
-        })
-      })
+      this._handleWindow(preopenInstanceId)
       oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
     }
   }
 
   setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
     return new Promise((resolve, reject) => {
-      const providerChangeStream = this.communicationMux.getStream('show_provider_change')
-      const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
-      const handler = function(ev) {
-        var { err, success } = ev.data
+      const providerChangeStream = this.communicationMux.getStream('provider_change')
+      const handler = chunk => {
+        var { err, success } = chunk.data
+        log.info(chunk)
         if (err) {
-          log.error(err)
           reject(err)
         } else if (success) {
           resolve()
         } else reject(new Error('some error occured'))
       }
-      handleStream(providerChangeSuccess, 'data', handler)
-      if (configuration.networkList.includes(host))
-        providerChangeStream.write({
-          name: 'show_provider_change',
-          data: {
-            network: {
-              host,
-              chainId,
-              networkName
-            },
-            override: false
-          }
-        })
-      else
-        providerChangeStream.write({
-          name: 'show_provider_change',
-          data: {
-            network: {
-              host,
-              chainId,
-              networkName
-            },
-            type: 'rpc'
+      handleStream(providerChangeStream, 'data', handler)
+      const preopenInstanceId = randomId()
+      this._handleWindow(preopenInstanceId)
+      providerChangeStream.write({
+        name: 'show_provider_change',
+        data: {
+          network: {
+            host,
+            chainId,
+            networkName
           },
+          type: configuration.networkList.includes(host) ? undefined : 'rpc',
+          preopenInstanceId: preopenInstanceId,
           override: false
-        })
+        }
+      })
     })
   }
 
   _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
-        const providerChangeStream = this.communicationMux.getStream('show_provider_change')
-        const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+        const providerChangeStream = this.communicationMux.getStream('provider_change')
         const handler = function(ev) {
+          log.info(ev)
           var { err, success } = ev.data
           if (err) {
-            log.error(err)
             reject(err)
           } else if (success) {
             resolve()
           } else reject(new Error('some error occured'))
         }
-        handleStream(providerChangeSuccess, 'data', handler)
-        if (configuration.networkList.includes(host))
-          providerChangeStream.write({
-            name: 'show_provider_change',
-            data: {
-              network: {
-                host,
-                chainId,
-                networkName
-              },
-              override: true
-            }
-          })
-        else
-          providerChangeStream.write({
-            name: 'show_provider_change',
-            data: {
-              network: {
-                host,
-                chainId,
-                networkName
-              },
-              type: 'rpc',
-              override: true
-            }
-          })
+        handleStream(providerChangeStream, 'data', handler)
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            type: configuration.networkList.includes(host) ? undefined : 'rpc',
+            override: true
+          }
+        })
       } else reject(new Error('Already initialized'))
     })
   }
@@ -932,19 +887,60 @@ class Torus {
   getUserInfo(message) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
-        const userInfoStream = this.communicationMux.getStream('user_info')
-        userInfoStream.write({ name: 'user_info_request', data: { message: message } })
-        const userInfoHandler = chunk => {
-          if (chunk.name === 'user_info_response') {
-            if (chunk.data.approved) {
-              resolve(chunk.data.payload)
-            } else {
+        const userInfoAccessStream = this.communicationMux.getStream('user_info_access')
+        userInfoAccessStream.write({ name: 'user_info_access_request' })
+        const userInfoAccessHandler = chunk => {
+          const {
+            name,
+            data: { approved, payload, rejected, newRequest }
+          } = chunk
+          if (name === 'user_info_access_response') {
+            if (approved) {
+              resolve(payload)
+            } else if (rejected) {
               reject(new Error('User rejected the request'))
+            } else if (newRequest) {
+              const userInfoStream = this.communicationMux.getStream('user_info')
+              const userInfoHandler = chunk => {
+                if (chunk.name === 'user_info_response') {
+                  if (chunk.data.approved) {
+                    resolve(chunk.data.payload)
+                  } else {
+                    reject(new Error('User rejected the request'))
+                  }
+                }
+              }
+              handleStream(userInfoStream, 'data', userInfoHandler)
+              const preopenInstanceId = randomId()
+              this._handleWindow(preopenInstanceId)
+              userInfoStream.write({ name: 'user_info_request', data: { message: message, preopenInstanceId: preopenInstanceId } })
             }
           }
         }
-        handleStream(userInfoStream, 'data', userInfoHandler)
+        handleStream(userInfoAccessStream, 'data', userInfoAccessHandler)
       } else reject(new Error('User has not logged in yet'))
+    })
+  }
+
+  _handleWindow(preopenInstanceId) {
+    const windowStream = this.communicationMux.getStream('window')
+    const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
+    const handledWindow = new PopupHandler({ url: finalUrl })
+    handledWindow.open()
+    const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
+      if (receivedId === preopenInstanceId && close) {
+        handledWindow.close()
+        windowStream.removeListener('data', closeHandler)
+      }
+    }
+    windowStream.on('data', closeHandler)
+    handledWindow.once('close', () => {
+      windowStream.write({
+        data: {
+          preopenInstanceId: preopenInstanceId,
+          closed: true
+        }
+      })
     })
   }
 
@@ -960,7 +956,6 @@ class Torus {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
         const topupStream = this.communicationMux.getStream('topup')
-        topupStream.write({ name: 'topup_request', data: { provider: provider, params: params } })
         const topupHandler = chunk => {
           if (chunk.name === 'topup_response') {
             if (chunk.data.success) {
@@ -971,6 +966,9 @@ class Torus {
           }
         }
         handleStream(topupStream, 'data', topupHandler)
+        const preopenInstanceId = randomId()
+        this._handleWindow(preopenInstanceId)
+        topupStream.write({ name: 'topup_request', data: { provider: provider, params: params, preopenInstanceId: preopenInstanceId } })
       } else reject(new Error('User has not logged in yet'))
     })
   }
