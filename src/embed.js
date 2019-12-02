@@ -843,13 +843,23 @@ class Torus {
 
   /**
    * Shows the wallet popup
-   * @param {boolean} calledFromEmbed if called from dapp context
    * @param {string} path the route to open
    */
   showWallet(path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
     showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
+
+    const showWalletHandler = chunk => {
+      if (chunk.name === 'show_wallet_instance') {
+        const { instanceId } = chunk.data
+        const finalUrl = `${this.torusUrl}/wallet${finalPath}?integrity=true&instanceId=${instanceId}`
+        const walletWindow = new PopupHandler({ url: finalUrl })
+        walletWindow.open()
+      }
+    }
+
+    handleStream(showWalletStream, 'data', showWalletHandler)
   }
 
   _toggleSpeedDial() {
