@@ -286,6 +286,33 @@ class Torus {
   }
 
   /**
+   * Show alert for when popup is blocked
+   */
+  _createPopupBlockAlert(preopenInstanceId) {
+    const torusAlert = htmlToElement(
+      '<div id="torusAlert" class="torus-alert">' +
+        '<h1>Attention Required</h1>' +
+        '<p>You have a pending action. Please click below to complete it</p></div>'
+    )
+
+    const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
+    torusAlert.appendChild(successAlert)
+    const bindOnLoad = () => {
+      successAlert.addEventListener('click', () => {
+        this._handleWindow(preopenInstanceId)
+        torusAlert.remove()
+      })
+    }
+
+    const attachOnLoad = () => {
+      window.document.body.appendChild(torusAlert)
+    }
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
+  }
+
+  /**
    * Creates the widget
    */
   _createWidget(torusUrl) {
@@ -651,7 +678,7 @@ class Torus {
     var windowStream = communicationMux.getStream('window')
     windowStream.on('data', chunk => {
       if (chunk.name === 'create_window') {
-        this._handleWindow(chunk.data.preopenInstanceId)
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
       }
     })
 
@@ -934,6 +961,12 @@ class Torus {
     const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
     const handledWindow = new PopupHandler({ url: finalUrl })
     handledWindow.open()
+    windowStream.write({
+      name: 'opened_window',
+      data: {
+        preopenInstanceId: preopenInstanceId
+      }
+    })
     const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
       if (receivedId === preopenInstanceId && close) {
         handledWindow.close()
