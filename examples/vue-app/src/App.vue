@@ -38,7 +38,7 @@ export default {
         })
         window.torus = torus
         await torus.init({
-          buildEnv: 'production',
+          buildEnv: 'development',
           enabledVerifiers: {
             twitch: false
           },
@@ -222,13 +222,11 @@ export default {
     logout() {
       window.torus.logout().then(() => (this.publicAddress = ''))
     },
-    async changeProvider() {
-      await window.torus.setProvider({ host: 'ropsten' })
-      console.log('finished changing provider')
+    changeProvider() {
+      window.torus.setProvider({ host: 'ropsten' }).then(console.log).catch(console.log)
     },
     async getUserInfo() {
-      const userInfo = await window.torus.getUserInfo()
-      console.log(userInfo)
+      window.torus.getUserInfo().then(console.log).catch(console.log)
     }
   }
 }
