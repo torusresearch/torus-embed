@@ -299,7 +299,10 @@ class Torus {
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
-        this._handleWindow(preopenInstanceId)
+        this._handleWindow(preopenInstanceId, {
+          target: '_blank',
+          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500'
+        })
         torusAlert.remove()
       })
     }
@@ -783,7 +786,10 @@ class Torus {
       }
       handleStream(providerChangeStream, 'data', handler)
       const preopenInstanceId = randomId()
-      this._handleWindow(preopenInstanceId)
+      this._handleWindow(preopenInstanceId, {
+        target: '_blank',
+        features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
+      })
       providerChangeStream.write({
         name: 'show_provider_change',
         data: {
@@ -946,7 +952,10 @@ class Torus {
               }
               handleStream(userInfoStream, 'data', userInfoHandler)
               const preopenInstanceId = randomId()
-              this._handleWindow(preopenInstanceId)
+              this._handleWindow(preopenInstanceId, {
+                target: '_blank',
+                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
+              })
               userInfoStream.write({ name: 'user_info_request', data: { message: message, preopenInstanceId: preopenInstanceId } })
             }
           }
@@ -956,10 +965,10 @@ class Torus {
     })
   }
 
-  _handleWindow(preopenInstanceId) {
+  _handleWindow(preopenInstanceId, { target, features } = {}) {
     const windowStream = this.communicationMux.getStream('window')
     const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
-    const handledWindow = new PopupHandler({ url: finalUrl })
+    const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
     handledWindow.open()
     windowStream.write({
       name: 'opened_window',
