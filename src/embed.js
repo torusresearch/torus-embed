@@ -648,6 +648,13 @@ class Torus {
     communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
+    var windowStream = communicationMux.getStream('window')
+    windowStream.on('data', chunk => {
+      if (chunk.name === 'create_window') {
+        this._handleWindow(chunk.data.preopenInstanceId)
+      }
+    })
+
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
