@@ -13,6 +13,7 @@ const web3Obj = {
     await torus.init()
     await torus.login()
     web3Obj.setweb3(torus.provider)
+    window.torus = torus
   }
 }
 export default web3Obj
