@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
+    <p>Build Environment</p>
+    <input :value="buildEnv" @change="changeBuildEnv" />
     <br />
     <button v-if="publicAddress === ''" @click="login">Login</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
@@ -27,7 +28,8 @@ export default {
   name: 'app',
   data() {
     return {
-      publicAddress: ''
+      publicAddress: '',
+      buildEnv: 'testing'
     }
   },
   methods: {
@@ -38,14 +40,14 @@ export default {
         })
         window.torus = torus
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: this.buildEnv,
           enabledVerifiers: {
             twitch: false
           },
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
-            // chainId: 1, // optional
+            chainId: 4,
           },
           showTorusButton: true
         })
@@ -64,6 +66,9 @@ export default {
     },
     console(text) {
       document.querySelector('#console>p').innerHTML = text
+    },
+    changeBuildEnv(ev) {
+      this.buildEnv = ev.target.value
     },
     createPaymentTx() {
       window.torus.initiateTopup('moonpay', {
