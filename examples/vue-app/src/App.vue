@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
+    <p>Build Environment</p>
+    <input :value="buildEnv" @change="changeBuildEnv" />
     <br />
     <button v-if="publicAddress === ''" @click="login">Login</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
@@ -27,7 +28,8 @@ export default {
   name: 'app',
   data() {
     return {
-      publicAddress: ''
+      publicAddress: '',
+      buildEnv: 'testing'
     }
   },
   methods: {
@@ -38,14 +40,14 @@ export default {
         })
         window.torus = torus
         await torus.init({
-          buildEnv: 'production',
+          buildEnv: this.buildEnv,
           enabledVerifiers: {
             twitch: false
           },
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
-            // chainId: 1, // optional
+            chainId: 4,
           },
           showTorusButton: true
         })
@@ -65,8 +67,13 @@ export default {
     console(text) {
       document.querySelector('#console>p').innerHTML = text
     },
+    changeBuildEnv(ev) {
+      this.buildEnv = ev.target.value
+    },
     createPaymentTx() {
-      window.torus.initiateTopup('moonpay').then(console.log).catch(console.log)
+      window.torus.initiateTopup('moonpay', {
+        selectedCurrency: "USD"
+      }).then(console.log).catch(console.error)
     },
     sendEth() {
       window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
@@ -220,13 +227,11 @@ export default {
     logout() {
       window.torus.logout().then(() => (this.publicAddress = ''))
     },
-    async changeProvider() {
-      await window.torus.setProvider({ host: 'ropsten' })
-      console.log('finished changing provider')
+    changeProvider() {
+      window.torus.setProvider({ host: 'ropsten' }).then(console.log).catch(console.log)
     },
     async getUserInfo() {
-      const userInfo = await window.torus.getUserInfo()
-      console.log(userInfo)
+      window.torus.getUserInfo().then(console.log).catch(console.log)
     }
   }
 }
