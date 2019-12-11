@@ -997,7 +997,7 @@ class Torus {
    * Exposes the topup api of torus
    * Allows the dapp to trigger a payment method directly
    * If no params are provided, it defaults to { fiatValue = MIN_FOR_PROVIDER; selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are simplex, moonpay, wyre and coindirect
+   * @param {Enum} provider Supported options are moonpay, wyre and coindirect
    * @param {PaymentParams} params PaymentParams is { fiatValue?: Number; selectedCurrency?: string; selectedCryptoCurrency?: string; }
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */
