@@ -20,7 +20,7 @@ const defaultVerifiers = {
 }
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-ArOlPfZE4kziYaPvgUukw6Tm7uUut/qzFwazz+oYS60T6T8QV+tN+6FDurLOnjY/'
+const iframeIntegrity = 'sha384-66VtjHublaGpzO1QesW1ogbfc/JSblIP59ZxRgnMPS3lH3Pz3tVZoCcNOihWPbh0'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -80,7 +80,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.2.9'
+          torusUrl = 'https://staging.tor.us/v0.2.10'
           logLevel = 'info'
           break
         case 'testing':
