@@ -1,9 +1,16 @@
 <template>
   <div id="app">
-    <p>Build Environment</p>
-    <input :value="buildEnv" @change="changeBuildEnv" />
+    <form @submit.prevent="login">
+      <p>Build Environment</p>
+      <select name="buildEnv" v-model="buildEnv">
+        <option value="production">Production</option>
+        <option selected value="staging">Staging</option>
+        <option value="testing">Testing</option>
+        <option value="development">Development</option>
+      </select>
+      <button v-if="publicAddress === ''">Login</button>
+    </form>
     <br />
-    <button v-if="publicAddress === ''" @click="login">Login</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
     <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
@@ -29,7 +36,7 @@ export default {
   data() {
     return {
       publicAddress: '',
-      buildEnv: 'testing'
+      buildEnv: 'staging'
     }
   },
   methods: {
@@ -47,7 +54,7 @@ export default {
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
-            chainId: 4,
+            chainId: 4
           },
           showTorusButton: true
         })
@@ -67,13 +74,12 @@ export default {
     console(text) {
       document.querySelector('#console>p').innerHTML = text
     },
-    changeBuildEnv(ev) {
-      this.buildEnv = ev.target.value
-    },
     createPaymentTx() {
-      window.torus.initiateTopup('moonpay', {
-        selectedCurrency: "USD"
-      }).then(console.log).catch(console.error)
+      window.torus
+        .initiateTopup('moonpay', {
+          selectedCurrency: 'USD'
+        })
+        .finally(console.log)
     },
     sendEth() {
       window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
@@ -134,8 +140,15 @@ export default {
             { name: 'chainId', type: 'uint256' },
             { name: 'verifyingContract', type: 'address' }
           ],
-          Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
-          Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }]
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' }
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person' },
+            { name: 'contents', type: 'string' }
+          ]
         },
         primaryType: 'Mail',
         domain: {
@@ -180,9 +193,19 @@ export default {
             { name: 'chainId', type: 'uint256' },
             { name: 'verifyingContract', type: 'address' }
           ],
-          Person: [{ name: 'name', type: 'string' }, { name: 'wallets', type: 'address[]' }],
-          Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person[]' }, { name: 'contents', type: 'string' }],
-          Group: [{ name: 'name', type: 'string' }, { name: 'members', type: 'Person[]' }]
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallets', type: 'address[]' }
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person[]' },
+            { name: 'contents', type: 'string' }
+          ],
+          Group: [
+            { name: 'name', type: 'string' },
+            { name: 'members', type: 'Person[]' }
+          ]
         },
         domain: {
           name: 'Ether Mail',
@@ -228,10 +251,14 @@ export default {
       window.torus.logout().then(() => (this.publicAddress = ''))
     },
     changeProvider() {
-      window.torus.setProvider({ host: 'ropsten' }).then(console.log).catch(console.log)
+      window.torus
+        .setProvider({ host: 'ropsten' })
+        .finally(console.log)
     },
     async getUserInfo() {
-      window.torus.getUserInfo().then(console.log).catch(console.log)
+      window.torus
+        .getUserInfo()
+        .finally(console.log)
     }
   }
 }
