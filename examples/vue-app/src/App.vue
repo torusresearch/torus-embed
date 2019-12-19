@@ -14,7 +14,6 @@
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
     <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
     <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
-    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
@@ -22,6 +21,7 @@
     <button v-if="publicAddress !== ''" @click="signTypedData_v3">sign typed data v3</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v4">sign typed data v4</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
+    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <div id="console">
       <p></p>
     </div>
@@ -51,7 +51,7 @@ export default {
         await torus.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
-            twitch: false
+            reddit: false
           },
           enableLogging: true,
           network: {
