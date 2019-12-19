@@ -1,0 +1,23 @@
+<div class="content" role="main">
+  <button (click)="startTorus($event)">Start using torus</button>
+
+  <br />
+  <div *ngIf="address">
+    <div>Account: {{ address }}</div>
+    <div>Balance: {{ balance }}</div>
+    <br />
+    <br />
+    <br />
+    <button (click)="changeProvider($event)">Change Provider</button>
+    <button (click)="getUserInfo($event)">Get User Info</button>
+    <button (click)="createPaymentTx($event)">Create Payment Tx</button>
+    <button (click)="sendEth($event)">Send Eth</button>
+    <button (click)="sendDai($event)">Send DAI</button>
+    <button (click)="logout($event)">Logout</button>
+    <br />
+    <button (click)="signMessage($event)">sign_eth</button>
+    <button (click)="signTypedData_v1($event)">sign typed data v1</button>
+    <button (click)="signTypedData_v3($event)">sign typed data v3</button>
+    <button (click)="signTypedData_v4($event)">sign typed data v4</button>
+  </div>
+</div>
