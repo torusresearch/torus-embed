@@ -262,7 +262,7 @@ export default {
         .setProvider({ host: 'mainnet' })
         .finally(() => {
           const localWeb3 = window.web3
-          const instance = new localWeb3.eth.Contract(tokenAbi, "0xc94a6e7776bade5da316cf6fd8c751fb0d5c3c5e")
+          const instance = new localWeb3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f")
           const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
           instance.methods.transfer(this.publicAddress, value).send({
             from: this.publicAddress
