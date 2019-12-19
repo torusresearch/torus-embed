@@ -15,6 +15,7 @@
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
     <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
     <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
+    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
@@ -30,13 +31,14 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
+const tokenAbi = require('human-standard-token-abi')
 
 export default {
   name: 'app',
   data() {
     return {
       publicAddress: '',
-      buildEnv: 'staging'
+      buildEnv: 'development'
     }
   },
   methods: {
@@ -254,6 +256,22 @@ export default {
       window.torus
         .setProvider({ host: 'ropsten' })
         .finally(console.log)
+    },
+    sendDai() {
+      window.torus
+        .setProvider({ host: 'mainnet' })
+        .finally(() => {
+          const localWeb3 = window.web3
+          const instance = new localWeb3.eth.Contract(tokenAbi, "0x8fdcc30eda7e94f1c12ce0280df6cd531e8365c5")
+          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+          instance.methods.transfer(this.publicAddress, value).send({
+            from: this.publicAddress
+          }, (err, hash) => {
+            if (err) this.console(err)
+            this.console(hash)
+          })
+
+        })
     },
     async getUserInfo() {
       window.torus
