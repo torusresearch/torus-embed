@@ -11,17 +11,17 @@
       <button v-if="publicAddress === ''">Login</button>
     </form>
     <br />
-    <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
     <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
     <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
-    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v1">sign typed data v1</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v3">sign typed data v3</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v4">sign typed data v4</button>
+    <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
+    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <div id="console">
       <p></p>
     </div>
@@ -38,7 +38,7 @@ export default {
   data() {
     return {
       publicAddress: '',
-      buildEnv: 'development'
+      buildEnv: 'testing'
     }
   },
   methods: {
@@ -51,7 +51,7 @@ export default {
         await torus.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
-            twitch: false
+            reddit: false
           },
           enableLogging: true,
           network: {
@@ -262,7 +262,7 @@ export default {
         .setProvider({ host: 'mainnet' })
         .finally(() => {
           const localWeb3 = window.web3
-          const instance = new localWeb3.eth.Contract(tokenAbi, "0x8fdcc30eda7e94f1c12ce0280df6cd531e8365c5")
+          const instance = new localWeb3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f")
           const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
           instance.methods.transfer(this.publicAddress, value).send({
             from: this.publicAddress
