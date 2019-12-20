@@ -36,25 +36,32 @@ export class AppComponent {
 				selectedCurrency: 'USD'
 			})
 			.finally(console.log)
+			.catch(error => console.log('create payment tx error ', error))
 	}
 
 	async changeProvider() {
 		await window.torus
 			.setProvider({ host: 'ropsten' })
 			.finally(console.log)
+			.catch(error => console.log('change provider error ', error))
 	}
 
 	async getUserInfo() {
 		await window.torus
 			.getUserInfo()
 			.finally(console.log)
-
+			.catch(error => console.log('get userInfo error ', error))
 	}
 
-	// async sendEth() {
-	// 	console.log(window.torus.web3)
-	// 	await window.torus.web3.eth.sendTransaction({ from: this.address, to: this.address, value: window.torus.web3.toWei('0.01') })
-	// }
+	async sendEth() {
+		try {
+			window.torus.web3.eth.sendTransaction({ from: this.address, to: this.address, value: window.torus.web3.toWei('0.01') }, (err, transactionHash) => {
+				console.log(err, transactionHash)
+			})
+		} catch (error) {
+			console.log(error)
+		}
+	}
 
 	async sendDai() {
 
@@ -62,6 +69,8 @@ export class AppComponent {
 
 	async logout() {
 		await window.torus.logout().then(() => (this.address = '', this.balance = ''))
+			.catch(error => console.log('logout error ', error))
+
 	}
 
 	async signMessage() {
