@@ -291,8 +291,8 @@ class Torus {
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert">' +
-        '<h1>Attention Required</h1>' +
-        '<p>You have a pending action. Please click below to complete it</p></div>'
+        '<h1 class="torus-alert__title">Attention Required</h1>' +
+        '<p class="torus-alert__desc">You have a pending action. Please click below to complete it</p></div>'
     )
 
     const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
