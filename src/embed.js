@@ -291,8 +291,8 @@ class Torus {
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert">' +
-        '<h1 class="torus-alert__title">Attention Required</h1>' +
-        '<p class="torus-alert__desc">You have a pending action. Please click below to complete it</p></div>'
+        '<h1 class="torus-alert__title">Action Required</h1>' +
+        '<p class="torus-alert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
     )
 
     const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
@@ -390,7 +390,7 @@ class Torus {
         '/images/torus-logo-blue.svg' +
         '"></div>' +
         '<div><h1 class="login-header">Login to Torus</h1>' +
-        '<p class="login-subtitle">You are just one step away from getting your digital wallet for your cryptocurrencies</p></div>' +
+        '<p class="login-subtitle">You are just one step away from getting your digital wallet</p></div>' +
         '</div>'
     )
 
