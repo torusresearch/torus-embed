@@ -12,7 +12,6 @@ export default class Torus {
   showTorusButton(): void
   hideTorusButton(): void
   getUserInfo(message: string): Promise<UserInfo>
-  requestPermissions(scope: Scope): Promise<void>
   init(params: TorusParams): Promise<void>
   login(params: LoginParams): Promise<string[]>
   logout(): Promise<void>
