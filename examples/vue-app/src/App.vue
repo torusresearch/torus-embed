@@ -1,16 +1,27 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
+    <form @submit.prevent="login">
+      <p>Build Environment</p>
+      <select name="buildEnv" v-model="buildEnv">
+        <option value="production">Production</option>
+        <option selected value="staging">Staging</option>
+        <option value="testing">Testing</option>
+        <option value="development">Development</option>
+      </select>
+      <button v-if="publicAddress === ''">Login</button>
+    </form>
     <br />
-    <button v-if="publicAddress === ''" @click="login">Login</button>
-    <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
+    <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
+    <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
     <button v-if="publicAddress !== ''" @click="logout">Logout</button>
     <br />
     <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v1">sign typed data v1</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v3">sign typed data v3</button>
     <button v-if="publicAddress !== ''" @click="signTypedData_v4">sign typed data v4</button>
+    <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
+    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
     <div id="console">
       <p></p>
     </div>
@@ -20,13 +31,14 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
-import sigUtil from 'eth-sig-util'
+const tokenAbi = require('human-standard-token-abi')
 
 export default {
   name: 'app',
   data() {
     return {
-      publicAddress: ''
+      publicAddress: '',
+      buildEnv: 'testing'
     }
   },
   methods: {
@@ -35,19 +47,22 @@ export default {
         const torus = new Torus({
           buttonPosition: 'bottom-left'
         })
+        window.torus = torus
         await torus.init({
-          buildEnv: 'development',
+          buildEnv: this.buildEnv,
+          enabledVerifiers: {
+            reddit: false
+          },
           enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
-            // chainId: 1, // optional
-            networkName: 'kovan' // optional
+            chainId: 4
           },
           showTorusButton: true
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
-        window.torus = torus
+        window.web3 = web3
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
@@ -60,6 +75,16 @@ export default {
     },
     console(text) {
       document.querySelector('#console>p').innerHTML = text
+    },
+    createPaymentTx() {
+      window.torus
+        .initiateTopup('moonpay', {
+          selectedCurrency: 'USD'
+        })
+        .finally(console.log)
+    },
+    sendEth() {
+      window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
     },
     signMessage() {
       const self = this
@@ -75,7 +100,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign message => true')
+          self.console('sign message => true \n', result)
         }
       )
     },
@@ -103,7 +128,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v1 => true')
+          self.console('sign typed message v1 => true \n', result)
         }
       )
     },
@@ -117,8 +142,15 @@ export default {
             { name: 'chainId', type: 'uint256' },
             { name: 'verifyingContract', type: 'address' }
           ],
-          Person: [{ name: 'name', type: 'string' }, { name: 'wallet', type: 'address' }],
-          Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person' }, { name: 'contents', type: 'string' }]
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' }
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person' },
+            { name: 'contents', type: 'string' }
+          ]
         },
         primaryType: 'Mail',
         domain: {
@@ -150,7 +182,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v3 => true')
+          self.console('sign typed message v3 => true \n', result)
         }
       )
     },
@@ -163,9 +195,19 @@ export default {
             { name: 'chainId', type: 'uint256' },
             { name: 'verifyingContract', type: 'address' }
           ],
-          Person: [{ name: 'name', type: 'string' }, { name: 'wallets', type: 'address[]' }],
-          Mail: [{ name: 'from', type: 'Person' }, { name: 'to', type: 'Person[]' }, { name: 'contents', type: 'string' }],
-          Group: [{ name: 'name', type: 'string' }, { name: 'members', type: 'Person[]' }]
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallets', type: 'address[]' }
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person[]' },
+            { name: 'contents', type: 'string' }
+          ],
+          Group: [
+            { name: 'name', type: 'string' },
+            { name: 'members', type: 'Person[]' }
+          ]
         },
         domain: {
           name: 'Ether Mail',
@@ -203,21 +245,38 @@ export default {
           if (err) {
             return console.error(err)
           }
-          // console.log(result)
-          self.console('sign typed message v4 => true')
+          self.console('sign typed message v4 => true \n', result)
         }
       )
     },
     logout() {
       window.torus.logout().then(() => (this.publicAddress = ''))
     },
-    async changeProvider() {
-      await window.torus.setProvider({ host: 'ropsten' })
-      console.log('finished changing provider')
+    changeProvider() {
+      window.torus
+        .setProvider({ host: 'ropsten' })
+        .finally(console.log)
+    },
+    sendDai() {
+      window.torus
+        .setProvider({ host: 'mainnet' })
+        .finally(() => {
+          const localWeb3 = window.web3
+          const instance = new localWeb3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f")
+          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+          instance.methods.transfer(this.publicAddress, value).send({
+            from: this.publicAddress
+          }, (err, hash) => {
+            if (err) this.console(err)
+            this.console(hash)
+          })
+
+        })
     },
     async getUserInfo() {
-      const userInfo = await window.torus.getUserInfo()
-      console.log(userInfo)
+      window.torus
+        .getUserInfo()
+        .finally(console.log)
     }
   }
 }

@@ -1,19 +1,43 @@
 import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
+import Web3 from 'web3'
+import randomId from 'random-id'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
-import { runOnLoad, htmlToElement, transformEthAddress } from './embedUtils'
+import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
-import Web3 from 'web3'
+import PopupHandler from './PopupHandler'
 
+const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
+const defaultVerifiers = {
+  [GOOGLE]: true,
+  [FACEBOOK]: true,
+  [REDDIT]: true,
+  [TWITCH]: true,
+  [DISCORD]: true
+}
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-QnOqOsinR+o2RyZI3HEXDuYzjJayzvkOoyfTjr9qmejlIqUJUMMtNe8KSFLgu/NE'
+const iframeIntegrity = 'sha384-bdsrEyjfVbywVu59qoXxsjKgyLf/LEaxI/7ibbYfOMpVbZkxP8HTZI78kgzHNIl/'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
+
+let thirdPartyCookiesSupported = true
+const receiveMessage = function(evt) {
+  if (evt.data === 'torus:3PCunsupported') {
+    log.info('unsupported 3rd party cookies')
+    thirdPartyCookiesSupported = false
+    window.removeEventListener('message', receiveMessage)
+  } else if (evt.data === 'torus:3PCsupported') {
+    log.info('supported 3rd party cookies')
+    thirdPartyCookiesSupported = true
+    window.removeEventListener('message', receiveMessage)
+  }
+}
+window.addEventListener('message', receiveMessage, false)
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
@@ -22,6 +46,7 @@ class Torus {
     this.torusMenuBtn = {}
     this.torusLogin = {}
     this.torusLoadingBtn = {}
+    this.torusUrl = ''
     this.torusIframe = {}
     this.torusLoginModal = {}
     this.torusSpeedDial = {}
@@ -33,12 +58,15 @@ class Torus {
     this.torusButtonVisibility = true
     this.requestedVerifier = ''
     this.currentVerifier = ''
+    this.enabledVerifiers = {}
     this.Web3 = Web3
+    this.torusAlert = {}
   }
 
   init({
     buildEnv = 'production',
     enableLogging = false,
+    enabledVerifiers = defaultVerifiers,
     network = {
       host: 'mainnet',
       chainId: 1,
@@ -52,7 +80,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.1.2'
+          torusUrl = 'https://staging.tor.us/v0.2.11'
           logLevel = 'info'
           break
         case 'testing':
@@ -64,10 +92,12 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.2.3'
+          torusUrl = 'https://app.tor.us/v0.2.11'
           logLevel = 'error'
           break
       }
+      this.torusUrl = torusUrl
+      this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
       log.setDefaultLevel(logLevel)
       if (enableLogging) log.enableAll()
       else log.disableAll()
@@ -130,12 +160,20 @@ class Torus {
     })
   }
 
+  _checkThirdPartyCookies() {
+    if (!thirdPartyCookiesSupported) {
+      this._createAlert()
+      throw new Error('Third party cookies not supported')
+    }
+  }
+
   /**
    * Logs the user in
    */
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (this.isLoggedIn) throw new Error('User has already logged in')
+    if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
       this.requestedVerifier = ''
       return this.ethereum.enable()
@@ -165,9 +203,8 @@ class Torus {
             this.requestedVerifier = ''
             resolve()
           } else reject(new Error('Some Error Occured'))
-          statusStream.removeListener('data', statusStreamHandler)
         }
-        statusStream.on('data', statusStreamHandler)
+        handleStream(statusStream, 'data', statusStreamHandler)
       }
     })
   }
@@ -199,22 +236,83 @@ class Torus {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
     }
-    if (isElement(this.styleLink)) {
-      window.document.head.removeChild(this.styleLink)
+    if (isElement(this.styleLink) && window.document.body.contains(this.styleLink)) {
+      this.styleLink.remove()
       this.styleLink = {}
     }
-    if (isElement(this.torusWidget)) {
-      window.document.body.removeChild(this.torusWidget)
+    if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
+      this.torusWidget.remove()
       this.torusWidget = {}
       this.torusLogin = {}
       this.torusMenuBtn = {}
       this.torusLoadingBtn = {}
       this.torusLoginModal = {}
     }
-    if (isElement(this.torusIframe)) {
-      window.document.body.removeChild(this.torusIframe)
+    if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
+      this.torusIframe.remove()
       this.torusIframe = {}
     }
+    if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
+      this.torusAlert.remove()
+      this.torusAlert = {}
+    }
+  }
+
+  /**
+   * Show alert for Cookies Required
+   */
+  _createAlert() {
+    this.torusAlert = htmlToElement(
+      '<div id="torusAlert" class="torus-alert">' +
+        '<h1>Cookies Required</h1>' +
+        '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
+    )
+
+    const closeAlert = htmlToElement('<span class="torus-alert-close">x<span>')
+    this.torusAlert.appendChild(closeAlert)
+
+    const bindOnLoad = () => {
+      closeAlert.addEventListener('click', () => {
+        this.torusAlert.remove()
+      })
+    }
+
+    const attachOnLoad = () => {
+      window.document.body.appendChild(this.torusAlert)
+    }
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
+  }
+
+  /**
+   * Show alert for when popup is blocked
+   */
+  _createPopupBlockAlert(preopenInstanceId) {
+    const torusAlert = htmlToElement(
+      '<div id="torusAlert" class="torus-alert">' +
+        '<h1 class="torus-alert__title">Action Required</h1>' +
+        '<p class="torus-alert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
+    )
+
+    const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
+    torusAlert.appendChild(successAlert)
+    const bindOnLoad = () => {
+      successAlert.addEventListener('click', () => {
+        this._handleWindow(preopenInstanceId, {
+          target: '_blank',
+          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500'
+        })
+        torusAlert.remove()
+      })
+    }
+
+    const attachOnLoad = () => {
+      window.document.body.appendChild(torusAlert)
+    }
+
+    runOnLoad(attachOnLoad.bind(this))
+    runOnLoad(bindOnLoad.bind(this))
   }
 
   /**
@@ -292,7 +390,7 @@ class Torus {
         '/images/torus-logo-blue.svg' +
         '"></div>' +
         '<div><h1 class="login-header">Login to Torus</h1>' +
-        '<p class="login-subtitle">You are just one step away from getting your digital wallet for your cryptocurrencies</p></div>' +
+        '<p class="login-subtitle">You are just one step away from getting your digital wallet</p></div>' +
         '</div>'
     )
 
@@ -328,13 +426,15 @@ class Torus {
         '"></button></li>'
     )
 
-    loginList.appendChild(this.facebookLogin)
-    loginList.appendChild(this.twitchLogin)
-    loginList.appendChild(this.redditLogin)
-    loginList.appendChild(this.discordLogin)
+    if (this.enabledVerifiers[FACEBOOK]) loginList.appendChild(this.facebookLogin)
+    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
+    if (this.enabledVerifiers[REDDIT]) loginList.appendChild(this.redditLogin)
+    if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
 
-    modalContent.appendChild(this.googleLogin)
-    modalContent.appendChild(otherAccount)
+    if (this.enabledVerifiers[GOOGLE]) {
+      modalContent.appendChild(this.googleLogin)
+      modalContent.appendChild(otherAccount)
+    }
     modalContent.appendChild(loginList)
 
     const loginNote = htmlToElement(
@@ -519,6 +619,7 @@ class Torus {
 
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
+      this._checkThirdPartyCookies()
       this._showLoggingIn()
       return new Promise((resolve, reject) => {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
@@ -577,6 +678,13 @@ class Torus {
     communicationMux.setMaxListeners(20)
     this.communicationMux = communicationMux
 
+    var windowStream = communicationMux.getStream('window')
+    windowStream.on('data', chunk => {
+      if (chunk.name === 'create_window') {
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
+      }
+    })
+
     // Show torus button if wallet has been hydrated/detected
     var statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
@@ -633,40 +741,19 @@ class Torus {
         this._showLoggedOut()
         if (reject) reject(new Error('Modal has been closed'))
       }
-      const googleHandler = () => {
-        this.requestedVerifier = configuration.enums.GOOGLE
-        this.googleLogin.removeEventListener('click', googleHandler)
+      const loginHandler = verifier => {
+        this.requestedVerifier = verifier
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
-      this.googleLogin.addEventListener('click', googleHandler)
-      const facebookHandler = () => {
-        this.requestedVerifier = configuration.enums.FACEBOOK
-        this.facebookLogin.removeEventListener('click', facebookHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.facebookLogin.addEventListener('click', facebookHandler)
-      const twitchHandler = () => {
-        this.requestedVerifier = configuration.enums.TWITCH
-        this.twitchLogin.removeEventListener('click', twitchHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.twitchLogin.addEventListener('click', twitchHandler)
-      const redditHandler = () => {
-        this.requestedVerifier = configuration.enums.REDDIT
-        this.redditLogin.removeEventListener('click', redditHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.redditLogin.addEventListener('click', redditHandler)
-      const discordHandler = () => {
-        this.requestedVerifier = configuration.enums.DISCORD
-        this.discordLogin.removeEventListener('click', discordHandler)
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      this.discordLogin.addEventListener('click', discordHandler)
+      Object.keys(this.enabledVerifiers).forEach(verifier => {
+        if (this.enabledVerifiers[verifier]) {
+          handleEvent(this[`${verifier}Login`], 'click', loginHandler, [verifier])
+        }
+      })
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
-      var handler = function(data) {
+      var loginHandler = function(data) {
         var { err, selectedAddress } = data
         if (err) {
           log.error(err)
@@ -677,110 +764,97 @@ class Torus {
           if (resolve) resolve([transformEthAddress(selectedAddress)])
           self._showLoggedIn()
         }
-        oauthStream.removeListener('data', handler)
       }
-      oauthStream.on('data', handler)
-      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier } })
+      handleStream(oauthStream, 'data', loginHandler)
+      const preopenInstanceId = randomId()
+      this._handleWindow(preopenInstanceId)
+      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
     }
   }
 
   setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
     return new Promise((resolve, reject) => {
-      const providerChangeStream = this.communicationMux.getStream('show_provider_change')
-      const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
-      const handler = function(ev) {
-        var { err, success } = ev.data
+      const providerChangeStream = this.communicationMux.getStream('provider_change')
+      const handler = chunk => {
+        var { err, success } = chunk.data
+        log.info(chunk)
         if (err) {
-          log.error(err)
           reject(err)
         } else if (success) {
           resolve()
         } else reject(new Error('some error occured'))
-        providerChangeSuccess.removeListener('data', handler)
       }
-      providerChangeSuccess.on('data', handler)
-      if (configuration.networkList.includes(host))
-        providerChangeStream.write({
-          name: 'show_provider_change',
-          data: {
-            network: {
-              host,
-              chainId,
-              networkName
-            },
-            override: false
-          }
-        })
-      else
-        providerChangeStream.write({
-          name: 'show_provider_change',
-          data: {
-            network: {
-              host,
-              chainId,
-              networkName
-            },
-            type: 'rpc'
+      handleStream(providerChangeStream, 'data', handler)
+      const preopenInstanceId = randomId()
+      this._handleWindow(preopenInstanceId, {
+        target: '_blank',
+        features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
+      })
+      providerChangeStream.write({
+        name: 'show_provider_change',
+        data: {
+          network: {
+            host,
+            chainId,
+            networkName
           },
+          type: configuration.networkList.includes(host) ? undefined : 'rpc',
+          preopenInstanceId: preopenInstanceId,
           override: false
-        })
+        }
+      })
     })
   }
 
   _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
-        const providerChangeStream = this.communicationMux.getStream('show_provider_change')
-        const providerChangeSuccess = this.communicationMux.getStream('provider_change_status')
+        const providerChangeStream = this.communicationMux.getStream('provider_change')
         const handler = function(ev) {
+          log.info(ev)
           var { err, success } = ev.data
           if (err) {
-            log.error(err)
             reject(err)
           } else if (success) {
             resolve()
           } else reject(new Error('some error occured'))
-          providerChangeSuccess.removeListener('data', handler)
         }
-        providerChangeSuccess.on('data', handler)
-        if (configuration.networkList.includes(host))
-          providerChangeStream.write({
-            name: 'show_provider_change',
-            data: {
-              network: {
-                host,
-                chainId,
-                networkName
-              },
-              override: true
-            }
-          })
-        else
-          providerChangeStream.write({
-            name: 'show_provider_change',
-            data: {
-              network: {
-                host,
-                chainId,
-                networkName
-              },
-              type: 'rpc',
-              override: true
-            }
-          })
+        handleStream(providerChangeStream, 'data', handler)
+        providerChangeStream.write({
+          name: 'show_provider_change',
+          data: {
+            network: {
+              host,
+              chainId,
+              networkName
+            },
+            type: configuration.networkList.includes(host) ? undefined : 'rpc',
+            override: true
+          }
+        })
       } else reject(new Error('Already initialized'))
     })
   }
 
   /**
    * Shows the wallet popup
-   * @param {boolean} calledFromEmbed if called from dapp context
    * @param {string} path the route to open
    */
   showWallet(path) {
     var showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
     showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
+
+    const showWalletHandler = chunk => {
+      if (chunk.name === 'show_wallet_instance') {
+        const { instanceId } = chunk.data
+        const finalUrl = `${this.torusUrl}/wallet${finalPath}?integrity=true&instanceId=${instanceId}`
+        const walletWindow = new PopupHandler({ url: finalUrl })
+        walletWindow.open()
+      }
+    }
+
+    handleStream(showWalletStream, 'data', showWalletHandler)
   }
 
   _toggleSpeedDial() {
@@ -853,19 +927,97 @@ class Torus {
   getUserInfo(message) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
-        const userInfoStream = this.communicationMux.getStream('user_info')
-        userInfoStream.write({ name: 'user_info_request', data: { message: message } })
-        const userInfoHandler = chunk => {
-          if (chunk.name === 'user_info_response') {
-            if (chunk.data.approved) {
-              resolve(chunk.data.payload)
-            } else {
+        const userInfoAccessStream = this.communicationMux.getStream('user_info_access')
+        userInfoAccessStream.write({ name: 'user_info_access_request' })
+        const userInfoAccessHandler = chunk => {
+          const {
+            name,
+            data: { approved, payload, rejected, newRequest }
+          } = chunk
+          if (name === 'user_info_access_response') {
+            if (approved) {
+              resolve(payload)
+            } else if (rejected) {
               reject(new Error('User rejected the request'))
+            } else if (newRequest) {
+              const userInfoStream = this.communicationMux.getStream('user_info')
+              const userInfoHandler = chunk => {
+                if (chunk.name === 'user_info_response') {
+                  if (chunk.data.approved) {
+                    resolve(chunk.data.payload)
+                  } else {
+                    reject(new Error('User rejected the request'))
+                  }
+                }
+              }
+              handleStream(userInfoStream, 'data', userInfoHandler)
+              const preopenInstanceId = randomId()
+              this._handleWindow(preopenInstanceId, {
+                target: '_blank',
+                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
+              })
+              userInfoStream.write({ name: 'user_info_request', data: { message: message, preopenInstanceId: preopenInstanceId } })
             }
           }
-          userInfoStream.removeListener('data', userInfoHandler)
         }
-        userInfoStream.on('data', userInfoHandler)
+        handleStream(userInfoAccessStream, 'data', userInfoAccessHandler)
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
+
+  _handleWindow(preopenInstanceId, { target, features } = {}) {
+    const windowStream = this.communicationMux.getStream('window')
+    const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
+    const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
+    handledWindow.open()
+    windowStream.write({
+      name: 'opened_window',
+      data: {
+        preopenInstanceId: preopenInstanceId
+      }
+    })
+    const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
+      if (receivedId === preopenInstanceId && close) {
+        handledWindow.close()
+        windowStream.removeListener('data', closeHandler)
+      }
+    }
+    windowStream.on('data', closeHandler)
+    handledWindow.once('close', () => {
+      windowStream.write({
+        data: {
+          preopenInstanceId: preopenInstanceId,
+          closed: true
+        }
+      })
+    })
+  }
+
+  /**
+   * Exposes the topup api of torus
+   * Allows the dapp to trigger a payment method directly
+   * If no params are provided, it defaults to { fiatValue = MIN_FOR_PROVIDER; selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
+   * @param {Enum} provider Supported options are moonpay, wyre and coindirect
+   * @param {PaymentParams} params PaymentParams is { fiatValue?: Number; selectedCurrency?: string; selectedCryptoCurrency?: string; }
+   * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
+   */
+  initiateTopup(provider, params) {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const topupStream = this.communicationMux.getStream('topup')
+        const topupHandler = chunk => {
+          if (chunk.name === 'topup_response') {
+            if (chunk.data.success) {
+              resolve(chunk.data.success)
+            } else {
+              reject(new Error(chunk.data.error))
+            }
+          }
+        }
+        handleStream(topupStream, 'data', topupHandler)
+        const preopenInstanceId = randomId()
+        this._handleWindow(preopenInstanceId)
+        topupStream.write({ name: 'topup_request', data: { provider: provider, params: params, preopenInstanceId: preopenInstanceId } })
       } else reject(new Error('User has not logged in yet'))
     })
   }
