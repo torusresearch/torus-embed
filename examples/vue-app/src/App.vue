@@ -22,6 +22,7 @@
     <button v-if="publicAddress !== ''" @click="signTypedData_v4">sign typed data v4</button>
     <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
     <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
+    <button v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
     <div id="console">
       <p></p>
     </div>
@@ -277,6 +278,9 @@ export default {
       window.torus
         .getUserInfo()
         .finally(console.log)
+    },
+    getPublicAddress() {
+      window.torus.getPublicAddress({ verifier: "google", verifierId: "chai@tor.us" }).then(this.console)
     }
   }
 }
