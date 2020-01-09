@@ -3,12 +3,15 @@ import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 import randomId from 'random-id'
+import NodeDetailManager from '@toruslabs/fetch-node-details'
+import TorusJs from '@toruslabs/torus.js'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
-import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
+
+const torusJs = new TorusJs()
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -883,40 +886,14 @@ class Torus {
    */
   getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
-    const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
-    const node = configuration.torusNodeEndpoints[randomNumber]
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
-      post(
-        node,
-        generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: verifier,
-          verifier_id: verifierId.toString().toLowerCase()
+      NodeDetailManager.getNodeDetails()
+        .then(nodeDetails => {
+          return torusJs.getPubKeyAsync(nodeDetails.torusNodeEndpoints, { verifier: verifier, verifierId: verifierId })
         })
-      )
-        .catch(err => log.error(err))
-        .then(lookupShare => {
-          if (lookupShare.error) {
-            return post(
-              node,
-              generateJsonRPCObject('KeyAssign', {
-                verifier: verifier,
-                verifier_id: verifierId.toString().toLowerCase()
-              })
-            )
-          } else if (lookupShare.result) {
-            return getLookupPromise(lookupShare)
-          }
-        })
-        .catch(err => log.error(err))
-        .then(lookupShare => {
-          var ethAddress = lookupShare.result.keys[0].address
-          resolve(ethAddress)
-        })
-        .catch(err => {
-          log.error(err)
-          reject(err)
-        })
+        .then(pubAddr => resolve(pubAddr))
+        .catch(err => reject(err))
     })
   }
 

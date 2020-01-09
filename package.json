@@ -2,6 +2,8 @@
   "name": "@toruslabs/torus-embed",
   "version": "0.2.11",
   "description": "Embed script for Torus",
+  "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "test": "test"
   },
@@ -24,6 +26,8 @@
     "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
+    "@toruslabs/fetch-node-details": "^1.0.0",
+    "@toruslabs/torus.js": "^1.0.1",
     "json-rpc-engine": "^5.1.5",
     "json-rpc-middleware-stream": "^2.1.1",
     "loglevel": "^1.6.6",
