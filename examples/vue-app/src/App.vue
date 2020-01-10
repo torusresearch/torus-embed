@@ -23,7 +23,7 @@
       <button @click="signTypedData_v4">sign typed data v4</button>
       <button @click="changeProvider">Change Provider</button>
       <button @click="sendDai">Send DAI</button>
-      <div>
+      <div :style="{marginTop: '20px'}">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
           <option selected value="google">Google</option>
           <option value="reddit">Reddit</option>
@@ -31,7 +31,7 @@
         </select>
         <input :style="{marginLeft: '20px'}" v-model="verifierId" :placeholder="placeholder" />
       </div>
-      <button v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
+      <button :style="{marginTop: '20px'}" v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
     </div>
     <div id="console">
       <p></p>
