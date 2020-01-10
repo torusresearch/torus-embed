@@ -51,13 +51,13 @@ export default {
       publicAddress: '',
       verifierId: '',
       selectedVerifier: 'google',
-      placeholder: '',
+      placeholder: 'Enter google email',
       buildEnv: 'testing'
     }
   },
   methods: {
-    onSelectedVerifierChanged(val) {
-      this.selectedVerifier = val
+    onSelectedVerifierChanged(e) {
+      this.selectedVerifier = e.target.value
       switch (this.selectedVerifier) {
         case 'google':
           this.placeholder = 'Enter google email'
