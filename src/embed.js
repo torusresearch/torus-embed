@@ -380,63 +380,60 @@ class Torus {
     this.torusWidget.prepend(this.torusSpeedDial)
 
     // Multiple login modal
-    this.torusLoginModal = htmlToElement('<div id="login-modal" class="torus-login-modal"></div>')
+    this.torusLoginModal = htmlToElement('<div id="torus-login-modal"></div>')
     this.torusLoginModal.style.display = 'none'
     const modalContainer = htmlToElement(
-      '<div class="torus-login-modal__modal-container">' +
-        '<div class="torus-login-modal__close-container">' +
-        '<span id="close" class="torus-login-modal__close">&times;</span>' +
+      '<div id="torus-login-modal__modal-container">' +
+        '<div id="torus-login-modal__close-container">' +
+        '<span id="torus-login-modal__close">&times;</span>' +
         '</div>' +
         '</div>'
     )
 
     const modalContent = htmlToElement(
-      '<div class="torus-login-modal__modal-content">' +
-        '<div class="torus-login-modal__header-container"><img src="' +
+      '<div id="torus-login-modal__modal-content">' +
+        '<div id="torus-login-modal__header-container"><img src="' +
         torusUrl +
-        '/images/torus-logo-white.svg' +
-        '"><div class="torus-login-modal__login-header">Login</div></div>' +
+        '/images/torus-logo-blue.svg' +
+        '"><div id="torus-login-modal__login-header">Login</div></div>' +
         '</div>'
     )
 
     const formContainer = htmlToElement(
-      '<div class="torus-login-modal__form-container">' +
-        '<p class="torus-login-modal__login-subtitle">You are just one step away from your digital wallet.</p>' +
+      '<div id="torus-login-modal__form-container">' +
+        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet.</p>' +
         '</div>'
     )
 
     this.googleLogin = htmlToElement(
-      '<button id="login-google" class="torus-login-modal__login-google"><img src="' +
-        torusUrl +
-        '/img/icons/google.svg' +
-        '">Sign in with Google</button>'
+      '<button id="torus-login-modal__login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign in with Google</button>'
     )
 
     // List for other logins
-    const loginList = htmlToElement('<ul id="login-list" class="torus-login-modal__login-list"></ul>')
+    const loginList = htmlToElement('<ul id="torus-login-modal__login-list"></ul>')
     this.facebookLogin = htmlToElement(
       '<li>' +
-        '<button id="login-facebook" class="torus-login-modal__login-btn torus-login-modal__login-btn--facebook" title="Login with Facebook">' +
+        '<button id="torus-login-modal__login-btn--facebook" title="Login with Facebook">' +
         '<img src="' +
         torusUrl +
         '/img/icons/facebook.svg' +
         '"></button></li>'
     )
     this.twitchLogin = htmlToElement(
-      '<li><button id="login-twitch" class="torus-login-modal__login-btn torus-login-modal__login-btn--twitch" title="Login with Twitch"><img src="' +
+      '<li><button id="torus-login-modal__login-btn--twitch" title="Login with Twitch"><img src="' +
         torusUrl +
         '/img/icons/twitch.svg' +
         '"></button></li>'
     )
     this.redditLogin = htmlToElement(
-      '<li><button id="login-reddit" class="torus-login-modal__login-btn torus-login-modal__login-btn--reddit" title="Login with Reddit"><img src="' +
+      '<li><button id="torus-login-modal__login-btn--reddit" title="Login with Reddit"><img src="' +
         torusUrl +
         '/img/icons/reddit.svg' +
         '"></button></li>'
     )
     this.discordLogin = htmlToElement(
       '<li>' +
-        '<button id="login-discord" class="torus-login-modal__login-btn torus-login-modal__login-btn--discord" title="Login with Discord">' +
+        '<button id="torus-login-modal__login-btn torus-login-modal__login-btn--discord" title="Login with Discord">' +
         '<img src="' +
         torusUrl +
         '/img/icons/discord.svg' +
@@ -454,7 +451,7 @@ class Torus {
     formContainer.appendChild(loginList)
 
     const loginNote = htmlToElement(
-      '<div class="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
+      '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
         '<a href="https://docs.tor.us/legal/terms-and-conditions" target="_blank">Terms and Conditions</a></div>'
     )
 
@@ -510,7 +507,7 @@ class Torus {
       })
 
       // Login Modal Listeners
-      modalContainer.querySelector('#close').addEventListener('click', () => {
+      modalContainer.querySelector('#torus-login-modal__close').addEventListener('click', () => {
         this.torusLoginModal.style.display = 'none'
         if (this.modalCloseHandler) this.modalCloseHandler()
         delete this.modalCloseHandler
