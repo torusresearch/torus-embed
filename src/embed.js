@@ -905,7 +905,7 @@ class Torus {
       if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
       NodeDetailManager.getNodeDetails()
         .then(nodeDetails => {
-          return torusJs.getPubKeyAsync(nodeDetails.torusNodeEndpoints, { verifier: verifier, verifierId: verifierId })
+          return torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, { verifier: verifier, verifierId: verifierId })
         })
         .then(pubAddr => resolve(pubAddr))
         .catch(err => reject(err))
