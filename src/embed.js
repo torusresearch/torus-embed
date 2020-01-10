@@ -271,7 +271,7 @@ class Torus {
         '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
     )
 
-    const closeAlert = htmlToElement('<span class="torus-alert-close">x<span>')
+    const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
     this.torusAlert.appendChild(closeAlert)
 
     const bindOnLoad = () => {
@@ -293,12 +293,12 @@ class Torus {
    */
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
-      '<div id="torusAlert" class="torus-alert">' +
-        '<h1 class="torus-alert__title">Action Required</h1>' +
-        '<p class="torus-alert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
+      '<div id="torusAlert">' +
+        '<h1 id="torusAlert__title">Action Required</h1>' +
+        '<p id="torusAlert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
     )
 
-    const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
+    const successAlert = htmlToElement('<div><button id="torusAlert__btn">Confirm</button></div>')
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
@@ -334,7 +334,11 @@ class Torus {
 
     // Loading spinner
     const spinner = htmlToElement(
-      '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
+      '<div id="torusSpinner">' +
+        '<div class="torusSpinner__beat beat-odd"></div>' +
+        '<div class="torusSpinner__beat beat-even"></div>' +
+        '<div class="torusSpinner__beat beat-odd"></div>' +
+        '</div>'
     )
     this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
     if (!this.torusButtonVisibility) {
@@ -358,14 +362,14 @@ class Torus {
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list" style="transition-delay: 0.05s">')
+    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s">')
     this.torusSpeedDial.style.opacity = '0'
     const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
-    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
-    const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
+    const tooltipNote = htmlToElement('<div class="torus-tooltip-text torus-tooltip-note">Copy public address to clipboard</div>')
+    const tooltipCopied = htmlToElement('<div class="torus-tooltip-text torus-tooltip-copied">Copied!</div>')
     this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
-    const keyContainer = htmlToElement('<li class="tooltip"></li>')
+    const keyContainer = htmlToElement('<li class="torus-tooltip"></li>')
 
     keyContainer.appendChild(this.keyBtn)
     keyContainer.appendChild(tooltipNote)
@@ -433,7 +437,7 @@ class Torus {
     )
     this.discordLogin = htmlToElement(
       '<li>' +
-        '<button id="torus-login-modal__login-btn torus-login-modal__login-btn--discord" title="Login with Discord">' +
+        '<button id="torus-login-modal__login-btn--discord" title="Login with Discord">' +
         '<img src="' +
         torusUrl +
         '/img/icons/discord.svg' +
