@@ -405,7 +405,7 @@ class Torus {
 
     const formContainer = htmlToElement(
       '<div id="torus-login-modal__form-container">' +
-        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet.</p>' +
+        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet</p>' +
         '</div>'
     )
 
