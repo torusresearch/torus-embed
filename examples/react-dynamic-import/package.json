@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@toruslabs/torus-embed": "^0.2.9",
+    "human-standard-token-abi": "^2.0.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0",
