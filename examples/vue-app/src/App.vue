@@ -31,7 +31,12 @@
         </select>
         <input :style="{marginLeft: '20px'}" v-model="verifierId" :placeholder="placeholder" />
       </div>
-      <button :style="{marginTop: '20px'}" v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
+      <button
+        :disabled="!verifierId"
+        :style="{marginTop: '20px'}"
+        v-if="publicAddress !== ''"
+        @click="getPublicAddress"
+      >Get Public Address</button>
     </div>
     <div id="console">
       <p></p>
@@ -75,21 +80,21 @@ export default {
     async login() {
       try {
         const torus = new Torus({
-        buttonPosition: 'bottom-left'
-      })
-      window.torus = torus
-      await torus.init({
-        buildEnv: this.buildEnv,
-        enabledVerifiers: {
-          reddit: false
-        },
-        enableLogging: false,
-        network: {
-          host: 'rinkeby', // mandatory
-          chainId: 4
-        },
-        showTorusButton: true
-      })
+          buttonPosition: 'bottom-left'
+        })
+        window.torus = torus
+        await torus.init({
+          buildEnv: this.buildEnv,
+          enabledVerifiers: {
+            reddit: false
+          },
+          enableLogging: false,
+          network: {
+            host: 'rinkeby', // mandatory
+            chainId: 4
+          },
+          showTorusButton: true
+        })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
         window.web3 = web3

@@ -4,26 +4,22 @@ import web3Obj from './helper'
 const tokenAbi = require('human-standard-token-abi')
 
 class App extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      account: null,
-      balance: '',
-      selectedVerifier: 'google',
-      placeholder: 'Enter google email',
-      verifierId: null
-    }
-    this.onSelectedVerifierChanged = this.onSelectedVerifierChanged.bind(this)
-    this.getPublicAddress = this.getPublicAddress.bind(this)
+  state = {
+    account: null,
+    balance: '',
+    selectedVerifier: 'google',
+    placeholder: 'Enter google email',
+    verifierId: null,
+    buildEnv: 'testing'
   }
 
   componentDidMount() {
-    // const isTorus = sessionStorage.getItem('pageUsingTorus')
-    // if (isTorus) {
-    //   web3Obj.initialize().then(() => {
-    //     this.setStateInfo()
-    //   })
-    // }
+    const isTorus = sessionStorage.getItem('pageUsingTorus')
+    if (isTorus) {
+      web3Obj.initialize().then(() => {
+        this.setStateInfo()
+      })
+    }
   }
 
   setStateInfo = () => {
@@ -35,7 +31,8 @@ class App extends React.Component {
     })
   }
 
-  enableTorus = async () => {
+  enableTorus = async e => {
+    e.preventDefault()
     try {
       await web3Obj.initialize()
       this.setStateInfo()
@@ -45,38 +42,38 @@ class App extends React.Component {
   }
 
   changeProvider = async () => {
-    await window.torus.setProvider({ host: 'ropsten' })
-    console.log('finished changing provider')
+    await web3Obj.torus.setProvider({ host: 'ropsten' })
+    this.console('finished changing provider')
   }
 
   getUserInfo = async () => {
-    const userInfo = await window.torus.getUserInfo()
-    console.log(userInfo)
+    const userInfo = await web3Obj.torus.getUserInfo()
+    this.console(userInfo)
   }
 
   logout = () => {
-    window.torus.logout().then(() => this.setState({ account: '', balance: 0 }))
+    web3Obj.torus.cleanUp().then(() => this.setState({ account: '', balance: 0 }))
   }
 
-  signMessage() {
+  signMessage = () => {
     // hex message
     const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
-    window.torus.web3.currentProvider.send(
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_sign',
-        params: [window.torus.web3.eth.accounts[0], message],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], message],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
-      function(err, result) {
+      (err, result) => {
         if (err) {
           return console.error(err)
         }
-        console.log('sign message => true \n', result)
+        this.console('sign message => true \n', result)
       }
     )
   }
 
-  signTypedData_v1() {
+  signTypedData_v1 = () => {
     const typedData = [
       {
         type: 'string',
@@ -89,22 +86,22 @@ class App extends React.Component {
         value: 10
       }
     ]
-    window.torus.web3.currentProvider.send(
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData',
-        params: [typedData, window.torus.web3.eth.accounts[0]],
-        from: window.torus.web3.eth.accounts[0]
+        params: [typedData, web3Obj.torus.web3.eth.accounts[0]],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
-      function(err, result) {
+      (err, result) => {
         if (err) {
           return console.error(err)
         }
-        console.log('sign typed message v1 => true \n', result)
+        this.console('sign typed message v1 => true \n', result)
       }
     )
   }
 
-  signTypedData_v3() {
+  signTypedData_v3 = () => {
     const typedData = {
       types: {
         EIP712Domain: [
@@ -142,19 +139,23 @@ class App extends React.Component {
         contents: 'Hello, Bob!'
       }
     }
-    window.torus.web3.currentProvider.send(
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v3',
-        params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
-      function(err, result) {
+      (err, result) => {
         if (err) {
           return console.error(err)
         }
-        console.log('sign typed message v3 => true \n', result)
+        this.console('sign typed message v3 => true \n', result)
       }
     )
+  }
+
+  console = text => {
+    document.querySelector('#console>p').innerHTML = typeof text === 'object' ? JSON.stringify(text) : text
   }
 
   signTypedData_v4() {
@@ -205,29 +206,34 @@ class App extends React.Component {
         contents: 'Hello, Bob!'
       }
     }
-    window.torus.web3.currentProvider.send(
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v4',
-        params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
-      function(err, result) {
+      (err, result) => {
         if (err) {
           return console.error(err)
         }
-        console.log('sign typed message v4 => true \n', result)
+        this.console('sign typed message v4 => true \n', result)
       }
     )
   }
 
-  sendDai() {
-    window.torus.setProvider({ host: 'mainnet' }).finally(() => {
-      const localWeb3 = window.web3
+  sendEth = () => {
+    const { account } = this.state
+    web3Obj.web3.eth.sendTransaction({ from: account, to: account, value: web3Obj.web3.utils.toWei('0.01') })
+  }
+
+  sendDai = () => {
+    web3Obj.torus.setProvider({ host: 'mainnet' }).finally(() => {
+      const localWeb3 = web3Obj.web3
       const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
       const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-      instance.methods.transfer(this.publicAddress, value).send(
+      instance.methods.transfer(this.state.account, value).send(
         {
-          from: this.publicAddress
+          from: this.state.account
         },
         (err, hash) => {
           if (err) this.console(err)
@@ -237,12 +243,19 @@ class App extends React.Component {
     })
   }
 
-  getPublicAddress() {
-    console.log(this.state.selectedVerifier, this.state.verifierId)
-    window.torus.getPublicAddress({ verifier: this.state.selectedVerifier, verifierId: this.state.verifierId }).then(this.console)
+  createPaymentTx = () => {
+    web3Obj.torus
+      .initiateTopup('moonpay', {
+        selectedCurrency: 'USD'
+      })
+      .finally(this.console)
   }
 
-  onSelectedVerifierChanged(event) {
+  getPublicAddress = () => {
+    web3Obj.torus.getPublicAddress({ verifier: this.state.selectedVerifier, verifierId: this.state.verifierId }).then(this.console)
+  }
+
+  onSelectedVerifierChanged = event => {
     let placeholder = 'Enter google email'
     switch (event.target.value) {
       case 'google':
@@ -265,30 +278,38 @@ class App extends React.Component {
   }
 
   render() {
-    let { account } = this.state
+    let { account, buildEnv, selectedVerifier, verifierId, placeholder, balance } = this.state
     return (
       <div className="App">
-        <div>
-          <button onClick={this.enableTorus}>Start using Torus</button>
-        </div>
-        <div>
-          {/* <button onClick={this.enableTorus}>Enable Torus</button> */}
-          <div>Account: {this.state.account}</div>
-          <div>Balance: {this.state.balance}</div>
-        </div>
+        {!account && (
+          <form onSubmit={this.enableTorus}>
+            <p>Build Environment</p>
+            <select name="buildEnv" value={buildEnv} onChange={e => this.setState({ buildEnv: e.target.value })}>
+              <option value="production">Production</option>
+              <option value="staging">Staging</option>
+              <option value="testing">Testing</option>
+              <option value="development">Development</option>
+            </select>
+            <button>Login</button>
+          </form>
+        )}
         {account !== null && (
           <div>
-            <button onClick={this.changeProvider}>Change Provider</button>
+            <div>Account: {account}</div>
+            <div>Balance: {balance}</div>
             <button onClick={this.getUserInfo}>Get User Info</button>
+            <button onClick={this.createPaymentTx}>Create Payment Tx</button>
+            <button onClick={this.sendEth}>Send Eth</button>
             <button onClick={this.logout}>Logout</button>
             <br />
             <button onClick={this.signMessage}>sign_eth</button>
             <button onClick={this.signTypedData_v1}>sign typed data v1</button>
             <button onClick={this.signTypedData_v3}>sign typed data v3</button>
             <button onClick={this.signTypedData_v4}>sign typed data v4</button>
+            <button onClick={this.changeProvider}>Change Provider</button>
             <button onClick={this.sendDai}>Send DAI</button>
             <div style={{ marginTop: '20px' }}>
-              <select name="verifier" value="selectedVerifier" onChange={this.onSelectedVerifierChanged} value={this.state.selectedVerifier}>
+              <select name="verifier" onChange={this.onSelectedVerifierChanged} value={selectedVerifier}>
                 <option defaultValue value="google">
                   Google
                 </option>
@@ -296,16 +317,20 @@ class App extends React.Component {
                 <option value="discord">Discord</option>
               </select>
               <input
+                type="email"
                 style={{ marginLeft: '20px' }}
                 onChange={e => this.setState({ verifierId: e.target.value })}
-                placeholder={this.state.placeholder}
+                placeholder={placeholder}
               />
             </div>
-            <button disabled={this.state.verifierId === null} style={{ marginTop: '20px' }} onClick={this.getPublicAddress}>
+            <button disabled={!verifierId} style={{ marginTop: '20px' }} onClick={this.getPublicAddress}>
               Get Public Address
             </button>
           </div>
         )}
+        <div id="console">
+          <p></p>
+        </div>
       </div>
     )
   }
