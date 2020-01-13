@@ -3,12 +3,15 @@ import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 import randomId from 'random-id'
+import NodeDetailManager from '@toruslabs/fetch-node-details'
+import TorusJs from '@toruslabs/torus.js'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
-import { post, generateJsonRPCObject, getLookupPromise } from './utils/httpHelpers'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
+
+const torusJs = new TorusJs()
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -20,7 +23,7 @@ const defaultVerifiers = {
 }
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-ui+H377gfHVy+vW34b9ZAbw4iipa/tNSAhxM8RGPBkEImnASxCC1BPrOJ8sKbdox'
+const iframeIntegrity = 'sha384-bdsrEyjfVbywVu59qoXxsjKgyLf/LEaxI/7ibbYfOMpVbZkxP8HTZI78kgzHNIl/'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -80,7 +83,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.2.10'
+          torusUrl = 'https://staging.tor.us/v0.2.11'
           logLevel = 'info'
           break
         case 'testing':
@@ -92,7 +95,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.2.10'
+          torusUrl = 'https://app.tor.us/v0.2.11'
           logLevel = 'error'
           break
       }
@@ -268,7 +271,7 @@ class Torus {
         '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
     )
 
-    const closeAlert = htmlToElement('<span class="torus-alert-close">x<span>')
+    const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
     this.torusAlert.appendChild(closeAlert)
 
     const bindOnLoad = () => {
@@ -290,12 +293,12 @@ class Torus {
    */
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
-      '<div id="torusAlert" class="torus-alert">' +
-        '<h1>Attention Required</h1>' +
-        '<p>You have a pending action. Please click below to complete it</p></div>'
+      '<div id="torusAlert">' +
+        '<h1 id="torusAlert__title">Action Required</h1>' +
+        '<p id="torusAlert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
     )
 
-    const successAlert = htmlToElement('<div><button class="torus-alert-btn">Confirm</button></div>')
+    const successAlert = htmlToElement('<div><button id="torusAlert__btn">Confirm</button></div>')
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
@@ -331,7 +334,11 @@ class Torus {
 
     // Loading spinner
     const spinner = htmlToElement(
-      '<div class="spinner"><div class="beat beat-odd"></div><div class="beat beat-even"></div><div class="beat beat-odd"></div></div>'
+      '<div id="torusSpinner">' +
+        '<div class="torusSpinner__beat beat-odd"></div>' +
+        '<div class="torusSpinner__beat beat-even"></div>' +
+        '<div class="torusSpinner__beat beat-odd"></div>' +
+        '</div>'
     )
     this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
     if (!this.torusButtonVisibility) {
@@ -355,14 +362,14 @@ class Torus {
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul class="speed-dial-list" style="transition-delay: 0.05s">')
+    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s">')
     this.torusSpeedDial.style.opacity = '0'
     const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
-    const tooltipNote = htmlToElement('<div class="tooltip-text tooltip-note">Copy public address to clipboard</div>')
-    const tooltipCopied = htmlToElement('<div class="tooltip-text tooltip-copied">Copied!</div>')
+    const tooltipNote = htmlToElement('<div class="torus-tooltip-text torus-tooltip-note">Copy public address to clipboard</div>')
+    const tooltipCopied = htmlToElement('<div class="torus-tooltip-text torus-tooltip-copied">Copied!</div>')
     this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
-    const keyContainer = htmlToElement('<li class="tooltip"></li>')
+    const keyContainer = htmlToElement('<li class="torus-tooltip"></li>')
 
     keyContainer.appendChild(this.keyBtn)
     keyContainer.appendChild(tooltipNote)
@@ -377,72 +384,83 @@ class Torus {
     this.torusWidget.prepend(this.torusSpeedDial)
 
     // Multiple login modal
-    this.torusLoginModal = htmlToElement('<div id="login-modal" class="login-modal"></div>')
+    this.torusLoginModal = htmlToElement('<div id="torus-login-modal"></div>')
     this.torusLoginModal.style.display = 'none'
     const modalContainer = htmlToElement(
-      '<div class="modal-container"><div class="close-container"><span id="close" class="close">&times;</span></div></div>'
+      '<div id="torus-login-modal__modal-container">' +
+        '<div id="torus-login-modal__close-container">' +
+        '<span id="torus-login-modal__close">&times;</span>' +
+        '</div>' +
+        '</div>'
     )
 
     const modalContent = htmlToElement(
-      '<div class="modal-content">' +
-        '<div class="logo-container"><img src="' +
+      '<div id="torus-login-modal__modal-content">' +
+        '<div id="torus-login-modal__header-container"><img src="' +
         torusUrl +
         '/images/torus-logo-blue.svg' +
-        '"></div>' +
-        '<div><h1 class="login-header">Login to Torus</h1>' +
-        '<p class="login-subtitle">You are just one step away from getting your digital wallet for your cryptocurrencies</p></div>' +
+        '"><div id="torus-login-modal__login-header">Login</div></div>' +
+        '</div>'
+    )
+
+    const formContainer = htmlToElement(
+      '<div id="torus-login-modal__form-container">' +
+        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet</p>' +
         '</div>'
     )
 
     this.googleLogin = htmlToElement(
-      '<button id="login-google" class="login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign in with Google</button>'
+      '<button id="torus-login-modal__login-google"><img src="' + torusUrl + '/img/icons/google.svg' + '">Sign in with Google</button>'
     )
-    const otherAccount = htmlToElement('<div>Or, use another account:</div>')
 
     // List for other logins
-    const loginList = htmlToElement('<ul id="login-list" class="login-list"></ul>')
+    const loginList = htmlToElement('<ul id="torus-login-modal__login-list"></ul>')
     this.facebookLogin = htmlToElement(
-      '<li><button id="login-facebook" class="login-btn login-btn--facebook" title="Login with Facebook"><img src="' +
+      '<li>' +
+        '<button id="torus-login-modal__login-btn--facebook" title="Login with Facebook">' +
+        '<img src="' +
         torusUrl +
         '/img/icons/facebook.svg' +
         '"></button></li>'
     )
     this.twitchLogin = htmlToElement(
-      '<li><button id="login-twitch" class="login-btn login-btn--twitch" title="Login with Twitch"><img src="' +
+      '<li><button id="torus-login-modal__login-btn--twitch" title="Login with Twitch"><img src="' +
         torusUrl +
         '/img/icons/twitch.svg' +
         '"></button></li>'
     )
     this.redditLogin = htmlToElement(
-      '<li><button id="login-reddit" class="login-btn login-btn--reddit" title="Login with Reddit"><img src="' +
+      '<li><button id="torus-login-modal__login-btn--reddit" title="Login with Reddit"><img src="' +
         torusUrl +
         '/img/icons/reddit.svg' +
         '"></button></li>'
     )
     this.discordLogin = htmlToElement(
-      '<li><button id="login-discord" class="login-btn login-btn--discord" title="Login with Discord"><img src="' +
+      '<li>' +
+        '<button id="torus-login-modal__login-btn--discord" title="Login with Discord">' +
+        '<img src="' +
         torusUrl +
         '/img/icons/discord.svg' +
         '"></button></li>'
     )
 
     if (this.enabledVerifiers[FACEBOOK]) loginList.appendChild(this.facebookLogin)
-    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
     if (this.enabledVerifiers[REDDIT]) loginList.appendChild(this.redditLogin)
+    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
     if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
 
     if (this.enabledVerifiers[GOOGLE]) {
-      modalContent.appendChild(this.googleLogin)
-      modalContent.appendChild(otherAccount)
+      formContainer.appendChild(this.googleLogin)
     }
-    modalContent.appendChild(loginList)
+    formContainer.appendChild(loginList)
 
     const loginNote = htmlToElement(
-      '<div class="login-note">By clicking Login, you accept our ' +
+      '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
         '<a href="https://docs.tor.us/legal/terms-and-conditions" target="_blank">Terms and Conditions</a></div>'
     )
 
-    modalContent.appendChild(loginNote)
+    formContainer.appendChild(loginNote)
+    modalContent.appendChild(formContainer)
 
     modalContainer.appendChild(modalContent)
     this.torusLoginModal.appendChild(modalContainer)
@@ -493,7 +511,7 @@ class Torus {
       })
 
       // Login Modal Listeners
-      modalContainer.querySelector('#close').addEventListener('click', () => {
+      modalContainer.querySelector('#torus-login-modal__close').addEventListener('click', () => {
         this.torusLoginModal.style.display = 'none'
         if (this.modalCloseHandler) this.modalCloseHandler()
         delete this.modalCloseHandler
@@ -883,40 +901,14 @@ class Torus {
    */
   getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
-    const randomNumber = Math.floor(Math.random() * configuration.torusNodeEndpoints.length)
-    const node = configuration.torusNodeEndpoints[randomNumber]
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
-      post(
-        node,
-        generateJsonRPCObject('VerifierLookupRequest', {
-          verifier: verifier,
-          verifier_id: verifierId.toString().toLowerCase()
+      NodeDetailManager.getNodeDetails()
+        .then(nodeDetails => {
+          return torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, { verifier: verifier, verifierId: verifierId })
         })
-      )
-        .catch(err => log.error(err))
-        .then(lookupShare => {
-          if (lookupShare.error) {
-            return post(
-              node,
-              generateJsonRPCObject('KeyAssign', {
-                verifier: verifier,
-                verifier_id: verifierId.toString().toLowerCase()
-              })
-            )
-          } else if (lookupShare.result) {
-            return getLookupPromise(lookupShare)
-          }
-        })
-        .catch(err => log.error(err))
-        .then(lookupShare => {
-          var ethAddress = lookupShare.result.keys[0].address
-          resolve(ethAddress)
-        })
-        .catch(err => {
-          log.error(err)
-          reject(err)
-        })
+        .then(pubAddr => resolve(pubAddr))
+        .catch(err => reject(err))
     })
   }
 

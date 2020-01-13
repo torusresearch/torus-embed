@@ -37,3 +37,4 @@ server.js
 .eslintignore
 .prettierignore
 .prettierrc.yaml
+.github

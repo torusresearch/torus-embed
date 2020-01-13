@@ -11,17 +11,33 @@
       <button v-if="publicAddress === ''">Login</button>
     </form>
     <br />
-    <button v-if="publicAddress !== ''" @click="changeProvider">Change Provider</button>
-    <button v-if="publicAddress !== ''" @click="getUserInfo">Get User Info</button>
-    <button v-if="publicAddress !== ''" @click="createPaymentTx">Create Payment Tx</button>
-    <button v-if="publicAddress !== ''" @click="sendEth">Send Eth</button>
-    <button v-if="publicAddress !== ''" @click="sendDai">Send DAI</button>
-    <button v-if="publicAddress !== ''" @click="logout">Logout</button>
-    <br />
-    <button v-if="publicAddress !== ''" @click="signMessage">sign_eth</button>
-    <button v-if="publicAddress !== ''" @click="signTypedData_v1">sign typed data v1</button>
-    <button v-if="publicAddress !== ''" @click="signTypedData_v3">sign typed data v3</button>
-    <button v-if="publicAddress !== ''" @click="signTypedData_v4">sign typed data v4</button>
+    <div v-if="publicAddress !== ''">
+      <button @click="getUserInfo">Get User Info</button>
+      <button @click="createPaymentTx">Create Payment Tx</button>
+      <button @click="sendEth">Send Eth</button>
+      <button @click="logout">Logout</button>
+      <br />
+      <button @click="signMessage">sign_eth</button>
+      <button @click="signTypedData_v1">sign typed data v1</button>
+      <button @click="signTypedData_v3">sign typed data v3</button>
+      <button @click="signTypedData_v4">sign typed data v4</button>
+      <button @click="changeProvider">Change Provider</button>
+      <button @click="sendDai">Send DAI</button>
+      <div :style="{marginTop: '20px'}">
+        <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
+          <option selected value="google">Google</option>
+          <option value="reddit">Reddit</option>
+          <option value="discord">Discord</option>
+        </select>
+        <input :style="{marginLeft: '20px'}" v-model="verifierId" :placeholder="placeholder" />
+      </div>
+      <button
+        :disabled="!verifierId"
+        :style="{marginTop: '20px'}"
+        v-if="publicAddress !== ''"
+        @click="getPublicAddress"
+      >Get Public Address</button>
+    </div>
     <div id="console">
       <p></p>
     </div>
@@ -38,10 +54,29 @@ export default {
   data() {
     return {
       publicAddress: '',
-      buildEnv: 'development'
+      verifierId: '',
+      selectedVerifier: 'google',
+      placeholder: 'Enter google email',
+      buildEnv: 'testing'
     }
   },
   methods: {
+    onSelectedVerifierChanged(e) {
+      this.selectedVerifier = e.target.value
+      switch (this.selectedVerifier) {
+        case 'google':
+          this.placeholder = 'Enter google email'
+          break
+        case 'reddit':
+          this.placeholder = 'Enter reddit username'
+          break
+        case 'discord':
+          this.placeholder = 'Enter Discord ID'
+          break
+        default:
+          break
+      }
+    },
     async login() {
       try {
         const torus = new Torus({
@@ -51,9 +86,9 @@ export default {
         await torus.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
-            twitch: false
+            reddit: false
           },
-          enableLogging: true,
+          enableLogging: false,
           network: {
             host: 'rinkeby', // mandatory
             chainId: 4
@@ -250,33 +285,33 @@ export default {
       )
     },
     logout() {
-      window.torus.logout().then(() => (this.publicAddress = ''))
+      window.torus.cleanUp().then(() => (this.publicAddress = ''))
     },
     changeProvider() {
-      window.torus
-        .setProvider({ host: 'ropsten' })
-        .finally(console.log)
+      window.torus.setProvider({ host: 'ropsten' }).finally(console.log)
     },
     sendDai() {
-      window.torus
-        .setProvider({ host: 'mainnet' })
-        .finally(() => {
-          const localWeb3 = window.web3
-          const instance = new localWeb3.eth.Contract(tokenAbi, "0x8fdcc30eda7e94f1c12ce0280df6cd531e8365c5")
-          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-          instance.methods.transfer(this.publicAddress, value).send({
+      window.torus.setProvider({ host: 'mainnet' }).finally(() => {
+        const localWeb3 = window.web3
+        const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
+        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        instance.methods.transfer(this.publicAddress, value).send(
+          {
             from: this.publicAddress
-          }, (err, hash) => {
+          },
+          (err, hash) => {
             if (err) this.console(err)
             this.console(hash)
-          })
-
-        })
+          }
+        )
+      })
     },
     async getUserInfo() {
-      window.torus
-        .getUserInfo()
-        .finally(console.log)
+      window.torus.getUserInfo().finally(console.log)
+    },
+    getPublicAddress() {
+      console.log(this.selectedVerifier, this.verifierId)
+      window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console)
     }
   }
 }
