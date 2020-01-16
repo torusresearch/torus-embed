@@ -16,7 +16,7 @@ class App extends React.Component {
   componentDidMount() {
     const isTorus = sessionStorage.getItem('pageUsingTorus')
     if (isTorus) {
-      web3Obj.initialize().then(() => {
+      web3Obj.initialize(isTorus).then(() => {
         this.setStateInfo()
       })
     }
@@ -32,9 +32,10 @@ class App extends React.Component {
   }
 
   enableTorus = async e => {
+    const { buildEnv } = this.state;
     e.preventDefault()
     try {
-      await web3Obj.initialize()
+      await web3Obj.initialize(buildEnv)
       this.setStateInfo()
     } catch (error) {
       console.error(error)
@@ -52,7 +53,10 @@ class App extends React.Component {
   }
 
   logout = () => {
-    web3Obj.torus.cleanUp().then(() => this.setState({ account: '', balance: 0 }))
+    web3Obj.torus.cleanUp().then(() => {
+      this.setState({ account: '', balance: 0 })
+      sessionStorage.setItem('pageUsingTorus', false)
+    })
   }
 
   signMessage = () => {
@@ -293,7 +297,7 @@ class App extends React.Component {
             <button>Login</button>
           </form>
         )}
-        {account !== null && (
+        {account && (
           <div>
             <div>Account: {account}</div>
             <div>Balance: {balance}</div>

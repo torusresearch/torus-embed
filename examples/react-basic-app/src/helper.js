@@ -7,14 +7,14 @@ const web3Obj = {
   setweb3: function(provider) {
     const web3Inst = new Web3(provider)
     web3Obj.web3 = web3Inst
-    sessionStorage.setItem('pageUsingTorus', true)
   },
-  initialize: async function() {
+  initialize: async function(buildEnv) {
     const torus = new Torus()
-    await torus.init()
+    await torus.init({ buildEnv: buildEnv || 'production' })
     await torus.login()
     web3Obj.setweb3(torus.provider)
     web3Obj.torus = torus
+    sessionStorage.setItem('pageUsingTorus', buildEnv)
   }
 }
 export default web3Obj
