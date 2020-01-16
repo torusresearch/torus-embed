@@ -32,7 +32,7 @@ class App extends React.Component {
   }
 
   enableTorus = async e => {
-    const { buildEnv } = this.state;
+    const { buildEnv } = this.state
     e.preventDefault()
     try {
       await web3Obj.initialize(buildEnv)

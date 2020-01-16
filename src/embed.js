@@ -109,7 +109,7 @@ class Torus {
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
       }
-      if (buildEnv !== 'testing' && buildEnv !== 'development' && buildEnv !== 'staging') {
+      if (buildEnv === 'production') {
         // hacky solution to check for iframe integrity
         const fetchUrl = torusUrl + '/popup'
         fetch(fetchUrl, { cache: 'reload' })
