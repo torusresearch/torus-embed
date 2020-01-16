@@ -11,8 +11,6 @@ import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStrea
 import configuration from './config'
 import PopupHandler from './PopupHandler'
 
-const torusJs = new TorusJs()
-
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
   [GOOGLE]: true,
@@ -64,6 +62,8 @@ class Torus {
     this.enabledVerifiers = {}
     this.Web3 = Web3
     this.torusAlert = {}
+    this.nodeDetailManager = new NodeDetailManager()
+    this.torusJs = new TorusJs()
   }
 
   init({
@@ -109,7 +109,7 @@ class Torus {
       const attachIFrame = () => {
         window.document.body.appendChild(this.torusIframe)
       }
-      if (buildEnv !== 'testing' && buildEnv !== 'development') {
+      if (buildEnv === 'production') {
         // hacky solution to check for iframe integrity
         const fetchUrl = torusUrl + '/popup'
         fetch(fetchUrl, { cache: 'reload' })
@@ -903,9 +903,13 @@ class Torus {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
-      NodeDetailManager.getNodeDetails()
+      this.nodeDetailManager
+        .getNodeDetails()
         .then(nodeDetails => {
-          return torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, { verifier: verifier, verifierId: verifierId })
+          return this.torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, nodeDetails.torusNodePub, {
+            verifier: verifier,
+            verifierId: verifierId
+          })
         })
         .then(pubAddr => resolve(pubAddr))
         .catch(err => reject(err))
