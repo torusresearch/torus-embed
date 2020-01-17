@@ -21,7 +21,7 @@ const defaultVerifiers = {
 }
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-7XDmd+yejJdOZjRgIdXuRCcqMgsZZ2siQjrh+pZZ5cZfA/myIyuO9BCL6Q92v7wc'
+const iframeIntegrity = 'sha384-jLbBb6Y0C49xeFSsBo+FfdGcx3wgtF78eha3GS+CLV+r1dKvvWd1lDD3WjYCadqR'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
