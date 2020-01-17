@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "Embed script for Torus",
   "main": "index.js",
   "types": "index.d.ts",
