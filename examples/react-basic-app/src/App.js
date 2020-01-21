@@ -249,10 +249,12 @@ class App extends React.Component {
 
   createPaymentTx = () => {
     web3Obj.torus
-      .initiateTopup('moonpay', {
-        selectedCurrency: 'USD'
+      .initiateTopup('wyre', {
+        selectedCurrency: 'USD',
+        fiatValue: '250',
+        selectedCryptoCurrency: 'ETH'
       })
-      .finally(this.console)
+      .catch(err => this.console(err.message))
   }
 
   getPublicAddress = () => {

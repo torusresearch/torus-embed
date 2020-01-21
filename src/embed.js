@@ -8,6 +8,7 @@ import TorusJs from '@toruslabs/torus.js'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
+import { validatePaymentProvider } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
 
@@ -989,6 +990,8 @@ class Torus {
     })
   }
 
+  paymentProviders = configuration.paymentProviders
+
   /**
    * Exposes the topup api of torus
    * Allows the dapp to trigger a payment method directly
@@ -1000,6 +1003,8 @@ class Torus {
   initiateTopup(provider, params) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
+        const { errors, isValid } = validatePaymentProvider(provider, params)
+        if (!isValid) return reject(new Error(JSON.stringify(errors)))
         const topupStream = this.communicationMux.getStream('topup')
         const topupHandler = chunk => {
           if (chunk.name === 'topup_response') {
