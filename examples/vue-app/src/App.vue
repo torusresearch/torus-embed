@@ -116,6 +116,7 @@ export default {
         .initiateTopup('moonpay', {
           selectedCurrency: 'USD'
         })
+        .catch(console.error)
         .finally(console.log)
     },
     sendEth() {
