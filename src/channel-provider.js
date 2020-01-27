@@ -53,7 +53,7 @@ class TorusChannelProvider extends ChannelProvider {
   constructor(connectionStream) {
     const connection = new TorusChannelRpcConnection(connectionStream)
     super(connection)
-    this.isTorusChannelProvider = true
+    this.isTorus = true
   }
 }
 
