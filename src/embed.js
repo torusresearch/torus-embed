@@ -330,7 +330,9 @@ class Torus {
 
     this.styleLink = link
 
-    this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
+    if(this.torusButtonVisibility) {
+      this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
+    }
 
     // Loading spinner
     const spinner = htmlToElement(
