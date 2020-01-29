@@ -79,7 +79,7 @@ class Torus {
     showTorusButton = true
   } = {}) {
     return new Promise((resolve, reject) => {
-      if (this.isInitalized) reject(new Error('Already initialized'))
+      if (this.isInitalized) return reject(new Error('Already initialized'))
       let torusUrl
       let logLevel
       switch (buildEnv) {
@@ -194,22 +194,21 @@ class Torus {
    */
   logout() {
     return new Promise((resolve, reject) => {
-      if (!this.isLoggedIn) reject(new Error('User has not logged in yet'))
-      else {
-        const logOutStream = this.communicationMux.getStream('logout')
-        logOutStream.write({ name: 'logOut' })
-        var statusStream = this.communicationMux.getStream('status')
-        const statusStreamHandler = status => {
-          if (!status.loggedIn) {
-            this.isLoggedIn = false
-            this.isRehydrated = false
-            this.currentVerifier = ''
-            this.requestedVerifier = ''
-            resolve()
-          } else reject(new Error('Some Error Occured'))
-        }
-        handleStream(statusStream, 'data', statusStreamHandler)
+      if (!this.isLoggedIn) return reject(new Error('User has not logged in yet'))
+
+      const logOutStream = this.communicationMux.getStream('logout')
+      logOutStream.write({ name: 'logOut' })
+      var statusStream = this.communicationMux.getStream('status')
+      const statusStreamHandler = status => {
+        if (!status.loggedIn) {
+          this.isLoggedIn = false
+          this.isRehydrated = false
+          this.currentVerifier = ''
+          this.requestedVerifier = ''
+          resolve()
+        } else reject(new Error('Some Error Occured'))
       }
+      handleStream(statusStream, 'data', statusStreamHandler)
     })
   }
 
@@ -903,7 +902,7 @@ class Torus {
   getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
-      if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
+      if (!configuration.supportedVerifierList.includes(verifier)) return reject(new Error('Unsupported verifier'))
       this.nodeDetailManager
         .getNodeDetails()
         .then(nodeDetails => {
