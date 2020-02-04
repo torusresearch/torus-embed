@@ -169,7 +169,6 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
     // typecheck payload and payload.method
     if (Array.isArray(payload) || typeof finalParams === 'function' || typeof payload !== 'object' || typeof payload.method !== 'string') {
-      console.log(payload, 'error')
       throw ethErrors.rpc.invalidRequest({
         message: messages.errors.invalidParams(),
         data: [methodOrPayload, _params]
@@ -215,7 +214,6 @@ class MetamaskInpageProvider extends SafeEventEmitter {
       if (payload.method === 'eth_accounts' || payload.method === 'eth_requestAccounts') {
         // handle accounts changing
         cb = (err, res) => {
-          console.log(err, res, 'handling callback', payload)
           this._handleAccountsChanged(res.result || [], payload.method === 'eth_accounts', isInternal)
           userCallback(err, res)
         }

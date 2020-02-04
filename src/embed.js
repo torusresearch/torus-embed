@@ -743,7 +743,7 @@ class Torus {
     // pretend to be Metamask for dapp compatibility reasons
     this.web3.currentProvider.isMetamask = true
     this.web3.currentProvider.isTorus = true
-    inpageProvider.on('accountsChanged', () => accounts => {
+    inpageProvider.on('accountsChanged', accounts => {
       this._updateKeyBtnAddress((accounts && accounts[0]) || '')
     })
     // window.web3 = window.torus.web3
