@@ -5,7 +5,7 @@ import Web3 from 'web3'
 import randomId from '@chaitanyapotti/random-id'
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
-import MetamaskInpageProvider from './inpage-provider'
+import MetamaskInpageProvider from './inpage2'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { validatePaymentProvider } from './utils'
@@ -740,13 +740,9 @@ class Torus {
     // pretend to be Metamask for dapp compatibility reasons
     this.web3.currentProvider.isMetamask = true
     this.web3.currentProvider.isTorus = true
-
-    inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
-    inpageProvider.publicConfigStore.subscribe(
-      function(state) {
-        this._updateKeyBtnAddress(state.selectedAddress)
-      }.bind(this)
-    )
+    inpageProvider.on('accountsChanged', () => accounts => {
+      this._updateKeyBtnAddress((accounts && accounts[0]) || '')
+    })
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
