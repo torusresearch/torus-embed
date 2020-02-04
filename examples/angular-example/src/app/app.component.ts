@@ -2,20 +2,18 @@ import { Component } from '@angular/core'
 import web3Obj from './helper'
 const tokenAbi = require('human-standard-token-abi')
 
-declare const window: any
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  address: string
-  balance: string
-  buildEnvironment: string
-  console: string
-  selectedVerifier: string
-  placeholder: string
+  address: string = ''
+  balance: string = ''
+  buildEnvironment: 'production' | 'staging'| 'testing' | 'development' =  'production'
+  console: string | object
+  selectedVerifier: 'google' | 'reddit' | 'discord' = 'google'
+  placeholder: string = 'Enter google email'
   selectedVerifierId: string
 
   buildEnvironments = ['production', 'staging', 'testing', 'development']
@@ -24,6 +22,15 @@ export class AppComponent {
     { label: 'Reddit', value: 'reddit' },
     { label: 'Discord', value: 'discord' }
   ]
+
+  ngAfterContentInit() {
+    const isTorus = sessionStorage.getItem('pageUsingTorus')
+    if (isTorus) {
+      web3Obj.initialize(isTorus).then(() => {
+        this.setStateInfo()
+      })
+    }
+  }
 
   async setStateInfo() {
     this.address = (await web3Obj.web3.eth.getAccounts())[0]
@@ -45,18 +52,18 @@ export class AppComponent {
   }
 
   changeProvider = async () => {
-    await window.torus.setProvider({ host: 'ropsten' })
+    await web3Obj.torus.setProvider({ host: 'ropsten' })
     this.console = 'finished changing provider'
     this.printToConsole()
   }
 
   async getUserInfo() {
-    this.console = await window.torus.getUserInfo()
+    this.console = await web3Obj.torus.getUserInfo("")
     this.printToConsole()
   }
 
   async logout() {
-    await window.torus.cleanUp()
+    await web3Obj.torus.cleanUp()
     this.address = ''
     this.balance = '0'
     sessionStorage.setItem('pageUsingTorus', 'false')
@@ -65,11 +72,12 @@ export class AppComponent {
   signMessage() {
     // hex message
     const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
-    window.torus.web3.currentProvider.send(
+    // @ts-ignore
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_sign',
-        params: [window.torus.web3.eth.accounts[0], message],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], message],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
       (err, result) => {
         if (err) {
@@ -93,11 +101,12 @@ export class AppComponent {
         value: 10
       }
     ]
-    window.torus.web3.currentProvider.send(
+    // @ts-ignore
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData',
-        params: [typedData, window.torus.web3.eth.accounts[0]],
-        from: window.torus.web3.eth.accounts[0]
+        params: [typedData, web3Obj.torus.web3.eth.accounts[0]],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
       (err, result) => {
         if (err) {
@@ -147,11 +156,12 @@ export class AppComponent {
         contents: 'Hello, Bob!'
       }
     }
-    window.torus.web3.currentProvider.send(
+    // @ts-ignore
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v3',
-        params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
       (err, result) => {
         if (err) {
@@ -211,11 +221,12 @@ export class AppComponent {
         contents: 'Hello, Bob!'
       }
     }
-    window.torus.web3.currentProvider.send(
+    // @ts-ignore
+    web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v4',
-        params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: window.torus.web3.eth.accounts[0]
+        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
+        from: web3Obj.torus.web3.eth.accounts[0]
       },
       (err, result) => {
         if (err) {
@@ -228,11 +239,11 @@ export class AppComponent {
   }
 
   async sendEth() {
-    window.web3.eth.sendTransaction({ from: this.address, to: this.address, value: web3Obj.web3.utils.toWei('0.01') })
+    web3Obj.web3.eth.sendTransaction({ from: this.address, to: this.address, value: web3Obj.web3.utils.toWei('0.01') })
   }
 
   sendDai() {
-    window.torus.setProvider({ host: 'mainnet' }).finally(() => {
+    web3Obj.torus.setProvider({ host: 'mainnet' }).finally(() => {
       const localWeb3 = web3Obj.web3
       const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
       const value = Math.floor(parseFloat('0.01') * 10 ** parseFloat('18')).toString()
@@ -250,14 +261,14 @@ export class AppComponent {
   }
 
   async createPaymentTx() {
-    this.console = await window.torus.initiateTopup('moonpay', {
+    this.console = (await web3Obj.torus.initiateTopup('moonpay', {
       selectedCurrency: 'USD'
-    })
+    })).toString()
     this.printToConsole()
   }
 
   async getPublicAddress() {
-    this.console = await window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.selectedVerifierId })
+    this.console = await web3Obj.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.selectedVerifierId })
     this.printToConsole()
   }
 

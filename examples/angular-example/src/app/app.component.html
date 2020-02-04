@@ -1,9 +1,11 @@
 <div class="app">
-  <p>Build Environment</p>
-  <select name="buildEnv" [(ngModel)]="buildEnvironment">
-    <option *ngFor="let env of buildEnvironments" [value]="env">{{ env }}</option>
-  </select>
-  <button (click)="setBuildEnvironment($event)">Login</button>
+  <div *ngIf="address === ''">
+    <p>Build Environment</p>
+    <select name="buildEnv" [(ngModel)]="buildEnvironment">
+      <option *ngFor="let env of buildEnvironments" [value]="env">{{ env }}</option>
+    </select>
+    <button (click)="setBuildEnvironment($event)">Login</button>
+  </div>
   <div *ngIf="address">
     <div>Account: {{ address }}</div>
     <div>Balance: {{ balance }} ETH</div>
