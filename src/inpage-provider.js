@@ -66,6 +66,18 @@ class MetamaskInpageProvider extends SafeEventEmitter {
         }
       }
 
+      if ('selectedAddress' in state && this.selectedAddress !== state.selectedAddress) {
+        try {
+          this._sendAsync(
+            { method: 'eth_accounts', params: [] },
+            () => {},
+            true // indicating that eth_accounts _should_ update accounts
+          )
+        } catch (_) {
+          // Swallow error
+        }
+      }
+
       // Emit chainChanged event on chain change
       if ('chainId' in state && state.chainId !== this.chainId) {
         this.chainId = state.chainId
