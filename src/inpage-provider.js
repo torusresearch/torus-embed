@@ -12,7 +12,7 @@ import dequal from 'fast-deep-equal'
 
 import messages from './messages'
 // const { sendSiteMetadata } = require('./src/siteMetadata')
-import { createErrorMiddleware, logStreamDisconnectWarning } from './utils'
+import { createErrorMiddleware, logStreamDisconnectWarning, makeThenable } from './utils'
 
 // resolve response.result, reject errors
 const getRpcPromiseCallback = (resolve, reject) => (error, response) => {
@@ -63,6 +63,18 @@ class MetamaskInpageProvider extends SafeEventEmitter {
           } catch (_) {
             // Swallow error
           }
+        }
+      }
+
+      if ('selectedAddress' in state && this.selectedAddress !== state.selectedAddress) {
+        try {
+          this._sendAsync(
+            { method: 'eth_accounts', params: [] },
+            () => {},
+            true // indicating that eth_accounts _should_ update accounts
+          )
+        } catch (_) {
+          // Swallow error
         }
       }
 
@@ -153,6 +165,10 @@ class MetamaskInpageProvider extends SafeEventEmitter {
         return this._sendAsync(methodOrPayload, finalParams)
       }
       payload = methodOrPayload
+      // backwards compatibility: "synchronous" methods
+      if (!finalParams && ['eth_accounts', 'eth_coinbase', 'eth_uninstallFilter', 'net_version'].includes(payload.method)) {
+        return this._sendSync(payload)
+      }
     } else if (typeof methodOrPayload === 'string' && typeof finalParams !== 'function') {
       // wrap params in array out of kindness
       if (finalParams === undefined) {
@@ -193,6 +209,44 @@ class MetamaskInpageProvider extends SafeEventEmitter {
    */
   sendAsync(payload, cb) {
     this._sendAsync(payload, cb)
+  }
+
+  /**
+   * Internal backwards compatibility method.
+   */
+  _sendSync(payload) {
+    let result
+    switch (payload.method) {
+      case 'eth_accounts':
+        result = this.selectedAddress ? [this.selectedAddress] : []
+        break
+
+      case 'eth_coinbase':
+        result = this.selectedAddress || null
+        break
+
+      case 'eth_uninstallFilter':
+        this._sendAsync(payload, () => {})
+        result = true
+        break
+
+      case 'net_version':
+        result = this.networkVersion || null
+        break
+
+      default:
+        throw new Error(messages.errors.unsupportedSync(payload.method))
+    }
+
+    // looks like a plain object, but behaves like a Promise if someone calls .then on it :evil_laugh:
+    return makeThenable(
+      {
+        id: payload.id,
+        jsonrpc: payload.jsonrpc,
+        result
+      },
+      'result'
+    )
   }
 
   /**
