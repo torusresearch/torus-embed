@@ -364,7 +364,7 @@ class Torus {
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s">')
+    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s;display: none">')
     this.torusSpeedDial.style.opacity = '0'
     const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
@@ -558,6 +558,7 @@ class Torus {
     this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
     this.torusLoadingBtn.style.display = 'none'
     this.torusLoginModal.style.display = 'none'
+    this.torusSpeedDial.style.display = 'none'
     this.torusSpeedDial.style.opacity = '0'
   }
 
@@ -583,6 +584,7 @@ class Torus {
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
     this.torusLoadingBtn.style.display = 'none'
+    this.torusSpeedDial.style.display = 'none'
     this.torusSpeedDial.style.opacity = '0'
   }
 
@@ -878,6 +880,10 @@ class Torus {
     const isActive = this.torusMenuBtn.classList.contains('active')
 
     var torusSpeedDial = this.torusSpeedDial
+    if (isActive) {
+      torusSpeedDial.style.display = 'block'
+    }
+
     torusSpeedDial.style.opacity = torusSpeedDial.style.opacity === '0' ? '1' : '0'
     torusSpeedDial.classList.toggle('active')
     var mainTime = isActive ? 0.05 : 1.2
@@ -889,7 +895,10 @@ class Torus {
         element.style.transitionDelay = time + 's'
         time += isActive ? 0.05 : -0.05
       })
-    }, 200)
+      if (!isActive) {
+        torusSpeedDial.style.display = 'none'
+      }
+    }, 500)
   }
 
   /**
