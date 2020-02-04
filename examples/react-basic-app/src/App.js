@@ -65,8 +65,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_sign',
-        params: [this.account, message],
-        from: this.account
+        params: [this.state.account, message],
+        from: this.state.account
       },
       (err, result) => {
         if (err) {
@@ -93,8 +93,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData',
-        params: [typedData, this.account],
-        from: this.account
+        params: [typedData, this.state.account],
+        from: this.state.account
       },
       (err, result) => {
         if (err) {
@@ -146,8 +146,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v3',
-        params: [this.account, JSON.stringify(typedData)],
-        from: this.account
+        params: [this.state.account, JSON.stringify(typedData)],
+        from: this.state.account
       },
       (err, result) => {
         if (err) {
@@ -213,8 +213,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v4',
-        params: [this.account, JSON.stringify(typedData)],
-        from: this.account
+        params: [this.state.account, JSON.stringify(typedData)],
+        from: this.state.account
       },
       (err, result) => {
         if (err) {

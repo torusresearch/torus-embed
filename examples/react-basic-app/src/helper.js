@@ -10,7 +10,7 @@ const web3Obj = {
   },
   initialize: async function(buildEnv) {
     const torus = new Torus()
-    await torus.init({ buildEnv: buildEnv || 'production' })
+    await torus.init({ buildEnv: buildEnv || 'production', network: { host: 'rinkeby'} })
     await torus.login()
     web3Obj.setweb3(torus.provider)
     web3Obj.torus = torus
