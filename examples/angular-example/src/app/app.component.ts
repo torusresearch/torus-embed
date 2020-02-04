@@ -84,6 +84,7 @@ export class AppComponent {
           return console.error(err)
         }
         this.console = `sign message => true \n ${result}`
+        this.printToConsole()
       }
     )
   }
@@ -141,7 +142,7 @@ export class AppComponent {
       domain: {
         name: 'Ether Mail',
         version: '1',
-        chainId: 1,
+        chainId: 4,
         verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
       },
       message: {
@@ -199,7 +200,7 @@ export class AppComponent {
       domain: {
         name: 'Ether Mail',
         version: '1',
-        chainId: 1,
+        chainId: 4,
         verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
       },
       primaryType: 'Mail',

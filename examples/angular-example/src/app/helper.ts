@@ -9,7 +9,7 @@ const web3Obj = {
     web3Obj.web3 = web3Instance
   },
   async initialize(env) {
-    await web3Obj.torus.init({ showTorusButton: true, buildEnv: env || 'production' })
+    await web3Obj.torus.init({ showTorusButton: true, buildEnv: env || 'production', network: { host: 'rinkeby' } })
     await web3Obj.torus.login({})
     web3Obj.setWeb3(web3Obj.torus.provider)
     sessionStorage.setItem('pageUsingTorus', env)
