@@ -65,8 +65,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_sign',
-        params: [web3Obj.torus.web3.eth.accounts[0], message],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.account, message],
+        from: this.account
       },
       (err, result) => {
         if (err) {
@@ -93,8 +93,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData',
-        params: [typedData, web3Obj.torus.web3.eth.accounts[0]],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [typedData, this.account],
+        from: this.account
       },
       (err, result) => {
         if (err) {
@@ -146,8 +146,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v3',
-        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.account, JSON.stringify(typedData)],
+        from: this.account
       },
       (err, result) => {
         if (err) {
@@ -162,7 +162,7 @@ class App extends React.Component {
     document.querySelector('#console>p').innerHTML = typeof text === 'object' ? JSON.stringify(text) : text
   }
 
-  signTypedData_v4() {
+  signTypedData_v4 = () => {
     const typedData = {
       types: {
         EIP712Domain: [
@@ -213,8 +213,8 @@ class App extends React.Component {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v4',
-        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.account, JSON.stringify(typedData)],
+        from: this.account
       },
       (err, result) => {
         if (err) {
