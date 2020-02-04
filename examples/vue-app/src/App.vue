@@ -109,7 +109,7 @@ export default {
       }
     },
     console(text) {
-      document.querySelector('#console>p').innerHTML = text
+      document.querySelector('#console>p').innerHTML = typeof text === 'object' ? JSON.stringify(text) : text
     },
     createPaymentTx() {
       window.torus
@@ -289,7 +289,7 @@ export default {
       window.torus.cleanUp().then(() => (this.publicAddress = ''))
     },
     changeProvider() {
-      window.torus.setProvider({ host: 'ropsten' }).finally(console.log)
+      window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
     },
     sendDai() {
       window.torus.setProvider({ host: 'mainnet' }).finally(() => {
@@ -308,7 +308,7 @@ export default {
       })
     },
     async getUserInfo() {
-      window.torus.getUserInfo().finally(console.log)
+      window.torus.getUserInfo().then(this.console).catch(this.console)
     },
     getPublicAddress() {
       console.log(this.selectedVerifier, this.verifierId)
