@@ -27,8 +27,11 @@
     "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
+    "@chaitanyapotti/random-id": "^1.0.3",
     "@toruslabs/fetch-node-details": "^2.0.1",
     "@toruslabs/torus.js": "^1.0.6",
+    "eth-json-rpc-errors": "^2.0.1",
+    "fast-deep-equal": "^3.1.1",
     "json-rpc-engine": "^5.1.6",
     "json-rpc-middleware-stream": "^2.1.1",
     "loglevel": "^1.6.6",
@@ -36,11 +39,11 @@
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "@chaitanyapotti/random-id": "^1.0.3",
     "readable-stream": "^3.5.0",
+    "safe-event-emitter": "^1.0.1",
     "sri-toolbox": "^0.2.0",
     "through2": "^3.0.1",
-    "web3": "0.20.7"
+    "web3": "^1.2.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",
@@ -111,13 +114,11 @@
   "lint-staged": {
     "*.js": [
       "npm run lint:js --",
-      "prettier --write **/*.js",
-      "git add"
+      "prettier --write **/*.js"
     ],
     "*.{json}": [
       "prettier --write **/*.json",
-      "prettier --write **/*.css",
-      "git add"
+      "prettier --write **/*.css"
     ]
   }
 }

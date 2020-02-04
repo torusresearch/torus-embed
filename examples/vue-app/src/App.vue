@@ -129,8 +129,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_sign',
-          params: [window.torus.web3.eth.accounts[0], message],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, message],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -157,8 +157,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData',
-          params: [typedData, window.torus.web3.eth.accounts[0]],
-          from: window.torus.web3.eth.accounts[0]
+          params: [typedData, this.publicAddress],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -211,8 +211,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
-          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, JSON.stringify(typedData)],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -274,8 +274,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v4',
-          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, JSON.stringify(typedData)],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {

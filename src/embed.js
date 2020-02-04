@@ -5,6 +5,7 @@ import Web3 from 'web3'
 import randomId from '@chaitanyapotti/random-id'
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
+
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
@@ -259,6 +260,7 @@ class Torus {
       this.torusAlert.remove()
       this.torusAlert = {}
     }
+    this.isInitalized = false
   }
 
   /**
@@ -624,8 +626,8 @@ class Torus {
     const detectAccountRequestPrototypeModifier = m => {
       const originalMethod = inpageProvider[m]
       const self = this
-      inpageProvider[m] = function({ method }) {
-        if (method === 'eth_requestAccounts') {
+      inpageProvider[m] = function(method) {
+        if (method && method === 'eth_requestAccounts') {
           return self.ethereum.enable()
         }
         return originalMethod.apply(this, arguments)
@@ -643,8 +645,9 @@ class Torus {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
         // If user is already logged in, we assume they have given access to the website
-        this.web3.eth.getAccounts(
-          function(err, res) {
+        inpageProvider.sendAsync(
+          { method: 'eth_requestAccounts', params: [] },
+          function(err, { result: res } = {}) {
             const self = this
             if (err) {
               setTimeout(() => {
@@ -738,15 +741,10 @@ class Torus {
       log.debug('Torus - overrode web3.setProvider')
     }
     // pretend to be Metamask for dapp compatibility reasons
-    this.web3.currentProvider.isMetamask = true
     this.web3.currentProvider.isTorus = true
-
-    inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
-    inpageProvider.publicConfigStore.subscribe(
-      function(state) {
-        this._updateKeyBtnAddress(state.selectedAddress)
-      }.bind(this)
-    )
+    inpageProvider.on('accountsChanged', accounts => {
+      this._updateKeyBtnAddress((accounts && accounts[0]) || '')
+    })
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
