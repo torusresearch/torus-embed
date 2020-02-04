@@ -76,8 +76,8 @@ export class AppComponent {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_sign',
-        params: [web3Obj.torus.web3.eth.accounts[0], message],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.address, message],
+        from: this.address
       },
       (err, result) => {
         if (err) {
@@ -105,8 +105,8 @@ export class AppComponent {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData',
-        params: [typedData, web3Obj.torus.web3.eth.accounts[0]],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [typedData, this.address],
+        from: this.address
       },
       (err, result) => {
         if (err) {
@@ -160,8 +160,8 @@ export class AppComponent {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v3',
-        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.address, JSON.stringify(typedData)],
+        from: this.address
       },
       (err, result) => {
         if (err) {
@@ -225,8 +225,8 @@ export class AppComponent {
     web3Obj.torus.web3.currentProvider.send(
       {
         method: 'eth_signTypedData_v4',
-        params: [web3Obj.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-        from: web3Obj.torus.web3.eth.accounts[0]
+        params: [this.address, JSON.stringify(typedData)],
+        from: this.address
       },
       (err, result) => {
         if (err) {
