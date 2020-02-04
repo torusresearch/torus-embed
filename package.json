@@ -45,9 +45,11 @@
   "devDependencies": {
     "@babel/cli": "^7.8.3",
     "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
     "assert": "^2.0.0",
+    "babel-eslint": "^10.0.3",
     "browserify": "^16.5.0",
     "cross-env": "^7.0.0",
     "discify": "^1.6.3",

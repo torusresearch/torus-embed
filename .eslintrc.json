@@ -1,10 +1,10 @@
 {
   "extends": ["standard", "prettier", "prettier/standard", "eslint:recommended"],
   "plugins": ["prettier", "standard", "mocha"],
+  "parser": "babel-eslint",
   "parserOptions": {
-    "parser": "babel-eslint",
-    "ecmaVersion": 2018,
-    "ecmaFeatures.experimentalObjectRestSpread": true
+    "sourceType": "module",
+    "ecmaVersion": 9
   },
   "rules": {
     "quotes": [2, "single"],
