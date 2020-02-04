@@ -1,0 +1,36 @@
+<div class="app">
+  <div *ngIf="address === ''">
+    <p>Build Environment</p>
+    <select name="buildEnv" [(ngModel)]="buildEnvironment">
+      <option *ngFor="let env of buildEnvironments" [value]="env">{{ env }}</option>
+    </select>
+    <button (click)="setBuildEnvironment($event)">Login</button>
+  </div>
+  <div *ngIf="address">
+    <div>Account: {{ address }}</div>
+    <div>Balance: {{ balance }} ETH</div>
+    <button (click)="getUserInfo($event)">Get User Info</button>
+    <button (click)="createPaymentTx($event)">Create Payment Tx</button>
+    <button (click)="sendEth($event)">Send Eth</button>
+    <button (click)="logout($event)">Logout</button>
+    <br />
+    <button (click)="signMessage($event)">sign_eth</button>
+    <button (click)="signTypedData_v1($event)">sign typed data v1</button>
+    <button (click)="signTypedData_v3($event)">sign typed data v3</button>
+    <button (click)="signTypedData_v4($event)">sign typed data v4</button>
+    <button (click)="changeProvider($event)">Change Provider</button>
+    <button (click)="sendDai($event)">Send DAI</button>
+    <div class="mt-20">
+      <select name="verifier" [(ngModel)]="selectedVerifier" (change)="onSelectedVerifierChanged($event)">
+        <option *ngFor="let verifier of selectedVerifiers" [value]="verifier.value">{{ verifier.label }}</option>
+      </select>
+      <input type="email" [(ngModel)]="selectedVerifierId" class="mt-20" placeholder="{{ placeholder }}" />
+    </div>
+    <button [disabled]="!selectedVerifierId" class="mt-20" (click)="getPublicAddress($event)">
+      Get Public Address
+    </button>
+  </div>
+  <div id="console">
+    <p></p>
+  </div>
+</div>
