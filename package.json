@@ -36,7 +36,7 @@
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "random-id": "^1.0.3",
+    "@chaitanyapotti/random-id": "^1.0.3",
     "readable-stream": "^3.5.0",
     "sri-toolbox": "^0.2.0",
     "through2": "^3.0.1",
