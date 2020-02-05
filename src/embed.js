@@ -270,7 +270,9 @@ class Torus {
     this.torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert">' +
         '<h1>Cookies Required</h1>' +
-        '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
+        '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
+        '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
+        '</div>'
     )
 
     const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
