@@ -2,12 +2,14 @@ import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
-import randomId from 'random-id'
+import randomId from '@chaitanyapotti/random-id'
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
+
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
+import { validatePaymentProvider } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
 
@@ -78,12 +80,12 @@ class Torus {
     showTorusButton = true
   } = {}) {
     return new Promise((resolve, reject) => {
-      if (this.isInitalized) reject(new Error('Already initialized'))
+      if (this.isInitalized) return reject(new Error('Already initialized'))
       let torusUrl
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.2.11'
+          torusUrl = 'https://staging.tor.us/v0.2.13'
           logLevel = 'info'
           break
         case 'testing':
@@ -193,22 +195,21 @@ class Torus {
    */
   logout() {
     return new Promise((resolve, reject) => {
-      if (!this.isLoggedIn) reject(new Error('User has not logged in yet'))
-      else {
-        const logOutStream = this.communicationMux.getStream('logout')
-        logOutStream.write({ name: 'logOut' })
-        var statusStream = this.communicationMux.getStream('status')
-        const statusStreamHandler = status => {
-          if (!status.loggedIn) {
-            this.isLoggedIn = false
-            this.isRehydrated = false
-            this.currentVerifier = ''
-            this.requestedVerifier = ''
-            resolve()
-          } else reject(new Error('Some Error Occured'))
-        }
-        handleStream(statusStream, 'data', statusStreamHandler)
+      if (!this.isLoggedIn) return reject(new Error('User has not logged in yet'))
+
+      const logOutStream = this.communicationMux.getStream('logout')
+      logOutStream.write({ name: 'logOut' })
+      var statusStream = this.communicationMux.getStream('status')
+      const statusStreamHandler = status => {
+        if (!status.loggedIn) {
+          this.isLoggedIn = false
+          this.isRehydrated = false
+          this.currentVerifier = ''
+          this.requestedVerifier = ''
+          resolve()
+        } else reject(new Error('Some Error Occured'))
       }
+      handleStream(statusStream, 'data', statusStreamHandler)
     })
   }
 
@@ -259,6 +260,7 @@ class Torus {
       this.torusAlert.remove()
       this.torusAlert = {}
     }
+    this.isInitalized = false
   }
 
   /**
@@ -268,7 +270,9 @@ class Torus {
     this.torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert">' +
         '<h1>Cookies Required</h1>' +
-        '<p>Please enable cookies in your browser preferences to access Torus.</p></div>'
+        '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
+        '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
+        '</div>'
     )
 
     const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
@@ -362,7 +366,7 @@ class Torus {
     this.torusWidget.appendChild(this.torusMenuBtn)
 
     // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s">')
+    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s;display: none">')
     this.torusSpeedDial.style.opacity = '0'
     const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
 
@@ -556,6 +560,7 @@ class Torus {
     this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
     this.torusLoadingBtn.style.display = 'none'
     this.torusLoginModal.style.display = 'none'
+    this.torusSpeedDial.style.display = 'none'
     this.torusSpeedDial.style.opacity = '0'
   }
 
@@ -581,6 +586,7 @@ class Torus {
     this.torusMenuBtn.style.display = 'none'
     this.torusLogin.style.display = 'none'
     this.torusLoadingBtn.style.display = 'none'
+    this.torusSpeedDial.style.display = 'none'
     this.torusSpeedDial.style.opacity = '0'
   }
 
@@ -624,8 +630,8 @@ class Torus {
     const detectAccountRequestPrototypeModifier = m => {
       const originalMethod = inpageProvider[m]
       const self = this
-      inpageProvider[m] = function({ method }) {
-        if (method === 'eth_requestAccounts') {
+      inpageProvider[m] = function(method) {
+        if (method && method === 'eth_requestAccounts') {
           return self.ethereum.enable()
         }
         return originalMethod.apply(this, arguments)
@@ -643,8 +649,9 @@ class Torus {
         // TODO: Handle errors when pipe is broken (eg. popup window is closed)
 
         // If user is already logged in, we assume they have given access to the website
-        this.web3.eth.getAccounts(
-          function(err, res) {
+        inpageProvider.sendAsync(
+          { method: 'eth_requestAccounts', params: [] },
+          function(err, { result: res } = {}) {
             const self = this
             if (err) {
               setTimeout(() => {
@@ -738,15 +745,10 @@ class Torus {
       log.debug('Torus - overrode web3.setProvider')
     }
     // pretend to be Metamask for dapp compatibility reasons
-    this.web3.currentProvider.isMetamask = true
     this.web3.currentProvider.isTorus = true
-
-    inpageProvider.init({ ethereum: this.ethereum, web3: this.web3 })
-    inpageProvider.publicConfigStore.subscribe(
-      function(state) {
-        this._updateKeyBtnAddress(state.selectedAddress)
-      }.bind(this)
-    )
+    inpageProvider.on('accountsChanged', accounts => {
+      this._updateKeyBtnAddress((accounts && accounts[0]) || '')
+    })
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
@@ -880,6 +882,10 @@ class Torus {
     const isActive = this.torusMenuBtn.classList.contains('active')
 
     var torusSpeedDial = this.torusSpeedDial
+    if (isActive) {
+      torusSpeedDial.style.display = 'block'
+    }
+
     torusSpeedDial.style.opacity = torusSpeedDial.style.opacity === '0' ? '1' : '0'
     torusSpeedDial.classList.toggle('active')
     var mainTime = isActive ? 0.05 : 1.2
@@ -891,7 +897,10 @@ class Torus {
         element.style.transitionDelay = time + 's'
         time += isActive ? 0.05 : -0.05
       })
-    }, 200)
+      if (!isActive) {
+        torusSpeedDial.style.display = 'none'
+      }
+    }, 500)
   }
 
   /**
@@ -902,7 +911,7 @@ class Torus {
   getPublicAddress({ verifier, verifierId }) {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
-      if (!configuration.supportedVerifierList.includes(verifier)) reject(new Error('Unsupported verifier'))
+      if (!configuration.supportedVerifierList.includes(verifier)) return reject(new Error('Unsupported verifier'))
       this.nodeDetailManager
         .getNodeDetails()
         .then(nodeDetails => {
@@ -989,17 +998,22 @@ class Torus {
     })
   }
 
+  paymentProviders = configuration.paymentProviders
+
   /**
    * Exposes the topup api of torus
    * Allows the dapp to trigger a payment method directly
-   * If no params are provided, it defaults to { fiatValue = MIN_FOR_PROVIDER; selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
+   * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
+   * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
    * @param {Enum} provider Supported options are moonpay, wyre and coindirect
-   * @param {PaymentParams} params PaymentParams is { fiatValue?: Number; selectedCurrency?: string; selectedCryptoCurrency?: string; }
+   * @param {PaymentParams} params PaymentParams
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */
   initiateTopup(provider, params) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
+        const { errors, isValid } = validatePaymentProvider(provider, params)
+        if (!isValid) return reject(new Error(JSON.stringify(errors)))
         const topupStream = this.communicationMux.getStream('topup')
         const topupHandler = chunk => {
           if (chunk.name === 'topup_response') {

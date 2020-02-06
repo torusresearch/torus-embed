@@ -23,6 +23,7 @@ declare class Provider {
 }
 
 interface PaymentParams {
+  selectedAddress?: string;
   selectedCurrency?: string;
   fiatValue?: Number;
   selectedCryptoCurrency?: string;  

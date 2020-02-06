@@ -27,8 +27,11 @@
     "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
-    "@toruslabs/fetch-node-details": "^2.0.0",
-    "@toruslabs/torus.js": "^1.0.5",
+    "@chaitanyapotti/random-id": "^1.0.3",
+    "@toruslabs/fetch-node-details": "^2.0.1",
+    "@toruslabs/torus.js": "^1.0.6",
+    "eth-json-rpc-errors": "^2.0.1",
+    "fast-deep-equal": "^3.1.1",
     "json-rpc-engine": "^5.1.6",
     "json-rpc-middleware-stream": "^2.1.1",
     "loglevel": "^1.6.6",
@@ -36,20 +39,22 @@
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "random-id": "^1.0.3",
-    "readable-stream": "^3.4.0",
+    "readable-stream": "^3.5.0",
+    "safe-event-emitter": "^1.0.1",
     "sri-toolbox": "^0.2.0",
     "through2": "^3.0.1",
-    "web3": "0.20.7"
+    "web3": "^0.20.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",
     "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
     "assert": "^2.0.0",
+    "babel-eslint": "^10.0.3",
     "browserify": "^16.5.0",
-    "cross-env": "^6.0.3",
+    "cross-env": "^7.0.0",
     "discify": "^1.6.3",
     "envify": "^4.1.0",
     "eslint": "^6.8.0",
@@ -65,12 +70,12 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "express": "^4.17.1",
-    "husky": "^4.0.10",
-    "lint-staged": "^9.5.0",
-    "mocha": "^7.0.0",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.3",
+    "mocha": "^7.0.1",
     "mocha-eslint": "^6.0.0",
     "prettier": "^1.19.1",
-    "puppeteer": "^2.0.0",
+    "puppeteer": "^2.1.0",
     "rimraf": "^3.0.0",
     "uglifyify": "^5.0.2"
   },
@@ -109,13 +114,11 @@
   "lint-staged": {
     "*.js": [
       "npm run lint:js --",
-      "prettier --write **/*.js",
-      "git add"
+      "prettier --write **/*.js"
     ],
     "*.{json}": [
       "prettier --write **/*.json",
-      "prettier --write **/*.css",
-      "git add"
+      "prettier --write **/*.css"
     ]
   }
 }
