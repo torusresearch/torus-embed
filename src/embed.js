@@ -23,7 +23,7 @@ const defaultVerifiers = {
 }
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-zOuYtxuxeEzQRXEjFWLMg2QnzGoSXZc1iUVvpuXvUlcztLcutA0twPrALKNv9dGF'
+const iframeIntegrity = 'sha384-2uV2kOuLIjn0IRWGZmaKFVukoac0HVCRSd7OMgLcszu9q1+RbfpeNirb/bGxIpnJ'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -97,7 +97,7 @@ class Torus {
           logLevel = 'debug'
           break
         default:
-          torusUrl = 'https://app.tor.us/v0.2.13'
+          torusUrl = 'https://app.tor.us/v0.2.14'
           logLevel = 'error'
           break
       }
