@@ -8,10 +8,6 @@ export class TorusChannelRpcConnection extends SafeEventEmitter {
     super()
     this.promises = {}
     this.connectionStream = connectionStream
-
-    const self = this
-    // super constructor
-    SafeEventEmitter.call(self)
   }
 
   async onPayload(payload) {
