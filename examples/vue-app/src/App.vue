@@ -109,13 +109,14 @@ export default {
       }
     },
     console(text) {
-      document.querySelector('#console>p').innerHTML = text
+      document.querySelector('#console>p').innerHTML = typeof text === 'object' ? JSON.stringify(text) : text
     },
     createPaymentTx() {
       window.torus
         .initiateTopup('moonpay', {
           selectedCurrency: 'USD'
         })
+        .catch(console.error)
         .finally(console.log)
     },
     sendEth() {
@@ -128,8 +129,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_sign',
-          params: [window.torus.web3.eth.accounts[0], message],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, message],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -156,8 +157,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData',
-          params: [typedData, window.torus.web3.eth.accounts[0]],
-          from: window.torus.web3.eth.accounts[0]
+          params: [typedData, this.publicAddress],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -210,8 +211,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
-          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, JSON.stringify(typedData)],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -273,8 +274,8 @@ export default {
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v4',
-          params: [window.torus.web3.eth.accounts[0], JSON.stringify(typedData)],
-          from: window.torus.web3.eth.accounts[0]
+          params: [this.publicAddress, JSON.stringify(typedData)],
+          from: this.publicAddress
         },
         function(err, result) {
           if (err) {
@@ -288,7 +289,7 @@ export default {
       window.torus.cleanUp().then(() => (this.publicAddress = ''))
     },
     changeProvider() {
-      window.torus.setProvider({ host: 'ropsten' }).finally(console.log)
+      window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
     },
     sendDai() {
       window.torus.setProvider({ host: 'mainnet' }).finally(() => {
@@ -307,7 +308,7 @@ export default {
       })
     },
     async getUserInfo() {
-      window.torus.getUserInfo().finally(console.log)
+      window.torus.getUserInfo().then(this.console).catch(this.console)
     },
     getPublicAddress() {
       console.log(this.selectedVerifier, this.verifierId)
