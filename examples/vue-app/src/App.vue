@@ -286,7 +286,7 @@ export default {
       )
     },
     logout() {
-      window.torus.cleanUp().then(() => (this.publicAddress = ''))
+      window.torus.logout().then(() => (this.publicAddress = ''))
     },
     changeProvider() {
       window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
