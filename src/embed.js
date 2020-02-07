@@ -2,14 +2,13 @@ import sriToolbox from 'sri-toolbox'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
-import randomId from '@chaitanyapotti/random-id'
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
 
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
-import { validatePaymentProvider } from './utils'
+import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
 
@@ -167,7 +166,13 @@ class Torus {
 
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
-      this._createAlert()
+      this._createAlert(
+        '<div id="torusAlert" class="torus-alert">' +
+          '<h1>Cookies Required</h1>' +
+          '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
+          '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
+          '</div>'
+      )
       throw new Error('Third party cookies not supported')
     }
   }
@@ -266,14 +271,8 @@ class Torus {
   /**
    * Show alert for Cookies Required
    */
-  _createAlert() {
-    this.torusAlert = htmlToElement(
-      '<div id="torusAlert" class="torus-alert">' +
-        '<h1>Cookies Required</h1>' +
-        '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
-        '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
-        '</div>'
-    )
+  _createAlert(alertContent) {
+    this.torusAlert = htmlToElement(alertContent)
 
     const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
     this.torusAlert.appendChild(closeAlert)
@@ -706,7 +705,14 @@ class Torus {
     var windowStream = communicationMux.getStream('window')
     windowStream.on('data', chunk => {
       if (chunk.name === 'create_window') {
-        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
+        if (!isFirefox()) this._createPopupBlockAlert(chunk.data.preopenInstanceId)
+        else
+          this._createAlert(
+            '<div id="torusAlert" class="torus-alert">' +
+              '<h1>Popup Blocked</h1>' +
+              '<p>Please enable popups in your browser preferences to access Torus.</p>' +
+              '</div>'
+          )
       }
     })
 
@@ -786,7 +792,7 @@ class Torus {
         }
       }
       handleStream(oauthStream, 'data', loginHandler)
-      const preopenInstanceId = randomId()
+      const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId)
       oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
     }
@@ -805,7 +811,7 @@ class Torus {
         } else reject(new Error('some error occured'))
       }
       handleStream(providerChangeStream, 'data', handler)
-      const preopenInstanceId = randomId()
+      const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId, {
         target: '_blank',
         features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
@@ -956,7 +962,7 @@ class Torus {
                 }
               }
               handleStream(userInfoStream, 'data', userInfoHandler)
-              const preopenInstanceId = randomId()
+              const preopenInstanceId = getPreopenInstanceId()
               this._handleWindow(preopenInstanceId, {
                 target: '_blank',
                 features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500'
@@ -971,31 +977,33 @@ class Torus {
   }
 
   _handleWindow(preopenInstanceId, { target, features } = {}) {
-    const windowStream = this.communicationMux.getStream('window')
-    const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
-    const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
-    handledWindow.open()
-    windowStream.write({
-      name: 'opened_window',
-      data: {
-        preopenInstanceId: preopenInstanceId
-      }
-    })
-    const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
-      if (receivedId === preopenInstanceId && close) {
-        handledWindow.close()
-        windowStream.removeListener('data', closeHandler)
-      }
-    }
-    windowStream.on('data', closeHandler)
-    handledWindow.once('close', () => {
+    if (preopenInstanceId) {
+      const windowStream = this.communicationMux.getStream('window')
+      const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
+      const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
+      handledWindow.open()
       windowStream.write({
+        name: 'opened_window',
         data: {
-          preopenInstanceId: preopenInstanceId,
-          closed: true
+          preopenInstanceId: preopenInstanceId
         }
       })
-    })
+      const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
+        if (receivedId === preopenInstanceId && close) {
+          handledWindow.close()
+          windowStream.removeListener('data', closeHandler)
+        }
+      }
+      windowStream.on('data', closeHandler)
+      handledWindow.once('close', () => {
+        windowStream.write({
+          data: {
+            preopenInstanceId: preopenInstanceId,
+            closed: true
+          }
+        })
+      })
+    }
   }
 
   paymentProviders = configuration.paymentProviders
@@ -1025,7 +1033,7 @@ class Torus {
           }
         }
         handleStream(topupStream, 'data', topupHandler)
-        const preopenInstanceId = randomId()
+        const preopenInstanceId = getPreopenInstanceId()
         this._handleWindow(preopenInstanceId)
         topupStream.write({ name: 'topup_request', data: { provider: provider, params: params, preopenInstanceId: preopenInstanceId } })
       } else reject(new Error('User has not logged in yet'))
