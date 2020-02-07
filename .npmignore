@@ -37,3 +37,5 @@ server.js
 .eslintignore
 .prettierignore
 .prettierrc.yaml
+.github
+toruslabs-torus-embed*

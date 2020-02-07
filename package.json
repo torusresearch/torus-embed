@@ -1,7 +1,9 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "0.2.9",
+  "version": "0.2.14",
   "description": "Embed script for Torus",
+  "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "test": "test"
   },
@@ -18,54 +20,66 @@
     "build-embed": "node ./scripts/createEmbed.js",
     "lint:js": "eslint --fix src/**/*.js",
     "post-build": ". ./scripts/calculateIntegrity.sh",
+    "prepack": "npm run build",
     "test:e2e": "node ./test/e2e/puppeteer.js",
     "test:e2e:headful": "node ./test/e2e/puppeteer.js false",
     "test:build-embed": "mocha --exit ./test/compile/Web3Test.js",
     "update:gist": ". ./scripts/updateGistIntegrity.sh"
   },
   "dependencies": {
-    "json-rpc-engine": "^5.1.5",
+    "@chaitanyapotti/random-id": "^1.0.3",
+    "@toruslabs/fetch-node-details": "^2.0.1",
+    "@toruslabs/torus.js": "^1.0.6",
+    "eth-json-rpc-errors": "^2.0.1",
+    "fast-deep-equal": "^3.1.1",
+    "json-rpc-engine": "^5.1.6",
     "json-rpc-middleware-stream": "^2.1.1",
     "loglevel": "^1.6.6",
     "obj-multiplex": "^1.0.0",
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "readable-stream": "^3.4.0",
+    "readable-stream": "^3.5.0",
+    "safe-event-emitter": "^1.0.1",
     "sri-toolbox": "^0.2.0",
     "through2": "^3.0.1",
-    "web3": "0.20.7"
+    "web3": "^0.20.7"
   },
   "devDependencies": {
-    "@connext/channel-provider": "4.0.6",
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.2",
-    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
-    "@babel/preset-env": "^7.7.1",
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@connext/channel-provider": "4.0.10",
     "assert": "^2.0.0",
+    "babel-eslint": "^10.0.3",
     "browserify": "^16.5.0",
-    "cross-env": "^6.0.3",
+    "cross-env": "^7.0.0",
     "discify": "^1.6.3",
     "envify": "^4.1.0",
-    "eslint": "^6.7.0",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-prettier": "^6.9.0",
     "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-flowtype": "^4.4.1",
+    "eslint-plugin-flowtype": "^4.6.0",
     "eslint-plugin-html": "^6.0.0",
-    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-mocha": "^6.2.2",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-react-hooks": "^2.3.0",
     "eslint-plugin-standard": "^4.0.1",
     "express": "^4.17.1",
-    "husky": "^3.1.0",
-    "lint-staged": "^9.4.3",
-    "mocha": "^6.2.2",
+    "husky": "^4.2.1",
+    "lint-staged": "^10.0.3",
+    "mocha": "^7.0.1",
     "mocha-eslint": "^6.0.0",
     "prettier": "^1.19.1",
-    "puppeteer": "^2.0.0",
+    "puppeteer": "^2.1.0",
     "rimraf": "^3.0.0",
     "uglifyify": "^5.0.2"
   },
@@ -104,13 +118,11 @@
   "lint-staged": {
     "*.js": [
       "npm run lint:js --",
-      "prettier --write **/*.js",
-      "git add"
+      "prettier --write **/*.js"
     ],
     "*.{json}": [
       "prettier --write **/*.json",
-      "prettier --write **/*.css",
-      "git add"
+      "prettier --write **/*.css"
     ]
   }
 }

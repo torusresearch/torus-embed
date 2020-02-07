@@ -8,7 +8,7 @@ export default class Torus {
   getPublicAddress(verifierArgs: VerifierArgs): Promise<string>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
-  initiateTopup(provider: 'simplex' | 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>
+  initiateTopup(provider: 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>
   showTorusButton(): void
   hideTorusButton(): void
   getUserInfo(message: string): Promise<UserInfo>
@@ -23,6 +23,7 @@ declare class Provider {
 }
 
 interface PaymentParams {
+  selectedAddress?: string;
   selectedCurrency?: string;
   fiatValue?: Number;
   selectedCryptoCurrency?: string;  
