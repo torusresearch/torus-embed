@@ -10,6 +10,7 @@ import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
 import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
 import configuration from './config'
+import TorusChannelProvider from './channel-provider'
 import PopupHandler from './PopupHandler'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
@@ -618,6 +619,16 @@ class Torus {
       targetWindow: this.torusIframe.contentWindow
     })
     this.communicationStream.setMaxListeners(100)
+
+    // setup channel stream
+    this.channelStream = new LocalMessageDuplexStream({
+      name: 'embed_chan',
+      target: 'iframe_chan',
+      targetWindow: this.torusIframe.contentWindow
+    })
+    this.channelStream.setMaxListeners(100)
+
+    this.channelProvider = new TorusChannelProvider(this.channelStream)
 
     // Backward compatibility with Gotchi :)
     // window.metamaskStream = this.communicationStream
