@@ -1,5 +1,5 @@
 {
-  "extends": ["react-app"],
+  "extends": ["airbnb", "react-app"],
   "rules": {
     "react/jsx-filename-extension": [
       1,
