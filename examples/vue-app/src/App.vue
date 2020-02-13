@@ -97,6 +97,7 @@ export default {
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
+        torus.provider.on('chainChanged', (resp) => console.log(resp, 'chainchanged'))
         window.web3 = web3
         web3.eth.getAccounts().then(accounts => {
           this.publicAddress = accounts[0]
