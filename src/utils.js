@@ -2,6 +2,7 @@ import log from 'loglevel'
 import { serializeError } from 'eth-json-rpc-errors'
 import EventEmitter from 'events'
 import SafeEventEmitter from 'safe-event-emitter'
+import randomId from '@chaitanyapotti/random-id'
 
 import config from './config'
 
@@ -113,4 +114,12 @@ export const makeThenable = (obj, prop) => {
   Object.defineProperty(obj, 'finally', { ...defineOpts, value: Promise.prototype.finally })
 
   return obj
+}
+
+export const getPreopenInstanceId = () => {
+  return isFirefox() ? undefined : randomId()
+}
+
+export const isFirefox = () => {
+  return navigator.userAgent.toLowerCase().includes('firefox')
 }
