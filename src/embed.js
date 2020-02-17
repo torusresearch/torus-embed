@@ -11,6 +11,7 @@ import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStrea
 import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
+import { sendSiteMetadata } from './siteMetadata'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -755,6 +756,7 @@ class Torus {
     inpageProvider.on('accountsChanged', accounts => {
       this._updateKeyBtnAddress((accounts && accounts[0]) || '')
     })
+    sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
