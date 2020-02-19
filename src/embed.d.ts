@@ -5,7 +5,7 @@ export default class Torus {
   web3: Web3
   provider: Provider
   ethereum: Provider
-  getPublicAddress(verifierArgs: VerifierArgs): Promise<string>;
+  getPublicAddress(verifierArgs: VerifierArgs): Promise<string | TorusPublicKey>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
   initiateTopup(provider: 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>
@@ -22,16 +22,26 @@ declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;
 }
 
+interface TorusPublicKey extends TorusNodePub {
+  address: String;
+}
+
+interface TorusNodePub {
+  X: String;
+  Y: String;
+}
+
 interface PaymentParams {
   selectedAddress?: string;
   selectedCurrency?: string;
   fiatValue?: Number;
-  selectedCryptoCurrency?: string;  
+  selectedCryptoCurrency?: string;
 }
 
 interface VerifierArgs {
   verifier: 'google' | 'reddit' | 'discord';
   verifierId: string;
+  isExtended?: Boolean;
 }
 
 interface LoginParams {

@@ -916,17 +916,22 @@ class Torus {
    * @param {String} verifier Oauth Provider
    * @param {String} verifierId Unique idenfier of oauth provider
    */
-  getPublicAddress({ verifier, verifierId }) {
+  getPublicAddress({ verifier, verifierId, isExtended = false }) {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) return reject(new Error('Unsupported verifier'))
       this.nodeDetailManager
         .getNodeDetails()
         .then(nodeDetails => {
-          return this.torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, nodeDetails.torusNodePub, {
-            verifier: verifier,
-            verifierId: verifierId
-          })
+          return this.torusJs.getPublicAddress(
+            nodeDetails.torusNodeEndpoints,
+            nodeDetails.torusNodePub,
+            {
+              verifier: verifier,
+              verifierId: verifierId
+            },
+            isExtended
+          )
         })
         .then(pubAddr => resolve(pubAddr))
         .catch(err => reject(err))
