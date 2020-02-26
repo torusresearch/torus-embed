@@ -11,7 +11,6 @@ import log from 'loglevel'
 import dequal from 'fast-deep-equal'
 
 import messages from './messages'
-// const { sendSiteMetadata } = require('./src/siteMetadata')
 import { createErrorMiddleware, logStreamDisconnectWarning, makeThenable } from './utils'
 
 // resolve response.result, reject errors
@@ -129,13 +128,6 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     //     this.emit('notification', payload.params.result)
     //   }
     // })
-
-    // send website metadata
-    // const domContentLoadedHandler = () => {
-    //   sendSiteMetadata(this._rpcEngine)
-    //   window.removeEventListener('DOMContentLoaded', domContentLoadedHandler)
-    // }
-    // window.addEventListener('DOMContentLoaded', domContentLoadedHandler)
 
     // indicate that we've connected, for EIP-1193 compliance
     setTimeout(() => this.emit('connect'))

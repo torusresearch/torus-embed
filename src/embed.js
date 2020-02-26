@@ -11,6 +11,7 @@ import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStrea
 import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
+import { sendSiteMetadata } from './siteMetadata'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -755,6 +756,7 @@ class Torus {
     inpageProvider.on('accountsChanged', accounts => {
       this._updateKeyBtnAddress((accounts && accounts[0]) || '')
     })
+    sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
@@ -914,17 +916,22 @@ class Torus {
    * @param {String} verifier Oauth Provider
    * @param {String} verifierId Unique idenfier of oauth provider
    */
-  getPublicAddress({ verifier, verifierId }) {
+  getPublicAddress({ verifier, verifierId, isExtended = false }) {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) return reject(new Error('Unsupported verifier'))
       this.nodeDetailManager
         .getNodeDetails()
         .then(nodeDetails => {
-          return this.torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, nodeDetails.torusNodePub, {
-            verifier: verifier,
-            verifierId: verifierId
-          })
+          return this.torusJs.getPublicAddress(
+            nodeDetails.torusNodeEndpoints,
+            nodeDetails.torusNodePub,
+            {
+              verifier: verifier,
+              verifierId: verifierId
+            },
+            isExtended
+          )
         })
         .then(pubAddr => resolve(pubAddr))
         .catch(err => reject(err))
