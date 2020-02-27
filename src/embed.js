@@ -19,7 +19,8 @@ const defaultVerifiers = {
   [FACEBOOK]: true,
   [REDDIT]: true,
   [TWITCH]: true,
-  [DISCORD]: true
+  [DISCORD]: true,
+  [TORUS]: true
 }
 cleanContextForImports()
 
@@ -471,7 +472,9 @@ class Torus {
     }
     formContainer.appendChild(loginList)
 
-    formContainer.appendChild(loginEmailPhoneContainer)
+    if (this.enabledVerifiers[TORUS]) {
+      formContainer.appendChild(loginEmailPhoneContainer)
+    }
 
     const loginNote = htmlToElement(
       '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
