@@ -2,20 +2,20 @@ import Web3 from 'web3'
 
 export default class Torus {
   constructor(args: TorusCtorArgs);
-  web3: Web3
-  provider: Provider
-  ethereum: Provider
+  web3: Web3;
+  provider: Provider;
+  ethereum: Provider;
   getPublicAddress(verifierArgs: VerifierArgs): Promise<string | TorusPublicKey>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
-  showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void
-  initiateTopup(provider: 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>
-  showTorusButton(): void
-  hideTorusButton(): void
-  getUserInfo(message: string): Promise<UserInfo>
-  init(params: TorusParams): Promise<void>
-  login(params: LoginParams): Promise<string[]>
-  logout(): Promise<void>
-  cleanUp(): Promise<void>
+  showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void;
+  initiateTopup(provider: 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>;
+  showTorusButton(): void;
+  hideTorusButton(): void;
+  getUserInfo(message: string): Promise<UserInfo>;
+  init(params: TorusParams): Promise<void>;
+  login(params: LoginParams): Promise<string[]>;
+  logout(): Promise<void>;
+  cleanUp(): Promise<void>;
 }
 
 declare class Provider {
