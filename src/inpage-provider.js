@@ -120,14 +120,17 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     this._rpcEngine = rpcEngine
 
     // json rpc notification listener
-    // jsonRpcConnection.events.on('notification', payload => {
-    //   if (payload.method === 'wallet_accountsChanged') {
-    //     this._handleAccountsChanged(payload.result)
-    //   } else if (payload.method === 'eth_subscription') {
-    //     // EIP 1193 subscriptions, per eth-json-rpc-filters/subscriptionManager
-    //     this.emit('notification', payload.params.result)
-    //   }
-    // })
+    jsonRpcConnection.events.on('notification', payload => {
+      if (payload.method === 'wallet_accountsChanged') {
+        this._handleAccountsChanged(payload.result)
+      } else if (payload.method === 'eth_subscription') {
+        // EIP 1193 subscriptions, per eth-json-rpc-filters/subscriptionManager
+        this.emit('notification', payload.params.result)
+      }
+
+      // Backward compatibility for older non EIP 1193 subscriptions
+      this.emit('data', null, payload)
+    })
 
     // indicate that we've connected, for EIP-1193 compliance
     setTimeout(() => this.emit('connect'))
