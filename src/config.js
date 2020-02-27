@@ -4,6 +4,7 @@ const enums = {
   TWITCH: 'twitch',
   REDDIT: 'reddit',
   DISCORD: 'discord',
+  TORUS: 'torus',
   MOONPAY: 'moonpay',
   WYRE: 'wyre',
   COINDIRECT: 'coindirect'
