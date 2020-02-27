@@ -117,9 +117,5 @@ export const makeThenable = (obj, prop) => {
 }
 
 export const getPreopenInstanceId = () => {
-  return isFirefox() ? undefined : randomId()
-}
-
-export const isFirefox = () => {
-  return navigator.userAgent.toLowerCase().includes('firefox')
+  return randomId()
 }
