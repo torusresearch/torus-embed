@@ -13,7 +13,7 @@ import configuration from './config'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 
-const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
+const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD, TORUS } = configuration.enums
 const defaultVerifiers = {
   [GOOGLE]: true,
   [FACEBOOK]: true,
@@ -453,10 +453,25 @@ class Torus {
     if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
     if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
 
+    const loginEmailPhoneContainer = htmlToElement('<div id="torus-login-modal__login-email_phone"></div>')
+
+    this.emailLogin = htmlToElement(
+      '<button id="torus-login-modal__login-email"><img src="' + torusUrl + '/images/email.svg' + '">Sign up/in with Email</button>'
+    )
+
+    this.phoneLogin = htmlToElement(
+      '<button id="torus-login-modal__login-phone"><img src="' + torusUrl + '/images/phone-icon.svg' + '">Sign up/in with Phone</button>'
+    )
+
+    loginEmailPhoneContainer.appendChild(this.emailLogin)
+    loginEmailPhoneContainer.appendChild(this.phoneLogin)
+
     if (this.enabledVerifiers[GOOGLE]) {
       formContainer.appendChild(this.googleLogin)
     }
     formContainer.appendChild(loginList)
+
+    formContainer.appendChild(loginEmailPhoneContainer)
 
     const loginNote = htmlToElement(
       '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
@@ -769,8 +784,9 @@ class Torus {
         this._showLoggedOut()
         if (reject) reject(new Error('Modal has been closed'))
       }
-      const loginHandler = verifier => {
+      const loginHandler = (verifier, loginType) => {
         this.requestedVerifier = verifier
+        this.loginType = loginType
         this._showLoginPopup(calledFromEmbed, resolve, reject)
       }
       Object.keys(this.enabledVerifiers).forEach(verifier => {
@@ -778,6 +794,10 @@ class Torus {
           handleEvent(this[`${verifier}Login`], 'click', loginHandler, [verifier])
         }
       })
+
+      // Register email and phone login event
+      handleEvent(this.emailLogin, 'click', loginHandler, [TORUS, 'torus-email-login'])
+      handleEvent(this.phoneLogin, 'click', loginHandler, [TORUS, 'torus-phone-login'])
     } else {
       var oauthStream = this.communicationMux.getStream('oauth')
       const self = this
@@ -796,7 +816,10 @@ class Torus {
       handleStream(oauthStream, 'data', loginHandler)
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId)
-      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId: preopenInstanceId } })
+      oauthStream.write({
+        name: 'oauth',
+        data: { calledFromEmbed, verifier: this.requestedVerifier, loginType: this.loginType, preopenInstanceId: preopenInstanceId }
+      })
     }
   }
 
