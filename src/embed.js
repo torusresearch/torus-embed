@@ -718,7 +718,7 @@ class Torus {
     })
 
     // Show torus button if wallet has been hydrated/detected
-    var statusStream = communicationMux.getStream('status')
+    const statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
       // rehydration
       if (status.rehydrate && status.loggedIn) {
@@ -989,6 +989,10 @@ class Torus {
       const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
       const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
       handledWindow.open()
+      if (!handledWindow.window) {
+        this._createPopupBlockAlert(preopenInstanceId)
+        return
+      }
       windowStream.write({
         name: 'opened_window',
         data: {
