@@ -8,7 +8,7 @@ import TorusJs from '@toruslabs/torus.js'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
-import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
+import { validatePaymentProvider, getPreopenInstanceId } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
@@ -706,14 +706,7 @@ class Torus {
     var windowStream = communicationMux.getStream('window')
     windowStream.on('data', chunk => {
       if (chunk.name === 'create_window') {
-        if (!isFirefox()) this._createPopupBlockAlert(chunk.data.preopenInstanceId)
-        else
-          this._createAlert(
-            '<div id="torusAlert" class="torus-alert">' +
-              '<h1>Popup Blocked</h1>' +
-              '<p>Please enable popups in your browser preferences to access Torus.</p>' +
-              '</div>'
-          )
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
       }
     })
 
