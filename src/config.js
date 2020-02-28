@@ -5,8 +5,7 @@ const enums = {
   REDDIT: 'reddit',
   DISCORD: 'discord',
   MOONPAY: 'moonpay',
-  WYRE: 'wyre',
-  COINDIRECT: 'coindirect'
+  WYRE: 'wyre'
 }
 
 const verifierList = Object.values(enums)
@@ -33,17 +32,6 @@ const paymentProviders = {
     validCurrencies: ['USD'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
     includeFees: false
-  },
-  [enums.COINDIRECT]: {
-    line1: 'Credit / Debit Card',
-    line2: '2.99%',
-    line3: 'N/A',
-    supportPage: 'https://help.coindirect.com/hc/en-us',
-    minOrderValue: 20,
-    maxOrderValue: 1000,
-    validCurrencies: ['EUR'],
-    validCryptoCurrencies: ['ETH', 'DAI', 'USDT'],
-    includeFees: true
   }
 }
 
