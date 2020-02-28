@@ -235,11 +235,9 @@ class App extends React.Component {
       const localWeb3 = web3Obj.web3
       const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
       const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-      const result = await instance.methods.transfer(this.state.account, value).send(
-        {
-          from: this.state.account
-        }
-      )
+      const result = await instance.methods.transfer(this.state.account, value).send({
+        from: this.state.account
+      })
       this.console(result)
     })
   }
