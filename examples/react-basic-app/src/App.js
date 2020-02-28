@@ -10,7 +10,7 @@ class App extends React.Component {
     selectedVerifier: 'google',
     placeholder: 'Enter google email',
     verifierId: null,
-    buildEnv: 'testing'
+    buildEnv: 'development'
   }
 
   componentDidMount() {
@@ -231,19 +231,16 @@ class App extends React.Component {
   }
 
   sendDai = () => {
-    web3Obj.torus.setProvider({ host: 'mainnet' }).finally(() => {
+    web3Obj.torus.setProvider({ host: 'mainnet' }).finally(async () => {
       const localWeb3 = web3Obj.web3
       const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
       const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-      instance.methods.transfer(this.state.account, value).send(
+      const result = await instance.methods.transfer(this.state.account, value).send(
         {
           from: this.state.account
-        },
-        (err, hash) => {
-          if (err) this.console(err)
-          this.console(hash)
         }
       )
+      this.console(result)
     })
   }
 
@@ -258,7 +255,7 @@ class App extends React.Component {
   }
 
   getPublicAddress = () => {
-    web3Obj.torus.getPublicAddress({ verifier: this.state.selectedVerifier, verifierId: this.state.verifierId }).then(this.console)
+    web3Obj.torus.getPublicAddress({ verifier: this.state.selectedVerifier, verifierId: this.state.verifierId, isExtended: true }).then(this.console)
   }
 
   onSelectedVerifierChanged = event => {

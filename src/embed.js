@@ -8,9 +8,10 @@ import TorusJs from '@toruslabs/torus.js'
 import MetamaskInpageProvider from './inpage-provider'
 import { setupMultiplex } from './stream-utils'
 import { runOnLoad, htmlToElement, transformEthAddress, handleEvent, handleStream } from './embedUtils'
-import { validatePaymentProvider, getPreopenInstanceId, isFirefox } from './utils'
+import { validatePaymentProvider, getPreopenInstanceId } from './utils'
 import configuration from './config'
 import PopupHandler from './PopupHandler'
+import { sendSiteMetadata } from './siteMetadata'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -84,7 +85,7 @@ class Torus {
       let logLevel
       switch (buildEnv) {
         case 'staging':
-          torusUrl = 'https://staging.tor.us/v0.2.14'
+          torusUrl = 'https://staging.tor.us/v1.0.0'
           logLevel = 'info'
           break
         case 'testing':
@@ -705,19 +706,12 @@ class Torus {
     var windowStream = communicationMux.getStream('window')
     windowStream.on('data', chunk => {
       if (chunk.name === 'create_window') {
-        if (!isFirefox()) this._createPopupBlockAlert(chunk.data.preopenInstanceId)
-        else
-          this._createAlert(
-            '<div id="torusAlert" class="torus-alert">' +
-              '<h1>Popup Blocked</h1>' +
-              '<p>Please enable popups in your browser preferences to access Torus.</p>' +
-              '</div>'
-          )
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
       }
     })
 
     // Show torus button if wallet has been hydrated/detected
-    var statusStream = communicationMux.getStream('status')
+    const statusStream = communicationMux.getStream('status')
     statusStream.on('data', status => {
       // rehydration
       if (status.rehydrate && status.loggedIn) {
@@ -755,6 +749,7 @@ class Torus {
     inpageProvider.on('accountsChanged', accounts => {
       this._updateKeyBtnAddress((accounts && accounts[0]) || '')
     })
+    sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
@@ -914,17 +909,22 @@ class Torus {
    * @param {String} verifier Oauth Provider
    * @param {String} verifierId Unique idenfier of oauth provider
    */
-  getPublicAddress({ verifier, verifierId }) {
+  getPublicAddress({ verifier, verifierId, isExtended = false }) {
     // Select random node from the list of endpoints
     return new Promise((resolve, reject) => {
       if (!configuration.supportedVerifierList.includes(verifier)) return reject(new Error('Unsupported verifier'))
       this.nodeDetailManager
         .getNodeDetails()
         .then(nodeDetails => {
-          return this.torusJs.getPublicAddress(nodeDetails.torusNodeEndpoints, nodeDetails.torusNodePub, {
-            verifier: verifier,
-            verifierId: verifierId
-          })
+          return this.torusJs.getPublicAddress(
+            nodeDetails.torusNodeEndpoints,
+            nodeDetails.torusNodePub,
+            {
+              verifier: verifier,
+              verifierId: verifierId
+            },
+            isExtended
+          )
         })
         .then(pubAddr => resolve(pubAddr))
         .catch(err => reject(err))
@@ -982,6 +982,10 @@ class Torus {
       const finalUrl = this.torusUrl + `/redirect?preopenInstanceId=${preopenInstanceId}`
       const handledWindow = new PopupHandler({ url: finalUrl, target: target, features: features })
       handledWindow.open()
+      if (!handledWindow.window) {
+        this._createPopupBlockAlert(preopenInstanceId)
+        return
+      }
       windowStream.write({
         name: 'opened_window',
         data: {
@@ -1013,7 +1017,7 @@ class Torus {
    * Allows the dapp to trigger a payment method directly
    * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
    * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre and coindirect
+   * @param {Enum} provider Supported options are moonpay, wyre
    * @param {PaymentParams} params PaymentParams
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */
