@@ -1017,7 +1017,7 @@ class Torus {
    * Allows the dapp to trigger a payment method directly
    * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
    * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre and coindirect
+   * @param {Enum} provider Supported options are moonpay, wyre
    * @param {PaymentParams} params PaymentParams
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */

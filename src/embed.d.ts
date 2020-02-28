@@ -8,7 +8,7 @@ export default class Torus {
   getPublicAddress(verifierArgs: VerifierArgs): Promise<string | TorusPublicKey>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void;
-  initiateTopup(provider: 'moonpay' | 'wyre' | 'coindirect', params?: PaymentParams): Promise<boolean>;
+  initiateTopup(provider: 'moonpay' | 'wyre', params?: PaymentParams): Promise<boolean>;
   showTorusButton(): void;
   hideTorusButton(): void;
   getUserInfo(message: string): Promise<UserInfo>;
