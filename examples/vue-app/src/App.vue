@@ -3,10 +3,10 @@
     <form @submit.prevent="login">
       <p>Build Environment</p>
       <select name="buildEnv" v-model="buildEnv">
-        <option value="production">Production</option>
-        <option selected value="staging">Staging</option>
-        <option value="testing">Testing</option>
-        <option value="development">Development</option>
+        <option selected value="development">Development</option>
+        <!-- option value="production">Production</option>
+        <option value="staging">Staging</option>
+        <option value="testing">Testing</option> -->
       </select>
       <button v-if="publicAddress === ''">Login</button>
     </form>
@@ -22,6 +22,8 @@
       <button @click="signTypedData_v3">sign typed data v3</button>
       <button @click="signTypedData_v4">sign typed data v4</button>
       <button @click="changeProvider">Change Provider</button>
+      <button @click="createScw">Create Scw</button>
+      <button @click="getScw">Get Scw</button>
       <button @click="sendDai">Send DAI</button>
       <div :style="{marginTop: '20px'}">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
@@ -57,7 +59,7 @@ export default {
       verifierId: '',
       selectedVerifier: 'google',
       placeholder: 'Enter google email',
-      buildEnv: 'testing'
+      buildEnv: 'development'
     }
   },
   methods: {
@@ -90,8 +92,8 @@ export default {
           },
           enableLogging: false,
           network: {
-            host: 'rinkeby', // mandatory
-            chainId: 4
+            host: 'ropsten', // mandatory
+            chainId: 3
           },
           showTorusButton: true
         })
@@ -121,7 +123,7 @@ export default {
         .finally(console.log)
     },
     sendEth() {
-      window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
+      window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01'), relayer:true })
     },
     signMessage() {
       const self = this
@@ -291,6 +293,12 @@ export default {
     },
     changeProvider() {
       window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
+    },
+    createScw() {
+      window.torus.createSCW().then(this.console).catch(this.console)
+    },
+    getScw(){
+      window.torus.getSCWAddress().then(this.console).catch(this.console)
     },
     sendDai() {
       window.torus.setProvider({ host: 'mainnet' }).finally(() => {

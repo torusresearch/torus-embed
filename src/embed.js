@@ -976,6 +976,40 @@ class Torus {
     })
   }
 
+  /**
+   * Create smart contract wallet
+   * @param {String} message Message to be displayed to the user
+   */
+  createSCW(message) {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const createScwStream = this.communicationMux.getStream('create_scw')
+        createScwStream.write({ name: 'create_scw_request' })
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
+
+  /**
+   * Get smartcontract wallet address
+   * @param {String} message Message to be displayed to the user
+   */
+  getSCWAddress() {
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const getAddressSCW = this.communicationMux.getStream('get_scw')
+        getAddressSCW.write({ name: 'scw_address_request' })
+        const getAddressHandler = chunk => {
+          const { name, data } = chunk
+          if (name === 'scw_address_response') {
+            console.log(data)
+            resolve(data)
+          }
+        }
+        handleStream(getAddressSCW, 'data', getAddressHandler)
+      } else reject(new Error('User has not logged in yet'))
+    })
+  }
+
   _handleWindow(preopenInstanceId, { target, features } = {}) {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream('window')
