@@ -11,6 +11,7 @@ try {
   }
   bundler.transform(
     envify({
+      _: 'purge',
       TORUS_BUILD_ENV: process.env.TORUS_BUILD_ENV
     })
   )
