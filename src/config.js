@@ -5,12 +5,24 @@ const enums = {
   REDDIT: 'reddit',
   DISCORD: 'discord',
   MOONPAY: 'moonpay',
-  WYRE: 'wyre'
+  WYRE: 'wyre',
+  RAMPNETWORK: 'rampnetwork'
 }
 
 const verifierList = Object.values(enums)
 
 const paymentProviders = {
+  [enums.RAMPNETWORK]: {
+    line1: 'Bank transfer',
+    line2: '0% - 2.5%',
+    line3: '10,000€/purchase, 10,000€/mo',
+    supportPage: 'https://instant.ramp.network/',
+    minOrderValue: 1,
+    maxOrderValue: 10000,
+    validCurrencies: ['GBP', 'EUR'],
+    validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
+    includeFees: true
+  },
   [enums.MOONPAY]: {
     line1: 'Credit / Debit Card / Apple Pay',
     line2: '4.5% or 5 USD',
