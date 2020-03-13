@@ -32,7 +32,7 @@ class PopupHandler extends EventEmitter {
 
   close() {
     this.iClosedWindow = true
-    this.window && this.window.close()
+    if (this.window) this.window.close()
   }
 }
 

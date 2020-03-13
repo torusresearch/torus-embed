@@ -1,12 +1,37 @@
 {
-  "extends": ["standard", "prettier", "prettier/standard", "eslint:recommended"],
-  "plugins": ["prettier", "standard", "mocha"],
+  "extends": [
+    "standard",
+    "eslint:recommended",
+    "plugin:prettier/recommended",
+    "prettier/babel",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:flowtype/recommended",
+    "plugin:promise/recommended",
+    "airbnb-base",
+    "prettier"
+  ],
+  "plugins": ["prettier", "babel", "standard", "promise", "import", "flowtype", "standard", "simple-import-sort"],
   "parser": "babel-eslint",
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 9
   },
   "rules": {
+    "no-restricted-syntax": 0,
+    "simple-import-sort/sort": "error",
+    "operator-linebreak": 0,
+    "arrow-parens": [2, "as-needed"],
+    "object-curly-newline": 0,
+    "semi": [2, "never"],
+    "no-underscore-dangle": 0,
+    "comma-dangle": [
+      2,
+      {
+        "arrays": "ignore",
+        "objects": "ignore"
+      }
+    ],
     "quotes": [2, "single"],
     "max-len": [
       2,
@@ -21,6 +46,8 @@
     "no-nested-ternary": 0,
     "no-confusing-arrow": 0,
     "linebreak-style": 0,
+    "no-extra-semi": 0,
+    "no-unused-vars": [2, { "args": "after-used", "argsIgnorePattern": "_" }],
     "no-param-reassign": [
       "error",
       {

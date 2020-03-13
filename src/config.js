@@ -52,5 +52,6 @@ export default {
   enums,
   verifierList,
   supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD],
-  paymentProviders
+  paymentProviders,
+  api: 'https://api.tor.us'
 }
