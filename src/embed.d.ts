@@ -66,6 +66,13 @@ interface TorusParams {
   enableLogging?: boolean;
   showTorusButton?: boolean;
   enabledVerifiers?: VerifierStatus;
+  integrity?: IntegrityParams;
+}
+
+interface IntegrityParams {
+  check: boolean;
+  hash?: string;
+  version?: string;
 }
 
 interface VerifierStatus {
