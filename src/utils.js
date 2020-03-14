@@ -1,12 +1,13 @@
-import log from 'loglevel'
+import randomId from '@chaitanyapotti/random-id'
 import { serializeError } from 'eth-json-rpc-errors'
 import EventEmitter from 'events'
+import log from 'loglevel'
 import SafeEventEmitter from 'safe-event-emitter'
-import randomId from '@chaitanyapotti/random-id'
 
+import { name, version } from '../package.json'
 import config from './config'
 
-const paymentProviders = config.paymentProviders
+const { paymentProviders } = config
 
 export const validatePaymentProvider = (provider, params) => {
   const errors = {}
@@ -56,7 +57,7 @@ export const createErrorMiddleware = () => {
       }
       serializeError(error)
       log.error(`MetaMask - RPC Error: ${error.message}`, error)
-      done()
+      return done()
     })
   }
 }
@@ -70,7 +71,7 @@ export const createErrorMiddleware = () => {
  */
 export const logStreamDisconnectWarning = (remoteLabel, err) => {
   let warningMsg = `MetamaskInpageProvider - lost connection to ${remoteLabel}`
-  if (err) warningMsg += '\n' + err.stack
+  if (err) warningMsg += `\n${err.stack}`
   log.warn(warningMsg)
   if (this instanceof EventEmitter || this instanceof SafeEventEmitter) {
     if (this.listenerCount('error') > 0) {
@@ -118,4 +119,60 @@ export const makeThenable = (obj, prop) => {
 
 export const getPreopenInstanceId = () => {
   return randomId()
+}
+
+export const get = (url = '', options_ = {}) => {
+  const defaultOptions = {
+    mode: 'cors',
+    cache: 'no-cache'
+  }
+  const options = {
+    ...defaultOptions,
+    ...options_,
+    ...{ method: 'GET' }
+  }
+  return fetch(url, options).then(response => {
+    if (response.ok) {
+      return response.json()
+    }
+    throw response
+  })
+}
+
+export const getTorusUrl = async (buildEnv, integrity) => {
+  let torusUrl
+  let logLevel
+  let versionUsed = integrity.version || version
+  try {
+    if (buildEnv === 'staging' || buildEnv === 'production') {
+      if (integrity.check) {
+        versionUsed = integrity.version || version
+      } else {
+        const response = await get(`${config.api}/latestversion?name=${name}&version=${integrity.version || version}`)
+        versionUsed = response.data
+      }
+    }
+  } catch (error) {
+    log.error(error, 'unable to fetch latest version')
+  }
+  log.info('version used: ', versionUsed)
+  switch (buildEnv) {
+    case 'staging':
+      torusUrl = `https://staging.tor.us/v${versionUsed}`
+      logLevel = 'info'
+      break
+    case 'testing':
+      torusUrl = 'https://testing.tor.us'
+      logLevel = 'debug'
+      break
+    case 'development':
+      torusUrl = 'https://localhost:3000'
+      logLevel = 'debug'
+      break
+    default:
+      torusUrl = `https://app.tor.us/v${versionUsed}`
+      logLevel = 'error'
+      break
+  }
+  return { torusUrl, logLevel }
 }
