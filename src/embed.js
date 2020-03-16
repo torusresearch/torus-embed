@@ -118,7 +118,7 @@ class Torus {
   } = {}) {
     if (this.isInitalized) return Promise.reject(new Error('Already initialized'))
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
-    log.info(torusUrl, 'url')
+    log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
     this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
     log.setDefaultLevel(logLevel)
