@@ -144,13 +144,9 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   let logLevel
   let versionUsed = integrity.version || version
   try {
-    if (buildEnv === 'staging' || buildEnv === 'production') {
-      if (integrity.check) {
-        versionUsed = integrity.version || version
-      } else {
-        const response = await get(`${config.api}/latestversion?name=${name}&version=${integrity.version || version}`)
-        versionUsed = response.data
-      }
+    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.check) {
+      const response = await get(`${config.api}/latestversion?name=${name}&version=${integrity.version || version}`)
+      versionUsed = response.data
     }
   } catch (error) {
     log.error(error, 'unable to fetch latest version')
