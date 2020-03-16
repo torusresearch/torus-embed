@@ -9,12 +9,11 @@ import pump from 'pump'
 export const setupMultiplex = connectionStream => {
   const mux = new ObjectMultiplex()
   // bind helper method to get previously created streams
-  mux.getStream = function(name) {
+  mux.getStream = function streamHelper(name) {
     if (this._substreams[name]) {
       return this._substreams[name]
-    } else {
-      return this.createStream(name)
     }
+    return this.createStream(name)
   }
 
   pump(connectionStream, mux, connectionStream, err => {

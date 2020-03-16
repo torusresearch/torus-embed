@@ -1,22 +1,21 @@
-import pump from 'pump'
+import { ethErrors } from 'eth-json-rpc-errors'
+import dequal from 'fast-deep-equal'
 import RpcEngine from 'json-rpc-engine'
 import createIdRemapMiddleware from 'json-rpc-engine/src/idRemapMiddleware'
 import createJsonRpcStream from 'json-rpc-middleware-stream'
+import log from 'loglevel'
+import ObjectMultiplex from 'obj-multiplex'
 import ObservableStore from 'obs-store'
 import asStream from 'obs-store/lib/asStream'
-import ObjectMultiplex from 'obj-multiplex'
+import pump from 'pump'
 import SafeEventEmitter from 'safe-event-emitter'
-import { ethErrors } from 'eth-json-rpc-errors'
-import log from 'loglevel'
-import dequal from 'fast-deep-equal'
 
 import messages from './messages'
 import { createErrorMiddleware, logStreamDisconnectWarning, makeThenable } from './utils'
 
 // resolve response.result, reject errors
-const getRpcPromiseCallback = (resolve, reject) => (error, response) => {
+const getRpcPromiseCallback = (resolve, reject) => (error, response) =>
   error || response.error ? reject(error || response.error) : Array.isArray(response) ? resolve(response) : resolve(response.result)
-}
 
 class MetamaskInpageProvider extends SafeEventEmitter {
   constructor(connectionStream) {
@@ -37,7 +36,8 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     this.chainId = undefined
 
     // setup connectionStream multiplexing
-    const mux = (this.mux = new ObjectMultiplex())
+    const mux = new ObjectMultiplex()
+    this.mux = mux
     pump(connectionStream, mux, connectionStream, this._handleDisconnect.bind(this, 'MetaMask'))
 
     // subscribe to metamask public config (one-way)
