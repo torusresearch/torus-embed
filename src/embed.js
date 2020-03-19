@@ -1011,7 +1011,7 @@ class Torus {
    */
   initiateTopup(provider, params) {
     return new Promise((resolve, reject) => {
-      if (this.isInitalized) {
+      if (this.isLoggedIn) {
         const { errors, isValid } = validatePaymentProvider(provider, params)
         if (!isValid) {
           reject(new Error(JSON.stringify(errors)))
