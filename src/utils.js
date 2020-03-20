@@ -21,9 +21,9 @@ export const validatePaymentProvider = (provider, params) => {
   const selectedParams = params || {}
 
   // set default values
-  if (!selectedParams.selectedCurrency) [selectedParams.selectedCurrency] = selectedProvider.validCurrencies
+  // if (!selectedParams.selectedCurrency) [selectedParams.selectedCurrency] = selectedProvider.validCurrencies
   // if (!selectedParams.fiatValue) selectedParams.fiatValue = selectedProvider.minOrderValue
-  if (!selectedParams.selectedCryptoCurrency) [selectedParams.selectedCryptoCurrency] = selectedProvider.validCryptoCurrencies
+  // if (!selectedParams.selectedCryptoCurrency) [selectedParams.selectedCryptoCurrency] = selectedProvider.validCryptoCurrencies
 
   // validations
   if (selectedParams.fiatValue) {
@@ -31,10 +31,12 @@ export const validatePaymentProvider = (provider, params) => {
     if (requestedOrderAmount < selectedProvider.minOrderValue) errors.fiatValue = 'Requested amount is lower than supported'
     if (requestedOrderAmount > selectedProvider.maxOrderValue) errors.fiatValue = 'Requested amount is higher than supported'
   }
-  if (!selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) errors.selectedCurrency = 'Unsupported currency'
-  if (!selectedProvider.validCryptoCurrencies.includes(selectedParams.selectedCryptoCurrency))
+  if (selectedParams.selectedCurrency && !selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) {
+    errors.selectedCurrency = 'Unsupported currency'
+  }
+  if (selectedParams.selectedCryptoCurrency && !selectedProvider.validCryptoCurrencies.includes(selectedParams.selectedCryptoCurrency)) {
     errors.selectedCryptoCurrency = 'Unsupported cryptoCurrency'
-
+  }
   return { errors, isValid: Object.keys(errors).length === 0 }
 }
 
