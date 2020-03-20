@@ -127,11 +127,7 @@ class Torus {
     this.torusButtonVisibility = showTorusButton
     this._createWidget(torusUrl)
     const attachIFrame = () => {
-      if (!window.document.getElementById('torusIframe')) {
-        window.document.body.appendChild(this.torusIframe)
-      } else {
-        this.torusIframe = window.document.getElementById('torusIframe')
-      }
+      window.document.body.appendChild(this.torusIframe)
     }
     const handleSetup = async () => {
       await runOnLoad(attachIFrame.bind(this))
