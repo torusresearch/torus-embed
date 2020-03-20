@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 git clone git@gist.github.com:733405286923fa047af4cb26d167acd4.git ~/gist
-PACKAGE_VERSION=$(cat ./src/embed.js | grep app.tor.us | head -1 | awk -F//app.tor.us/ '{ print $2 }' | sed "s/[']//g")
+PACKAGE_VERSION=$(cat package.json \
+  | grep '"version"' \
+  | head -1 \
+  | awk -F: '{ print $2 }' \
+  | sed 's/[",]//g')
 cd public/
 HASH="$(cat embed.min.js | openssl dgst -sha384 -binary | openssl base64 -A)"
 cd ~/gist
-echo "<script src=\"https://app.tor.us/$PACKAGE_VERSION/embed.min.js\"
+URL=$(echo https://app.tor.us/v"$PACKAGE_VERSION"/embed.min.js | tr -d ' ')
+echo "<script src=\"$URL\"
         integrity=\"sha384-$HASH\"
         crossorigin=\"anonymous\"></script>" > torus-embed.html
 
