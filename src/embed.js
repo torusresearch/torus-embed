@@ -55,7 +55,7 @@ function restoreContextAfterImports() {
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-yxEP3RmD/gUIAKdv5Mp0o6oAwUW0haoc3CvXnQR3nq4J94E26+bM9P2wOIj4HmSB'
+const iframeIntegrity = 'sha384-Mvt/bqkgrP0R1HjO+BuBzymmQI/019N7oS+SSoJssAc+R9a++E/b55zbaf07pLI1'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
