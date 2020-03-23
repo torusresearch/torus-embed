@@ -1031,7 +1031,7 @@ class Torus {
         const preopenInstanceId = getPreopenInstanceId()
         this._handleWindow(preopenInstanceId)
         topupStream.write({ name: 'topup_request', data: { provider, params, preopenInstanceId } })
-      } else reject(new Error('User has not logged in yet'))
+      } else reject(new Error('User has not initialized in yet'))
     })
   }
 }
