@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+git config user.email "chaitanya.potti@gmail.com"
+git config user.name "chaitanyapotti"
 git clone git@gist.github.com:733405286923fa047af4cb26d167acd4.git ~/gist
 PACKAGE_VERSION=$(cat package.json \
   | grep '"version"' \
@@ -13,6 +15,4 @@ echo "<script src=\"$URL\"
         integrity=\"sha384-$HASH\"
         crossorigin=\"anonymous\"></script>" > torus-embed.html
 
-git config user.email "chaitanya.potti@gmail.com"
-git config user.name "chaitanyapotti"
 git diff --quiet && git diff --staged --quiet || (git commit -am "Updating embed" && git push origin master)
