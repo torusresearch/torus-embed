@@ -87,7 +87,7 @@ export default {
         })
         window.torus = torus
         await torus.init({
-          buildEnv: this.buildEnv,
+          buildEnv: 'development',
           enabledVerifiers: {
             reddit: false
           },
