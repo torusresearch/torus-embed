@@ -1,7 +1,9 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const browserify = require('browserify')
 const fs = require('fs')
 const path = require('path')
-var envify = require('envify/custom')
+const envify = require('envify/custom')
+
 try {
   const bundler = browserify(path.resolve(__dirname, '../public/index.js'), {
     fullPaths: true
@@ -11,6 +13,7 @@ try {
   }
   bundler.transform(
     envify({
+      _: 'purge',
       TORUS_BUILD_ENV: process.env.TORUS_BUILD_ENV
     })
   )

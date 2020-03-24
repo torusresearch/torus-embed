@@ -1,13 +1,21 @@
-const runOnLoad = fn => {
-  if (window.document.body != null) {
-    fn()
-  } else {
-    window.document.addEventListener('DOMContentLoaded', fn)
-  }
+export const runOnLoad = fn => {
+  return new Promise((resolve, reject) => {
+    if (window.document.body != null) {
+      Promise.resolve(fn())
+        .then(resolve)
+        .catch(reject)
+    } else {
+      window.document.addEventListener('DOMContentLoaded', () => {
+        Promise.resolve(fn())
+          .then(resolve)
+          .catch(reject)
+      })
+    }
+  })
 }
 
-const runOnComplete = fn => {
-  var retry = window.setInterval(function() {
+export const runOnComplete = fn => {
+  const retry = window.setInterval(() => {
     if (window.document.readyState === 'complete') {
       window.clearInterval(retry)
       fn()
@@ -15,25 +23,25 @@ const runOnComplete = fn => {
   }, 300)
 }
 
-const htmlToElement = html => {
-  var template = window.document.createElement('template')
-  var trimmedHtml = html.trim() // Never return a text node of whitespace as the result
+export const htmlToElement = html => {
+  const template = window.document.createElement('template')
+  const trimmedHtml = html.trim() // Never return a text node of whitespace as the result
   template.innerHTML = trimmedHtml
   return template.content.firstChild
 }
 
-const transformEthAddress = ethAddress => {
+export const transformEthAddress = ethAddress => {
   // return ethAddress
   if (Array.isArray(ethAddress)) {
     return ethAddress.map(addr => (typeof addr === 'string' ? addr.toLowerCase() : addr))
-  } else if (typeof ethAddress === 'string') {
-    return ethAddress.toLowerCase()
-  } else {
-    throw new Error('Unexpected Ethereum address format')
   }
+  if (typeof ethAddress === 'string') {
+    return ethAddress.toLowerCase()
+  }
+  throw new Error('Unexpected Ethereum address format')
 }
 
-const handleEvent = (handle, eventName, handler, handlerArgs) => {
+export const handleEvent = (handle, eventName, handler, handlerArgs) => {
   const handlerWrapper = () => {
     handler.apply(this, handlerArgs)
     handle.removeEventListener(eventName, handlerWrapper)
@@ -41,12 +49,10 @@ const handleEvent = (handle, eventName, handler, handlerArgs) => {
   handle.addEventListener(eventName, handlerWrapper)
 }
 
-const handleStream = (handle, eventName, handler) => {
+export const handleStream = (handle, eventName, handler) => {
   const handlerWrapper = chunk => {
     handler(chunk)
     handle.removeListener(eventName, handlerWrapper)
   }
   handle.on(eventName, handlerWrapper)
 }
-
-export { runOnLoad, runOnComplete, htmlToElement, transformEthAddress, handleEvent, handleStream }

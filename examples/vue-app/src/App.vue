@@ -25,6 +25,7 @@
       <button @click="createScw">Create Scw</button>
       <button @click="getScw">Get Scw</button>
       <button @click="sendDai">Send DAI</button>
+      <button @click="approveKnc">Approve Knc</button>
       <div :style="{marginTop: '20px'}">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
           <option selected value="google">Google</option>
@@ -306,6 +307,22 @@ export default {
         const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
         const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
         instance.methods.transfer(this.publicAddress, value).send(
+          {
+            from: this.publicAddress
+          },
+          (err, hash) => {
+            if (err) this.console(err)
+            this.console(hash)
+          }
+        )
+      })
+    },
+    approveKnc() {
+      window.torus.setProvider({ host: 'mainnet' }).finally(() => {
+        const localWeb3 = window.web3
+        const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
+        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        instance.methods.approve(this.publicAddress, value).send(
           {
             from: this.publicAddress
           },
