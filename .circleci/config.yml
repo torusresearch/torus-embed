@@ -1,4 +1,8 @@
 version: 2
+job_common_base: &job_common_base
+  docker:
+    - image: skyuppercut/buildpack-deps
+  working_directory: ~/torus-embed
 job_common: &job_common
   docker:
     - image: skyuppercut/node-puppeteer:latest
@@ -17,7 +21,7 @@ step_setup_global_packages: &step_setup_global_packages
     command: |
       npm install
 deploy_function: &deploy_function
-  <<: *job_common
+  <<: *job_common_base
   steps:
     - attach_workspace:
         at: ~/torus-embed
@@ -74,7 +78,7 @@ jobs:
   deploy-staging:
     <<: *deploy_function
   update-gist:
-    <<: *job_common
+    <<: *job_common_base
     steps:
       - attach_workspace:
           at: ~/torus-embed
