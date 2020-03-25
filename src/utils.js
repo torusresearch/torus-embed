@@ -54,7 +54,7 @@ export const validatePaymentProvider = (provider, params) => {
  */
 export const createErrorMiddleware = () => {
   return (_req, res, next) => {
-    next(done => {
+    next((done) => {
       const { error } = res
       if (!error) {
         return done()
@@ -101,7 +101,7 @@ export const makeThenable = (obj, prop) => {
   const defineOpts = {
     configurable: true,
     writable: true,
-    enumerable: false
+    enumerable: false,
   }
 
   // strange wrapping of Promise functions to fully emulate .then behavior,
@@ -128,14 +128,14 @@ export const getPreopenInstanceId = () => {
 export const get = (url = '', options_ = {}) => {
   const defaultOptions = {
     mode: 'cors',
-    cache: 'no-cache'
+    cache: 'no-cache',
   }
   const options = {
     ...defaultOptions,
     ...options_,
-    ...{ method: 'GET' }
+    ...{ method: 'GET' },
   }
-  return fetch(url, options).then(response => {
+  return fetch(url, options).then((response) => {
     if (response.ok) {
       return response.json()
     }

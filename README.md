@@ -1,5 +1,8 @@
 # Torus Embed — New Frictionless login for Dapps
 
+[![npm version](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed.svg)](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed)
+![npm](https://img.shields.io/npm/dw/@toruslabs/torus-embed)
+
 This module generates the javascript to include in a DApp via a script tag.
 It creates an iframe that loads the Torus page and sets up communication streams between
 the iframe and the DApp javascript context.
@@ -50,6 +53,10 @@ npm run test:build-embed
 ```
 
 entry-point: `index.js`
+
+## Requirements
+
+- Node 10+
 
 ## License
 `torus-embed` is [MIT Licensed](LICENSE)

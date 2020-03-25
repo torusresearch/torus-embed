@@ -4,7 +4,8 @@ export default {
       'MetaMask: Invalid request parameters. Please use ethereum.send(method: string, params: Array<any>). ' +
       'For more details, see: https://eips.ethereum.org/EIPS/eip-1193',
     sendSiteMetadata: () => 'MetaMask: Failed to send site metadata. This is an internal error, please report this bug.',
-    unsupportedSync: method => `MetaMask: The MetaMask Web3 object does not support synchronous methods like ${method} without a callback parameter.`
+    unsupportedSync: (method) =>
+      `MetaMask: The MetaMask Web3 object does not support synchronous methods like ${method} without a callback parameter.`,
   },
   warnings: {
     sendSyncDeprecation:
@@ -20,6 +21,6 @@ export default {
       'MetaMask: "ethereum.sendAsync(...)" is deprecated and may be removed in the future. ' +
       'Please use "ethereum.send(method: string, params: Array<any>)" instead. For more information, see: https://eips.ethereum.org/EIPS/eip-1193',
     // misc
-    experimentalMethods: 'MetaMask: "ethereum._metamask" exposes non-standard, experimental methods. They may be removed or changed without warning.'
-  }
+    experimentalMethods: 'MetaMask: "ethereum._metamask" exposes non-standard, experimental methods. They may be removed or changed without warning.',
+  },
 }
