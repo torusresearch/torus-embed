@@ -24,11 +24,11 @@ class MetamaskInpageProvider extends SafeEventEmitter {
       sentWarnings: {
         isConnected: false,
         sendAsync: false,
-        sendSync: false
+        sendSync: false,
       },
       isConnected: undefined,
       accounts: undefined,
-      isUnlocked: undefined
+      isUnlocked: undefined,
     }
     // public state
     this.selectedAddress = null
@@ -44,7 +44,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     this._publicConfigStore = new ObservableStore({ storageKey: 'MetaMask-Config' })
 
     // handle isUnlocked changes, and chainChanged and networkChanged events
-    this._publicConfigStore.subscribe(stringifiedState => {
+    this._publicConfigStore.subscribe((stringifiedState) => {
       const state = JSON.parse(stringifiedState)
       if ('isUnlocked' in state && state.isUnlocked !== this._state.isUnlocked) {
         this._state.isUnlocked = state.isUnlocked
@@ -120,7 +120,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     this._rpcEngine = rpcEngine
 
     // json rpc notification listener
-    jsonRpcConnection.events.on('notification', payload => {
+    jsonRpcConnection.events.on('notification', (payload) => {
       if (payload.method === 'wallet_accountsChanged') {
         this._handleAccountsChanged(payload.result)
       } else if (payload.method === 'eth_subscription') {
@@ -174,7 +174,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
       payload = {
         method: methodOrPayload,
-        params: finalParams
+        params: finalParams,
       }
     }
 
@@ -182,7 +182,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     if (Array.isArray(payload) || typeof finalParams === 'function' || typeof payload !== 'object' || typeof payload.method !== 'string') {
       throw ethErrors.rpc.invalidRequest({
         message: messages.errors.invalidParams(),
-        data: [methodOrPayload, _params]
+        data: [methodOrPayload, _params],
       })
     }
 
@@ -238,7 +238,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
       {
         id: payload.id,
         jsonrpc: payload.jsonrpc,
-        result
+        result,
       },
       'result'
     )
@@ -248,12 +248,13 @@ class MetamaskInpageProvider extends SafeEventEmitter {
    * Internal RPC method. Forwards requests to background via the RPC engine.
    * Also remap ids inbound and outbound.
    *
-   * @param {Object} payload - The RPC request object.
+   * @param {Object} reqPayload - The RPC request object.
    * @param {Function} userCallback - The caller's callback.
    * @param {boolean} isInternal - Whether the request is internal.
    */
-  _sendAsync(payload, userCallback, isInternal = false) {
+  _sendAsync(reqPayload, userCallback, isInternal = false) {
     let cb = userCallback
+    const payload = reqPayload
 
     if (!Array.isArray(payload)) {
       if (!payload.jsonrpc) {
@@ -280,7 +281,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     if (this._state.isConnected) {
       this.emit('close', {
         code: 1011,
-        reason: 'MetaMask background communication error.'
+        reason: 'MetaMask background communication error.',
       })
     }
     this._state.isConnected = false

@@ -1,20 +1,16 @@
-export const runOnLoad = fn => {
+export const runOnLoad = (fn) => {
   return new Promise((resolve, reject) => {
     if (window.document.body != null) {
-      Promise.resolve(fn())
-        .then(resolve)
-        .catch(reject)
+      Promise.resolve(fn()).then(resolve).catch(reject)
     } else {
       window.document.addEventListener('DOMContentLoaded', () => {
-        Promise.resolve(fn())
-          .then(resolve)
-          .catch(reject)
+        Promise.resolve(fn()).then(resolve).catch(reject)
       })
     }
   })
 }
 
-export const runOnComplete = fn => {
+export const runOnComplete = (fn) => {
   const retry = window.setInterval(() => {
     if (window.document.readyState === 'complete') {
       window.clearInterval(retry)
@@ -23,17 +19,17 @@ export const runOnComplete = fn => {
   }, 300)
 }
 
-export const htmlToElement = html => {
+export const htmlToElement = (html) => {
   const template = window.document.createElement('template')
   const trimmedHtml = html.trim() // Never return a text node of whitespace as the result
   template.innerHTML = trimmedHtml
   return template.content.firstChild
 }
 
-export const transformEthAddress = ethAddress => {
+export const transformEthAddress = (ethAddress) => {
   // return ethAddress
   if (Array.isArray(ethAddress)) {
-    return ethAddress.map(addr => (typeof addr === 'string' ? addr.toLowerCase() : addr))
+    return ethAddress.map((addr) => (typeof addr === 'string' ? addr.toLowerCase() : addr))
   }
   if (typeof ethAddress === 'string') {
     return ethAddress.toLowerCase()
@@ -50,7 +46,7 @@ export const handleEvent = (handle, eventName, handler, handlerArgs) => {
 }
 
 export const handleStream = (handle, eventName, handler) => {
-  const handlerWrapper = chunk => {
+  const handlerWrapper = (chunk) => {
     handler(chunk)
     handle.removeListener(eventName, handlerWrapper)
   }

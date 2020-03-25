@@ -21,17 +21,9 @@
     "no-restricted-syntax": 0,
     "simple-import-sort/sort": "error",
     "operator-linebreak": 0,
-    "arrow-parens": [2, "as-needed"],
     "object-curly-newline": 0,
     "semi": [2, "never"],
     "no-underscore-dangle": 0,
-    "comma-dangle": [
-      2,
-      {
-        "arrays": "ignore",
-        "objects": "ignore"
-      }
-    ],
     "quotes": [2, "single"],
     "max-len": [
       2,
@@ -39,8 +31,6 @@
         "code": 150
       }
     ],
-    "react/jsx-filename-extension": 0,
-    "jsx-a11y/label-has-for": 0,
     "no-console": 0,
     "import/prefer-default-export": 0,
     "no-nested-ternary": 0,
@@ -48,12 +38,6 @@
     "linebreak-style": 0,
     "no-extra-semi": 0,
     "no-unused-vars": [2, { "args": "after-used", "argsIgnorePattern": "_" }],
-    "no-param-reassign": [
-      "error",
-      {
-        "props": false
-      }
-    ],
     "prettier/prettier": [
       "error",
       {
