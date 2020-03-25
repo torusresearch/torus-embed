@@ -6,7 +6,7 @@ const enums = {
   DISCORD: 'discord',
   MOONPAY: 'moonpay',
   WYRE: 'wyre',
-  RAMPNETWORK: 'rampnetwork'
+  RAMPNETWORK: 'rampnetwork',
 }
 
 const verifierList = Object.values(enums)
@@ -21,7 +21,7 @@ const paymentProviders = {
     maxOrderValue: 10000,
     validCurrencies: ['GBP', 'EUR'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
-    includeFees: true
+    includeFees: true,
   },
   [enums.MOONPAY]: {
     line1: 'Credit / Debit Card / Apple Pay',
@@ -32,7 +32,7 @@ const paymentProviders = {
     maxOrderValue: 2000,
     validCurrencies: ['USD', 'EUR', 'GBP'],
     validCryptoCurrencies: ['ETH', 'DAI', 'TUSD', 'USDC', 'USDT'],
-    includeFees: true
+    includeFees: true,
   },
   [enums.WYRE]: {
     line1: 'Apple Pay/Debit Card',
@@ -43,8 +43,8 @@ const paymentProviders = {
     maxOrderValue: 250,
     validCurrencies: ['USD'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
-    includeFees: false
-  }
+    includeFees: false,
+  },
 }
 
 export default {
@@ -53,5 +53,5 @@ export default {
   verifierList,
   supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD],
   paymentProviders,
-  api: 'https://api.tor.us'
+  api: 'https://api.tor.us',
 }

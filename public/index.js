@@ -11,4 +11,4 @@ torus
     window.web3 = torus.web3
     return undefined
   })
-  .catch(err => console.error(err))
+  .catch((err) => console.error(err))

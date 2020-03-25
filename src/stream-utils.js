@@ -6,7 +6,7 @@ import pump from 'pump'
  * @param {any} connectionStream - the stream to mux
  * @return {stream.Stream} the multiplexed stream
  */
-export const setupMultiplex = connectionStream => {
+export const setupMultiplex = (connectionStream) => {
   const mux = new ObjectMultiplex()
   // bind helper method to get previously created streams
   mux.getStream = function streamHelper(name) {
@@ -16,7 +16,7 @@ export const setupMultiplex = connectionStream => {
     return this.createStream(name)
   }
 
-  pump(connectionStream, mux, connectionStream, err => {
+  pump(connectionStream, mux, connectionStream, (err) => {
     if (err) console.error(err)
   })
   return mux
