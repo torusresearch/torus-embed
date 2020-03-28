@@ -28,7 +28,7 @@ deploy_function: &deploy_function
   <<: *job_common_base
   steps:
     - attach_workspace:
-        at: ~/torus-embed
+        at: ~/
     - add_ssh_keys
     - run:
         name: "Deploy Over SSH to AWS"
@@ -47,8 +47,9 @@ jobs:
           command: |
             npm run build
       - persist_to_workspace:
-          root: ~/torus-embed
-          paths: .
+          root: ~/
+          paths:
+            - torus-embed
       - <<: *step_save_cache
   build-staging:
     <<: *job_common
@@ -62,8 +63,9 @@ jobs:
           command: |
             npm run build:staging
       - persist_to_workspace:
-          root: ~/torus-embed
-          paths: .
+          root: ~/
+          paths:
+            - torus-embed
       - <<: *step_save_cache
   build-dev:
     <<: *job_common
@@ -85,7 +87,7 @@ jobs:
     <<: *job_common_base
     steps:
       - attach_workspace:
-          at: ~/torus-embed
+          at: ~/
       - add_ssh_keys
       - run:
           name: "Deploy Over SSH"
@@ -97,7 +99,7 @@ jobs:
     <<: *job_common_node
     steps:
       - attach_workspace:
-          at: ~/torus-embed
+          at: ~/
       - add_ssh_keys
       - run:
           name: "publish npm package"
