@@ -1,4 +1,8 @@
 version: 2
+job_common_node: &job_common_node
+  docker:
+    - image: circleci/node
+  working_directory: ~/torus-embed
 job_common_base: &job_common_base
   docker:
     - image: skyuppercut/buildpack-deps
@@ -90,7 +94,7 @@ jobs:
             ssh-keyscan -H github.com >> ~/.ssh/known_hosts
             . ./scripts/updateGistIntegrity.sh
   publish-npm:
-    <<: *job_common
+    <<: *job_common_node
     steps:
       - attach_workspace:
           at: ~/torus-embed
