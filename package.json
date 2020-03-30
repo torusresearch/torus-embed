@@ -23,7 +23,7 @@
     "build-embed:testing": "cross-env TORUS_BUILD_ENV=testing node ./scripts/createEmbed.js",
     "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js",
     "build-embed:alpha5": "cross-env TORUS_BUILD_ENV=alpha5 node ./scripts/createEmbed.js",
-    "lint:js": "eslint --fix src/**/*.js",
+    "lint:js": "eslint --fix 'src/**/*.js'",
     "post-build": ". ./scripts/calculateIntegrity.sh",
     "prepack": "npm run build",
     "test:e2e": "node ./test/e2e/puppeteer.js",
@@ -121,11 +121,11 @@
   "lint-staged": {
     "*.js": [
       "npm run lint:js --",
-      "prettier --write **/*.js"
+      "prettier --write src/**/*.js"
     ],
     "*.{json}": [
-      "prettier --write **/*.json",
-      "prettier --write **/*.css"
+      "prettier --write src/**/*.json",
+      "prettier --write src/**/*.css"
     ]
   }
 }
