@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-git config user.email "chaitanya.potti@gmail.com"
-git config user.name "chaitanyapotti"
+git config --global user.email "chaitanya.potti@gmail.com"
+git config --global user.name "chaitanyapotti"
 git clone git@github.com:733405286923fa047af4cb26d167acd4.git ~/gist
 PACKAGE_VERSION=$(cat package.json \
   | grep '"version"' \
