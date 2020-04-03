@@ -130,16 +130,11 @@ class Torus {
       window.document.body.appendChild(this.torusIframe)
     }
     const handleSetup = async () => {
-      await runOnLoad(attachIFrame.bind(this))
-      await runOnLoad(() => this._setupWeb3())
+      await runOnLoad(attachIFrame)
+      await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
-        try {
-          await this._setProvider(network)
-          this.isInitalized = true
-          return Promise.resolve()
-        } catch (error) {
-          return Promise.reject(error)
-        }
+        await this._setProvider(network)
+        this.isInitalized = true
       })
     }
     if (buildEnv === 'production' && integrity.check) {
@@ -160,12 +155,8 @@ class Torus {
       if (calculatedIntegrity === integrity.hash) {
         await handleSetup()
       } else {
-        try {
-          this._cleanUp()
-        } catch (error) {
-          return Promise.reject(error)
-        }
-        return Promise.reject(new Error('Integrity check failed'))
+        this._cleanUp()
+        throw new Error('Integrity check failed')
       }
     } else {
       await handleSetup()
@@ -234,15 +225,10 @@ class Torus {
    * Logs the user out and then cleans up (removes iframe, widget, css)
    */
   async cleanUp() {
-    try {
-      if (this.isLoggedIn) {
-        await this.logout()
-      }
-      this._cleanUp()
-      return Promise.resolve()
-    } catch (error) {
-      return Promise.reject(error)
+    if (this.isLoggedIn) {
+      await this.logout()
     }
+    this._cleanUp()
   }
 
   _cleanUp() {
@@ -291,8 +277,8 @@ class Torus {
       window.document.body.appendChild(this.torusAlert)
     }
 
-    runOnLoad(attachOnLoad.bind(this))
-    runOnLoad(bindOnLoad.bind(this))
+    runOnLoad(attachOnLoad)
+    runOnLoad(bindOnLoad)
   }
 
   /**
@@ -321,8 +307,8 @@ class Torus {
       window.document.body.appendChild(torusAlert)
     }
 
-    runOnLoad(attachOnLoad.bind(this))
-    runOnLoad(bindOnLoad.bind(this))
+    runOnLoad(attachOnLoad)
+    runOnLoad(bindOnLoad)
   }
 
   /**
@@ -515,8 +501,8 @@ class Torus {
       window.document.body.appendChild(this.torusWidget)
     }
 
-    runOnLoad(attachOnLoad.bind(this))
-    runOnLoad(bindOnLoad.bind(this))
+    runOnLoad(attachOnLoad)
+    runOnLoad(bindOnLoad)
 
     switch (this.buttonPosition) {
       case 'top-left':
@@ -617,10 +603,9 @@ class Torus {
     // detect eth_requestAccounts and pipe to enable for now
     const detectAccountRequestPrototypeModifier = (m) => {
       const originalMethod = inpageProvider[m]
-      const self = this
       inpageProvider[m] = function providerFunc(method, ...args) {
         if (method && method === 'eth_requestAccounts') {
-          return self.ethereum.enable()
+          return inpageProvider.enable()
         }
         return originalMethod.apply(this, [method, ...args])
       }
@@ -634,14 +619,11 @@ class Torus {
       this._checkThirdPartyCookies()
       this._showLoggingIn()
       return new Promise((resolve, reject) => {
-        // TODO: Handle errors when pipe is broken (eg. popup window is closed)
-
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
-          const self = this
           if (err) {
             setTimeout(() => {
-              self._showLoggedOut()
+              this._showLoggedOut()
               reject(err)
             }, 50)
           } else if (Array.isArray(res) && res.length > 0) {
@@ -660,7 +642,7 @@ class Torus {
                   })
                   .catch((error) => reject(error))
               } else {
-                self._showLoggedIn()
+                this._showLoggedIn()
                 resolve(res)
               }
             }
@@ -760,17 +742,16 @@ class Torus {
       })
     } else {
       const oauthStream = this.communicationMux.getStream('oauth')
-      const self = this
       const loginHandler = (data) => {
         const { err, selectedAddress } = data
         if (err) {
           log.error(err)
-          self._showLoggedOut()
+          this._showLoggedOut()
           if (reject) reject(err)
         } else {
           // returns an array (cause accounts expects it)
           if (resolve) resolve([transformEthAddress(selectedAddress)])
-          self._showLoggedIn()
+          this._showLoggedIn()
         }
       }
       handleStream(oauthStream, 'data', loginHandler)

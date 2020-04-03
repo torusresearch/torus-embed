@@ -2,39 +2,36 @@
   "name": "@toruslabs/torus-embed",
   "version": "1.2.6",
   "description": "Embed script for Torus",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "directories": {
-    "test": "test"
+  "main": "dist/torus.cjs.js",
+  "module": "dist/torus.esm.js",
+  "browser": {
+    "./dist/torus.cjs.js": "./dist/torus.umd.js",
+    "./dist/torus.esm.js": "./dist/torus.esm.js"
   },
+  "unpkg": "dist/torus.umd.min.js",
+  "jsdelivr": "dist/torus.umd.min.js",
+  "types": "types/torus.d.ts",
+  "files": [
+    "dist",
+    "types"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build:babel": "babel ./src --out-dir dist/ && cp ./src/embed.d.ts ./dist/embed.d.ts",
-    "build": "rimraf ./dist && npm run build:babel && npm run build-embed && npm run post-build",
-    "build:staging": "rimraf ./dist && npm run build:babel && npm run build-embed:staging && npm run post-build",
-    "build:testing": "rimraf ./dist && npm run build:babel && npm run build-embed:testing && npm run post-build",
-    "build:dev": "rimraf ./dist && npm run build:babel && npm run build-embed:dev && npm run post-build",
-    "build:alpha5": "rimraf ./dist && npm run build:babel && npm run build-embed:alpha5 && npm run post-build",
-    "build-embed": "cross-env TORUS_BUILD_ENV=production node ./scripts/createEmbed.js",
-    "build-embed:staging": "cross-env TORUS_BUILD_ENV=staging node ./scripts/createEmbed.js",
-    "build-embed:testing": "cross-env TORUS_BUILD_ENV=testing node ./scripts/createEmbed.js",
-    "build-embed:dev": "cross-env TORUS_BUILD_ENV=development node ./scripts/createEmbed.js",
-    "build-embed:alpha5": "cross-env TORUS_BUILD_ENV=alpha5 node ./scripts/createEmbed.js",
+    "build": "rimraf ./dist && rollup -c",
     "lint:js": "eslint --fix 'src/**/*.js'",
-    "post-build": ". ./scripts/calculateIntegrity.sh",
     "prepack": "npm run build",
     "test:e2e": "node ./test/e2e/puppeteer.js",
     "test:e2e:headful": "node ./test/e2e/puppeteer.js false",
-    "test:build-embed": "mocha --exit ./test/compile/Web3Test.js",
-    "update:gist": ". ./scripts/updateGistIntegrity.sh"
+    "test:build-embed": "mocha --exit ./test/compile/Web3Test.js"
   },
   "dependencies": {
+    "@babel/runtime-corejs3": "~7.9.2",
     "@chaitanyapotti/random-id": "^1.0.3",
-    "@toruslabs/fetch-node-details": "^2.0.4",
-    "@toruslabs/torus.js": "^1.0.10",
+    "@toruslabs/fetch-node-details": "^2.1.1",
+    "@toruslabs/torus.js": "^2.0.0",
     "eth-json-rpc-errors": "^2.0.2",
     "fast-deep-equal": "^3.1.1",
     "json-rpc-engine": "^5.1.8",
@@ -57,6 +54,9 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-json": "^4.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.1",
     "assert": "^2.0.0",
     "babel-eslint": "^10.1.0",
     "browserify": "^16.5.1",
@@ -84,6 +84,11 @@
     "prettier": "^2.0.2",
     "puppeteer": "^2.1.1",
     "rimraf": "^3.0.2",
+    "rollup": "^2.3.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-terser": "^5.3.0",
     "uglifyify": "^5.0.2"
   },
   "mocha": {
@@ -110,9 +115,6 @@
     "last 2 versions",
     "not ie <= 8"
   ],
-  "engines": {
-    "node": ">=8.0.0"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -121,11 +123,10 @@
   "lint-staged": {
     "*.js": [
       "npm run lint:js --",
-      "prettier --write src/**/*.js"
+      "prettier --write 'src/**/*.js'"
     ],
     "*.{json}": [
-      "prettier --write src/**/*.json",
-      "prettier --write src/**/*.css"
+      "prettier --write 'src/**/*.json'"
     ]
   }
 }

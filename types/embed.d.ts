@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 
-export default class Torus {
+declare class Torus {
   constructor(args: TorusCtorArgs);
   web3: Web3;
   provider: Provider;
@@ -17,6 +17,11 @@ export default class Torus {
   logout(): Promise<void>;
   cleanUp(): Promise<void>;
 }
+
+export as namespace torus;
+
+export = Torus;
+
 
 declare class Provider {
   send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any;

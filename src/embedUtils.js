@@ -39,7 +39,7 @@ export const transformEthAddress = (ethAddress) => {
 
 export const handleEvent = (handle, eventName, handler, handlerArgs) => {
   const handlerWrapper = () => {
-    handler.apply(this, handlerArgs)
+    handler(...handlerArgs)
     handle.removeEventListener(eventName, handlerWrapper)
   }
   handle.addEventListener(eventName, handlerWrapper)
