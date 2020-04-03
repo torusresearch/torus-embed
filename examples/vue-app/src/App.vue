@@ -21,25 +21,21 @@
       <button @click="signTypedData_v1">sign typed data v1</button>
       <button @click="signTypedData_v3">sign typed data v3</button>
       <button @click="signTypedData_v4">sign typed data v4</button>
+      <button @click="generalisedContractCall">generalised contract call</button>
       <button @click="changeProvider">Change Provider</button>
       <button @click="createScw">Create Scw</button>
       <button @click="getScw">Get Scw</button>
       <button @click="sendDai">Send DAI</button>
       <button @click="approveKnc">Approve Knc</button>
-      <div :style="{marginTop: '20px'}">
+      <div :style="{ marginTop: '20px' }">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
           <option selected value="google">Google</option>
           <option value="reddit">Reddit</option>
           <option value="discord">Discord</option>
         </select>
-        <input :style="{marginLeft: '20px'}" v-model="verifierId" :placeholder="placeholder" />
+        <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
       </div>
-      <button
-        :disabled="!verifierId"
-        :style="{marginTop: '20px'}"
-        v-if="publicAddress !== ''"
-        @click="getPublicAddress"
-      >Get Public Address</button>
+      <button :disabled="!verifierId" :style="{ marginTop: '20px' }" v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
     </div>
     <div id="console">
       <p></p>
@@ -51,6 +47,7 @@
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
 const tokenAbi = require('human-standard-token-abi')
+const TestDappABI = require("./Dapp.json").abi
 
 export default {
   name: 'app',
@@ -288,6 +285,25 @@ export default {
           self.console('sign typed message v4 => true \n', result)
         }
       )
+    },
+    async generalisedContractCall() {
+      // eslint-disable-next-line global-require
+      const TestDapp = new window.web3.eth.Contract(TestDappABI, '0x2C40f5E48d9E054b17C2900A9e803A06616b1672')
+
+      const startingState = await TestDapp.methods.n().call()
+      const value = parseInt(startingState, 10) + 10
+      this.console(`N value of test dapp will be changed from ${startingState} to ${value}`)
+
+      const txReceipt = await window.web3.eth.sendTransaction({
+        from: await window.torus.getSCWAddress(),
+        to: TestDapp.options.address,
+        data: TestDapp.methods.setN(400).encodeABI(),
+        relayer: true
+      })
+
+      const finalState = await TestDapp.methods.n().call()
+      this.console(`N value of test dapp is now ${finalState}`)
+      console.log('txReceipt', txReceipt)
     },
     logout() {
       window.torus.logout().then(() => (this.publicAddress = ''))
