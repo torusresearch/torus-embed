@@ -292,12 +292,16 @@ export default {
 
       const startingState = await TestDapp.methods.n().call()
       const value = parseInt(startingState, 10) + 10
-      this.console(`N value of test dapp will be changed from ${startingState} to ${value}`)
+      console.log(startingState)
 
+      const scwAddress = await window.torus.getSCWAddress()
+      console.log(scwAddress, 'scwAddress')
+
+      /* eslint-disable */
       const txReceipt = await window.web3.eth.sendTransaction({
-        from: await window.torus.getSCWAddress(),
+        from: scwAddress,
         to: TestDapp.options.address,
-        data: TestDapp.methods.setN(400).encodeABI(),
+        data: TestDapp.methods.setN(value).encodeABI(),
         relayer: true
       })
 
