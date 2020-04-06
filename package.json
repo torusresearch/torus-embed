@@ -3,14 +3,9 @@
   "version": "1.2.6",
   "description": "Embed script for Torus",
   "main": "dist/torus.cjs.js",
-  "module": "dist/torus.esm.js",
-  "browser": {
-    "./dist/torus.cjs.js": "./dist/torus.umd.js",
-    "./dist/torus.esm.js": "./dist/torus.esm.js"
-  },
   "unpkg": "dist/torus.umd.min.js",
   "jsdelivr": "dist/torus.umd.min.js",
-  "types": "types/torus.d.ts",
+  "types": "types/embed.d.ts",
   "files": [
     "dist",
     "types"
@@ -20,7 +15,7 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build": "rimraf ./dist && rollup -c",
+    "build": "rimraf ./dist && parallel-webpack",
     "lint:js": "eslint --fix 'src/**/*.js'",
     "prepack": "npm run build",
     "test:e2e": "node ./test/e2e/puppeteer.js",
@@ -31,7 +26,8 @@
     "@babel/runtime-corejs3": "~7.9.2",
     "@chaitanyapotti/random-id": "^1.0.3",
     "@toruslabs/fetch-node-details": "^2.1.1",
-    "@toruslabs/torus.js": "^2.0.0",
+    "@toruslabs/torus.js": "file:../torus.js/toruslabs-torus.js-2.0.0.tgz",
+    "create-hash": "^1.2.0",
     "eth-json-rpc-errors": "^2.0.2",
     "fast-deep-equal": "^3.1.1",
     "json-rpc-engine": "^5.1.8",
@@ -41,10 +37,7 @@
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "readable-stream": "^3.6.0",
     "safe-event-emitter": "^1.0.1",
-    "sri-toolbox": "^0.2.0",
-    "through2": "^3.0.1",
     "web3": "^0.20.7"
   },
   "devDependencies": {
@@ -54,11 +47,9 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@rollup/plugin-commonjs": "^11.0.2",
-    "@rollup/plugin-json": "^4.0.2",
-    "@rollup/plugin-node-resolve": "^7.1.1",
     "assert": "^2.0.0",
     "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.1.0",
     "browserify": "^16.5.1",
     "cross-env": "^7.0.2",
     "discify": "^1.6.3",
@@ -67,6 +58,7 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-config-standard": "^14.1.1",
+    "eslint-loader": "^4.0.0",
     "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-flowtype": "^4.7.0",
     "eslint-plugin-import": "^2.20.2",
@@ -78,18 +70,16 @@
     "eslint-plugin-standard": "^4.0.1",
     "express": "^4.17.1",
     "husky": "^4.2.3",
-    "lint-staged": "^10.1.0",
+    "lint-staged": "^10.1.2",
     "mocha": "^7.1.1",
     "mocha-eslint": "^6.0.0",
-    "prettier": "^2.0.2",
+    "parallel-webpack": "^2.5.0",
+    "prettier": "^2.0.3",
     "puppeteer": "^2.1.1",
     "rimraf": "^3.0.2",
-    "rollup": "^2.3.2",
-    "rollup-plugin-babel": "^4.4.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-terser": "^5.3.0",
-    "uglifyify": "^5.0.2"
+    "uglifyify": "^5.0.2",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "mocha": {
     "timeout": 0

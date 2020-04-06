@@ -2,13 +2,13 @@ import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
-import sriToolbox from 'sri-toolbox'
 import Web3 from 'web3'
 
 import { version } from '../package.json'
 import configuration from './config'
 import { handleEvent, handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
+import generateIntegrity from './integrity'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
@@ -145,7 +145,7 @@ class Torus {
         throw new Error(`Unexpected Cache-Control headers, got ${resp.headers.get('Cache-Control')}`)
       }
       const response = await resp.text()
-      const calculatedIntegrity = sriToolbox.generate(
+      const calculatedIntegrity = generateIntegrity(
         {
           algorithms: ['sha384'],
         },
