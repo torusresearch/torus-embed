@@ -15,7 +15,7 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "build": "rimraf ./dist && parallel-webpack",
+    "build": "rimraf ./dist && parallel-webpack --no-stats",
     "lint:js": "eslint --fix 'src/**/*.js'",
     "prepack": "npm run build",
     "test:e2e": "node ./test/e2e/puppeteer.js",
