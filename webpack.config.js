@@ -11,6 +11,7 @@ const packagesToParse = [
   'post-message-stream',
   'pump',
   'safe-event-emitter',
+  'eth-json-rpc-errors',
 ]
 
 const baseConfig = {
