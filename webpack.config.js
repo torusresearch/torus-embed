@@ -1,19 +1,6 @@
 const path = require('path')
-const pkg = require('./package.json')
 
 const pkgName = 'torus'
-
-const packagesToParse = [
-  'json-rpc-engine',
-  'json-rpc-middleware-stream',
-  'obj-multiplex',
-  'obs-store',
-  'post-message-stream',
-  'pump',
-  'safe-event-emitter',
-  'eth-json-rpc-errors',
-  'web3',
-]
 
 const baseConfig = {
   mode: 'production',
@@ -106,21 +93,7 @@ const cjsConfig = {
   module: {
     rules: [eslintLoader, babelLoader],
   },
-  externals: [
-    ...Object.keys(pkg.dependencies).filter((x) => !packagesToParse.includes(x)),
-    '@babel/runtime/helpers/toConsumableArray',
-    '@babel/runtime/regenerator',
-    '@babel/runtime/helpers/asyncToGenerator',
-    '@babel/runtime/helpers/classCallCheck',
-    '@babel/runtime/helpers/createClass',
-    '@babel/runtime/helpers/defineProperty',
-    '@babel/runtime/helpers/possibleConstructorReturn',
-    '@babel/runtime/helpers/getPrototypeOf',
-    '@babel/runtime/helpers/inherits',
-    '@babel/runtime/helpers/typeof',
-    '@babel/runtime/helpers/assertThisInitialized',
-    'create-hash/browser',
-  ],
+  externals: [/^(@babel\/runtime)/i, '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel'],
 }
 
 module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
