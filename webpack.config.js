@@ -12,6 +12,7 @@ const packagesToParse = [
   'pump',
   'safe-event-emitter',
   'eth-json-rpc-errors',
+  'web3',
 ]
 
 const baseConfig = {
