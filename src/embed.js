@@ -87,7 +87,6 @@ class Torus {
     this.torusSpeedDial = {}
     this.keyBtn = {}
     this.styleLink = {}
-    this.isRehydrated = false // rehydrated
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
     this.torusButtonVisibility = true
@@ -182,7 +181,6 @@ class Torus {
    */
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
-    if (this.isLoggedIn) throw new Error('User has already logged in')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
       this.requestedVerifier = ''
@@ -211,7 +209,6 @@ class Torus {
       const statusStreamHandler = (status) => {
         if (!status.loggedIn) {
           this.isLoggedIn = false
-          this.isRehydrated = false
           this.currentVerifier = ''
           this.requestedVerifier = ''
           resolve()
@@ -629,8 +626,7 @@ class Torus {
           } else if (Array.isArray(res) && res.length > 0) {
             // If user is already rehydrated, resolve this
             // else wait for something to be written to status stream
-            const handleRehydration = () => {
-              this.isLoggedIn = true
+            const handleLoginCb = () => {
               if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
                 const { requestedVerifier } = this
                 // eslint-disable-next-line promise/no-promise-in-callback
@@ -646,10 +642,10 @@ class Torus {
                 resolve(res)
               }
             }
-            if (this.isRehydrated) {
-              handleRehydration()
+            if (this.isLoggedIn) {
+              handleLoginCb()
             } else {
-              this.isRehydratedCallback = handleRehydration
+              this.isLoginCallback = handleLoginCb
             }
           } else {
             // set up listener for login
@@ -682,22 +678,16 @@ class Torus {
     // Show torus button if wallet has been hydrated/detected
     const statusStream = communicationMux.getStream('status')
     statusStream.on('data', (status) => {
-      // rehydration
-      if (status.rehydrate && status.loggedIn) {
-        this.isRehydrated = status.rehydrate
-        this.currentVerifier = status.verifier
-        if (this.isRehydratedCallback) {
-          this.isRehydratedCallback()
-          delete this.isRehydratedCallback
-        }
-      }
-      // normal login
-      else if (status.loggedIn) {
+      // login
+      if (status.loggedIn) {
         this.isLoggedIn = status.loggedIn
         this.currentVerifier = status.verifier
-        this._showLoggedIn()
       } // logout
       else this._showLoggedOut()
+      if (this.isLoginCallback) {
+        this.isLoginCallback()
+        delete this.isLoginCallback
+      }
     })
     // if (typeof window.web3 !== 'undefined') {
     //   console.log(`Torus detected another web3.
