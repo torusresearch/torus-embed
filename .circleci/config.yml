@@ -3,10 +3,6 @@ job_common_node: &job_common_node
   docker:
     - image: circleci/node
   working_directory: ~/torus-embed
-job_common_base: &job_common_base
-  docker:
-    - image: skyuppercut/buildpack-deps
-  working_directory: ~/torus-embed
 job_common: &job_common
   docker:
     - image: skyuppercut/node-puppeteer:latest
@@ -24,16 +20,7 @@ step_setup_global_packages: &step_setup_global_packages
     name: "Set up global packages"
     command: |
       npm install
-deploy_function: &deploy_function
-  <<: *job_common_base
-  steps:
-    - attach_workspace:
-        at: ~/
-    - add_ssh_keys
-    - run:
-        name: "Deploy Over SSH to AWS"
-        command: |
-          . ./scripts/uploadToAws.sh
+
 jobs:
   build:
     <<: *job_common
@@ -51,50 +38,6 @@ jobs:
           paths:
             - torus-embed
       - <<: *step_save_cache
-  build-staging:
-    <<: *job_common
-    steps:
-      - checkout:
-          path: ~/torus-embed
-      - <<: *step_restore_cache
-      - <<: *step_setup_global_packages
-      - run:
-          name: "Build code for torus embed"
-          command: |
-            npm run build:staging
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - torus-embed
-      - <<: *step_save_cache
-  build-dev:
-    <<: *job_common
-    steps:
-      - checkout:
-          path: ~/torus-embed
-      - <<: *step_restore_cache
-      - <<: *step_setup_global_packages
-      - run:
-          name: "Build code for torus embed"
-          command: |
-            npm run build:dev
-      - <<: *step_save_cache
-  deploy:
-    <<: *deploy_function
-  deploy-staging:
-    <<: *deploy_function
-  update-gist:
-    <<: *job_common_base
-    steps:
-      - attach_workspace:
-          at: ~/
-      - add_ssh_keys
-      - run:
-          name: "Deploy Over SSH"
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-            . ./scripts/updateGistIntegrity.sh
   publish-npm:
     <<: *job_common_node
     steps:
@@ -110,38 +53,7 @@ workflows:
   version: 2
   commit:
     jobs:
-      - build-dev:
-          filters:
-            branches:
-              ignore:
-                - master
-                - staging
-      - build:
-          filters:
-            branches:
-              only:
-                - master
-            tags:
-              only: /^v.*/
-      - build-staging:
-          filters:
-            branches:
-              only:
-                - staging
-      - deploy:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-staging:
-          requires:
-            - build-staging
-          filters:
-            branches:
-              only:
-                - staging
+      - build
       - publish-npm:
           requires:
             - build
@@ -150,10 +62,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
-      - update-gist:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - master

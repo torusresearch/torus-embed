@@ -3,30 +3,61 @@
 [![npm version](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed.svg)](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed)
 ![npm](https://img.shields.io/npm/dw/@toruslabs/torus-embed)
 
+## Introduction
+
 This module generates the javascript to include in a DApp via a script tag.
 It creates an iframe that loads the Torus page and sets up communication streams between
 the iframe and the DApp javascript context.
 
-Please refer to docs for API Reference available [here](https://docs.tor.us/developers/api-reference) or [change log](https://docs.tor.us/features/changelog).
+Please refer to docs for API Reference available [here](https://docs.tor.us/api-reference) or [change log](https://docs.tor.us/features/changelog).
+
+## Features
+
+- Typescript compatible. Includes Type definitions
+
+Please refer to docs for API Reference available [here](https://docs.tor.us/api-reference) or [change log](https://docs.tor.us/features/changelog).
 
 ## Installation
 
-Torus is meant for gradual adoption from the start. You can use Torus as a `web3` provider dynamically (on demand) or by default.
+### Bundling
 
-- As a [script tag](https://gist.github.com/chaitanyapotti/733405286923fa047af4cb26d167acd4)
+This module is distributed in 6 formats
 
-  Include the script tag into the body of your `index.html`, this will include `torus` into the page and override any other web3 providers that are present.
+- `commonjs` build `dist/torus.cjs.js` in es5 format
+- `umd` build `dist/torus.umd.js` in es5 format without polyfilling corejs
+- `umd` build `dist/torus.umd.min.js` in es5 format without polyfilling corejs minified
+- `umd` build `dist/torus.polyfill.umd.js` in es5 format with polyfilling corejs
+- `umd` build `dist/torus.polyfill.umd.min.js` in es5 format with polyfilling corejs minified
 
-- As a package on [npm](https://www.npmjs.com/package/@toruslabs/torus-embed)
-  ```
-  npm install @toruslabs/torus-embed
-  ```
+By default, the appropriate format is used for your specified usecase
+You can use a different format (if you know what you're doing) by referencing the correct file
 
-  This approach would ensure that you can,
-  - use torus only if the user agrees to (by selecting from a choice of providers).
-  - use torus by default if no other `web3` providers are present.
+The cjs build is not polyfilled with core-js.
+It is upto the user to polyfill based on the browserlist they target
 
-  Please refer to the [examples](examples) folder for details on usage using dynamic import.
+### Directly in Browser
+
+CDN's serve the non-core-js polyfilled version by default. You can use a different
+
+jsdeliver
+
+```js
+<script src="https://cdn.jsdelivr.net/npm/@toruslabs/torus-embed"></script>
+```
+
+unpkg
+
+```js
+<script src="https://unpkg.com/@toruslabs/torus-embed"></script>
+```
+
+### Tips for NUXT
+
+This is a plugin that works [only on the client side](https://nuxtjs.org/guide/plugins/#client-side-only). So please register it as a ssr-free plugin.
+
+## Usage
+
+Please refer to the [examples](examples) folder for details on usage using dynamic import.
 
 ## Rehydration
 
@@ -39,6 +70,7 @@ The samples provided in the [examples](examples) folder illustrate the above cas
 ## Build
 
 Ensure you have a `Node.JS` development environment setup:
+
 ```
 git clone https://github.com/torusresearch/torus-embed.git
 cd torus-embed
@@ -47,6 +79,7 @@ npm run build
 ```
 
 To run tests:
+
 ```
 npm run test:e2e:headful
 npm run test:build-embed
@@ -56,7 +89,9 @@ entry-point: `index.js`
 
 ## Requirements
 
+- This package requires a peer dependency of `@babel/runtime` or `@babel/runtime-corejs3`
 - Node 10+
 
 ## License
+
 `torus-embed` is [MIT Licensed](LICENSE)

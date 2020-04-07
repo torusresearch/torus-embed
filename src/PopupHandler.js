@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events'
+import SafeEventEmitter from 'safe-event-emitter'
 
-class PopupHandler extends EventEmitter {
+class PopupHandler extends SafeEventEmitter {
   constructor({ url, target, features }) {
     super()
     this.url = url
