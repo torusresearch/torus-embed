@@ -2,6 +2,8 @@ const path = require('path')
 
 const pkgName = 'torus'
 
+const externals = ['@chaitanyapotti/random-id', '@toruslabs/fetch-node-details', '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel']
+
 const baseConfig = {
   mode: 'production',
   entry: './index.js',
@@ -93,7 +95,7 @@ const cjsConfig = {
   module: {
     rules: [eslintLoader, babelLoader],
   },
-  externals: [/^(@babel\/runtime)/i, '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel'],
+  externals: [...externals, /^(@babel\/runtime)/i],
 }
 
 module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]

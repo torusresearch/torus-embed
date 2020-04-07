@@ -23,12 +23,12 @@
     "test:build-embed": "mocha --exit ./test/compile/Web3Test.js"
   },
   "peerDependencies": {
-    "@babel/runtime-corejs3": "~7.9.2"
+    "@babel/runtime-corejs3": "^7.9.2"
   },
   "dependencies": {
     "@chaitanyapotti/random-id": "^1.0.3",
-    "@toruslabs/fetch-node-details": "^2.1.1",
-    "@toruslabs/torus.js": "file:../torus.js/toruslabs-torus.js-2.0.0.tgz",
+    "@toruslabs/fetch-node-details": "^2.2.0",
+    "@toruslabs/torus.js": "^2.1.0",
     "create-hash": "^1.2.0",
     "eth-json-rpc-errors": "^2.0.2",
     "fast-deep-equal": "^3.1.1",
@@ -49,7 +49,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.9.0",
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.9.0",
-    "@babel/runtime-corejs3": "~7.9.2",
+    "@babel/runtime-corejs3": "^7.9.2",
     "assert": "^2.0.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
@@ -74,7 +74,7 @@
     "mocha": "^7.1.1",
     "mocha-eslint": "^6.0.0",
     "parallel-webpack": "^2.5.0",
-    "prettier": "^2.0.3",
+    "prettier": "^2.0.4",
     "puppeteer": "^2.1.1",
     "rimraf": "^3.0.2",
     "uglifyify": "^5.0.2",

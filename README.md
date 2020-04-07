@@ -24,7 +24,6 @@ Please refer to docs for API Reference available [here](https://docs.tor.us/api-
 This module is distributed in 6 formats
 
 - `commonjs` build `dist/torus.cjs.js` in es5 format
-- `esm` build `dist/torus.esm.js` in es6 format
 - `umd` build `dist/torus.umd.js` in es5 format without polyfilling corejs
 - `umd` build `dist/torus.umd.min.js` in es5 format without polyfilling corejs minified
 - `umd` build `dist/torus.polyfill.umd.js` in es5 format with polyfilling corejs
@@ -33,7 +32,7 @@ This module is distributed in 6 formats
 By default, the appropriate format is used for your specified usecase
 You can use a different format (if you know what you're doing) by referencing the correct file
 
-The cjs and esm builds are not polyfilled with core-js.
+The cjs build is not polyfilled with core-js.
 It is upto the user to polyfill based on the browserlist they target
 
 ### Directly in Browser
@@ -90,6 +89,7 @@ entry-point: `index.js`
 
 ## Requirements
 
+- This package requires a peer dependency of `@babel/runtime` or `@babel/runtime-corejs3`
 - Node 10+
 
 ## License
