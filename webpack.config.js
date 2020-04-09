@@ -98,7 +98,8 @@ const cjsConfig = {
   externals: [...externals, /^(@babel\/runtime)/i],
 }
 
-module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
+// module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
+module.exports = [cjsConfig]
 
 // V5
 // experiments: {

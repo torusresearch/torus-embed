@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
 import log from 'loglevel'
@@ -124,7 +125,8 @@ class Torus {
     if (enableLogging) log.enableAll()
     else log.disableAll()
     this.torusButtonVisibility = showTorusButton
-    this._createWidget(torusUrl)
+    // Iframe code
+    this.torusIframe = htmlToElement(`<iframe id="torusIframe" style="display:none;" src="${torusUrl}/popup"></iframe>`)
     const attachIFrame = () => {
       window.document.body.appendChild(this.torusIframe)
     }
@@ -132,6 +134,8 @@ class Torus {
       await runOnLoad(attachIFrame)
       await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
+        const initStream = this.communicationMux.getStream('init_stream')
+        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers } })
         await this._setProvider(network)
         this.isInitalized = true
       })
@@ -183,13 +187,16 @@ class Torus {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
+      this.torusIframe.style.display = 'block'
       this.requestedVerifier = ''
       return this.ethereum.enable()
     }
     if (configuration.verifierList.includes(verifier)) {
+      this.torusIframe.style.display = 'block'
       this.requestedVerifier = verifier
       return this.ethereum.enable()
     }
+    this.torusIframe.style.display = 'none'
     throw new Error('Unsupported verifier')
   }
 
@@ -308,257 +315,43 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
-  /**
-   * Creates the widget
-   */
-  _createWidget(torusUrl) {
-    const link = window.document.createElement('link')
-
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('type', 'text/css')
-    link.setAttribute('href', `${torusUrl}/css/widget.css`)
-
-    this.styleLink = link
-
-    this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-
-    // Loading spinner
-    const spinner = htmlToElement(
-      '<div id="torusSpinner">' +
-        '<div class="torusSpinner__beat beat-odd"></div>' +
-        '<div class="torusSpinner__beat beat-even"></div>' +
-        '<div class="torusSpinner__beat beat-odd"></div>' +
-        '</div>'
-    )
-    this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
-    if (!this.torusButtonVisibility) {
-      this.torusLoadingBtn.style.display = 'none'
-    }
-    this.torusLoadingBtn.appendChild(spinner)
-    this.torusWidget.appendChild(this.torusLoadingBtn)
-
-    // Login button code
-    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
-    if (!this.torusButtonVisibility) {
-      this.torusLogin.style.display = 'none'
-    }
-    this.torusWidget.appendChild(this.torusLogin)
-
-    // Menu button
-    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
-    if (!this.torusButtonVisibility) {
-      this.torusMenuBtn.style.display = 'none'
-    }
-    this.torusWidget.appendChild(this.torusMenuBtn)
-
-    // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s;display: none">')
-    this.torusSpeedDial.style.opacity = '0'
-    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
-
-    const tooltipNote = htmlToElement('<div class="torus-tooltip-text torus-tooltip-note">Copy public address to clipboard</div>')
-    const tooltipCopied = htmlToElement('<div class="torus-tooltip-text torus-tooltip-copied">Copied!</div>')
-    this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
-    const keyContainer = htmlToElement('<li class="torus-tooltip"></li>')
-
-    keyContainer.appendChild(this.keyBtn)
-    keyContainer.appendChild(tooltipNote)
-    keyContainer.appendChild(tooltipCopied)
-
-    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer" title="Wallet Transfer Page"></button></li>')
-
-    this.torusSpeedDial.appendChild(homeBtn)
-    this.torusSpeedDial.appendChild(keyContainer)
-    this.torusSpeedDial.appendChild(transferBtn)
-
-    this.torusWidget.prepend(this.torusSpeedDial)
-
-    // Multiple login modal
-    this.torusLoginModal = htmlToElement('<div id="torus-login-modal"></div>')
-    this.torusLoginModal.style.display = 'none'
-    const modalContainer = htmlToElement(
-      '<div id="torus-login-modal__modal-container">' +
-        '<div id="torus-login-modal__close-container">' +
-        '<span id="torus-login-modal__close">&times;</span>' +
-        '</div>' +
-        '</div>'
-    )
-
-    const modalContent = htmlToElement(
-      `${'<div id="torus-login-modal__modal-content"><div id="torus-login-modal__header-container"><img src="'}` +
-        `${torusUrl}/images/torus-logo-blue.svg` +
-        '"><div id="torus-login-modal__login-header">Login</div></div>' +
-        '</div>'
-    )
-
-    const formContainer = htmlToElement(
-      '<div id="torus-login-modal__form-container">' +
-        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet</p>' +
-        '</div>'
-    )
-
-    this.googleLogin = htmlToElement(
-      `<button id="torus-login-modal__login-google"><img src="${torusUrl}/img/icons/google.svg">Sign in with Google</button>`
-    )
-
-    // List for other logins
-    const loginList = htmlToElement('<ul id="torus-login-modal__login-list"></ul>')
-    this.facebookLogin = htmlToElement(
-      `${'<li><button id="torus-login-modal__login-btn--facebook" title="Login with Facebook"><img src="'}` +
-        `${torusUrl}/img/icons/facebook.svg"></button></li>`
-    )
-    this.twitchLogin = htmlToElement(
-      `<li><button id="torus-login-modal__login-btn--twitch" title="Login with Twitch"><img src="${torusUrl}/img/icons/twitch.svg` +
-        '"></button></li>'
-    )
-    this.redditLogin = htmlToElement(
-      `<li><button id="torus-login-modal__login-btn--reddit" title="Login with Reddit"><img src="${torusUrl}/img/icons/reddit.svg` +
-        '"></button></li>'
-    )
-    this.discordLogin = htmlToElement(
-      `${'<li><button id="torus-login-modal__login-btn--discord" title="Login with Discord"><img src="'}${torusUrl}/img/icons/discord.svg` +
-        '"></button></li>'
-    )
-
-    if (this.enabledVerifiers[FACEBOOK]) loginList.appendChild(this.facebookLogin)
-    if (this.enabledVerifiers[REDDIT]) loginList.appendChild(this.redditLogin)
-    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
-    if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
-
-    if (this.enabledVerifiers[GOOGLE]) {
-      formContainer.appendChild(this.googleLogin)
-    }
-    formContainer.appendChild(loginList)
-
-    const loginNote = htmlToElement(
-      '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
-        '<a href="https://docs.tor.us/legal/terms-and-conditions" target="_blank">Terms and Conditions</a></div>'
-    )
-
-    formContainer.appendChild(loginNote)
-    modalContent.appendChild(formContainer)
-
-    modalContainer.appendChild(modalContent)
-    this.torusLoginModal.appendChild(modalContainer)
-
-    // Append login codes to widget
-    this.torusWidget.appendChild(this.torusLoginModal)
-
-    // Iframe code
-    this.torusIframe = htmlToElement(`<iframe id="torusIframe" frameBorder="0" src="${torusUrl}/popup"></iframe>`)
-    // Setup on load code
-    const bindOnLoad = () => {
-      this.torusLogin.addEventListener('click', () => {
-        this._showLoginPopup(false)
-      })
-
-      homeBtn.addEventListener('click', () => {
-        this.showWallet()
-        this._toggleSpeedDial()
-      })
-
-      transferBtn.addEventListener('click', () => {
-        this.showWallet('transfer')
-        this._toggleSpeedDial()
-      })
-
-      this.keyBtn.addEventListener('click', () => {
-        const publicKey = htmlToElement(`<input type="text" value="${this.ethereum.selectedAddress}">`)
-        this.torusWidget.prepend(publicKey)
-        publicKey.select()
-        publicKey.setSelectionRange(0, 99999) // For mobile
-
-        document.execCommand('copy')
-        this.torusWidget.removeChild(publicKey)
-
-        tooltipCopied.classList.add('active')
-        tooltipNote.classList.add('active')
-
-        setTimeout(() => {
-          tooltipCopied.classList.remove('active')
-          tooltipNote.classList.remove('active')
-          this._toggleSpeedDial()
-        }, 1000)
-      })
-
-      this.torusMenuBtn.addEventListener('click', () => {
-        this._toggleSpeedDial()
-      })
-
-      // Login Modal Listeners
-      modalContainer.querySelector('#torus-login-modal__close').addEventListener('click', () => {
-        this.torusLoginModal.style.display = 'none'
-        if (this.modalCloseHandler) this.modalCloseHandler()
-        delete this.modalCloseHandler
-      })
-    }
-
-    const attachOnLoad = () => {
-      window.document.head.appendChild(link)
-      window.document.body.appendChild(this.torusWidget)
-    }
-
-    runOnLoad(attachOnLoad)
-    runOnLoad(bindOnLoad)
-
-    switch (this.buttonPosition) {
-      case 'top-left':
-        this.torusWidget.style.top = '34px'
-        this.torusWidget.style.left = '34px'
-        break
-      case 'top-right':
-        this.torusWidget.style.top = '34px'
-        this.torusWidget.style.right = '34px'
-        break
-      case 'bottom-right':
-        this.torusWidget.style.bottom = '34px'
-        this.torusWidget.style.right = '34px'
-        break
-      case 'bottom-left':
-      default:
-        this.torusWidget.style.bottom = '34px'
-        this.torusWidget.style.left = '34px'
-        break
-    }
-  }
-
   _updateKeyBtnAddress(selectedAddress) {
     this.keyBtn.innerText = selectedAddress && `${selectedAddress.slice(0, 4)}..`
   }
 
   _showLoggedOut() {
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLoginModal.style.display = 'none'
-    this.torusSpeedDial.style.display = 'none'
-    this.torusSpeedDial.style.opacity = '0'
+    // this.torusMenuBtn.style.display = 'none'
+    // this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    // this.torusLoadingBtn.style.display = 'none'
+    // this.torusLoginModal.style.display = 'none'
+    // this.torusSpeedDial.style.display = 'none'
+    // this.torusSpeedDial.style.opacity = '0'
   }
 
   _showLoggingIn() {
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLoginModal.style.display = this.requestedVerifier === '' ? 'block' : 'none'
+    // this.torusMenuBtn.style.display = 'none'
+    // this.torusLogin.style.display = 'none'
+    // this.torusLoadingBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    // this.torusLoginModal.style.display = this.requestedVerifier === '' ? 'block' : 'none'
   }
 
   _showLoggedIn() {
-    this.torusMenuBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLoginModal.style.display = 'none'
+    // this.torusMenuBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    // this.torusLogin.style.display = 'none'
+    // this.torusLoadingBtn.style.display = 'none'
+    // this.torusLoginModal.style.display = 'none'
   }
 
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
-    this.torusButtonVisibility = false
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusSpeedDial.style.display = 'none'
-    this.torusSpeedDial.style.opacity = '0'
+    // this.torusButtonVisibility = false
+    // this.torusMenuBtn.style.display = 'none'
+    // this.torusLogin.style.display = 'none'
+    // this.torusLoadingBtn.style.display = 'none'
+    // this.torusSpeedDial.style.display = 'none'
+    // this.torusSpeedDial.style.opacity = '0'
   }
 
   /**
@@ -566,9 +359,9 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
-    this.torusButtonVisibility = true
-    if (this.isLoggedIn) this._showLoggedIn()
-    else this._showLoggedOut()
+    // this.torusButtonVisibility = true
+    // if (this.isLoggedIn) this._showLoggedIn()
+    // else this._showLoggedOut()
   }
 
   _setupWeb3() {
