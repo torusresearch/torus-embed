@@ -136,7 +136,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
     setTimeout(() => this.emit('connect'))
   }
 
-  isMetaMask = true
+  // isMetaMask = true
 
   /**
    * Sends an RPC request to MetaMask. Resolves to the result of the method call.
