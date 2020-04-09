@@ -1,8 +1,6 @@
 import randomId from '@chaitanyapotti/random-id'
 import { serializeError } from 'eth-json-rpc-errors'
-import EventEmitter from 'events'
 import log from 'loglevel'
-import SafeEventEmitter from 'safe-event-emitter'
 
 import { name, version } from '../package.json'
 import config from './config'
@@ -73,11 +71,11 @@ export const createErrorMiddleware = () => {
  * @param {string} remoteLabel - The label of the disconnected stream.
  * @param {Error} err - The associated error to log.
  */
-export const logStreamDisconnectWarning = (remoteLabel, err) => {
+export function logStreamDisconnectWarning(remoteLabel, err) {
   let warningMsg = `MetamaskInpageProvider - lost connection to ${remoteLabel}`
   if (err) warningMsg += `\n${err.stack}`
   log.warn(warningMsg)
-  if (this instanceof EventEmitter || this instanceof SafeEventEmitter) {
+  if (this.emit && this.listenerCount) {
     if (this.listenerCount('error') > 0) {
       this.emit('error', warningMsg)
     }
