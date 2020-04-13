@@ -126,7 +126,15 @@ class Torus {
     else log.disableAll()
     this.torusButtonVisibility = showTorusButton
     // Iframe code
-    this.torusIframe = htmlToElement(`<iframe id="torusIframe" style="display:none;" src="${torusUrl}/popup"></iframe>`)
+    this.torusIframe = htmlToElement(
+      `<iframe 
+        id="torusIframe"
+        class="torusIframe"
+        src="${torusUrl}/popup"
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0; z-index: 2147483647;"
+      ></iframe>`
+    )
+
     const attachIFrame = () => {
       window.document.body.appendChild(this.torusIframe)
     }
