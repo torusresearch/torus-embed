@@ -94,7 +94,20 @@ export default {
             host: 'rinkeby', // mandatory
             chainId: 4
           },
-          showTorusButton: true
+          showTorusButton: true,
+          whiteLabel: {
+            theme: {
+              isDark: true,
+              colors: {
+                torusBrand1: '#EF8102',
+                torusGray2: '#FBF7F3'
+              }
+            },
+            defaultLanguage: 'de',
+            logo: 'https://kyber.network/app/images/kyber-logo.svg',
+            topupHide: false,
+            featuredBillboardHide: false
+          }
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
