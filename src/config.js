@@ -7,6 +7,7 @@ const enums = {
   MOONPAY: 'moonpay',
   WYRE: 'wyre',
   RAMPNETWORK: 'rampnetwork',
+  XANPOOL: 'xanpool',
 }
 
 const verifierList = Object.values(enums)
@@ -22,6 +23,7 @@ const paymentProviders = {
     validCurrencies: ['GBP', 'EUR'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
     includeFees: true,
+    enforceMax: true,
   },
   [enums.MOONPAY]: {
     line1: 'Credit / Debit Card / Apple Pay',
@@ -33,6 +35,7 @@ const paymentProviders = {
     validCurrencies: ['USD', 'EUR', 'GBP'],
     validCryptoCurrencies: ['ETH', 'DAI', 'TUSD', 'USDC', 'USDT'],
     includeFees: true,
+    enforceMax: true,
   },
   [enums.WYRE]: {
     line1: 'Apple Pay/Debit Card',
@@ -44,6 +47,20 @@ const paymentProviders = {
     validCurrencies: ['USD'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
     includeFees: false,
+    enforceMax: true,
+  },
+  [enums.XANPOOL]: {
+    line1: 'PayNow/ InstaPay/ FPS/ GoJekPay/ UPI/ PromptPay/ VietelPay/ DuitNow',
+    line2: '2.5% buying, 3% selling',
+    line3: '$2,500 / day',
+    supportPage: 'mailto:support@xanpool.com',
+    minOrderValue: 1,
+    maxOrderValue: 2500,
+    validCurrencies: ['SGD', 'HKD', 'MYR', 'PHP', 'INR', 'VND', 'THB', 'IDR'],
+    validCryptoCurrencies: ['ETH', 'USDT'],
+    includeFees: true,
+    sell: true,
+    enforceMax: false,
   },
 }
 
