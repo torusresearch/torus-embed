@@ -18,7 +18,7 @@ declare class Torus {
   cleanUp(): Promise<void>;
 }
 
-export as namespace torus;
+export as namespace Torus;
 
 export = Torus;
 
