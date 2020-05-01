@@ -5,6 +5,7 @@ import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 
 import { version } from '../package.json'
+import TorusChannelProvider from './channel-provider'
 import configuration from './config'
 import { handleEvent, handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
@@ -590,6 +591,16 @@ class Torus {
       targetWindow: this.torusIframe.contentWindow,
     })
     this.communicationStream.setMaxListeners(100)
+
+    // setup channel stream
+    this.channelStream = new LocalMessageDuplexStream({
+      name: 'embed_chan',
+      target: 'iframe_chan',
+      targetWindow: this.torusIframe.contentWindow,
+    })
+    this.channelStream.setMaxListeners(100)
+
+    this.channelProvider = new TorusChannelProvider(this.channelStream)
 
     // Backward compatibility with Gotchi :)
     // window.metamaskStream = this.communicationStream

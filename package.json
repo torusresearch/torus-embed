@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@chaitanyapotti/random-id": "^1.0.3",
+    "@connext/channel-provider": "^6.3.1",
     "@toruslabs/fetch-node-details": "^2.2.0",
     "@toruslabs/torus.js": "^2.1.0",
     "create-hash": "^1.2.0",
