@@ -54,7 +54,7 @@ const paymentProviders = {
     line2: '2.5% buying, 3% selling',
     line3: '$2,500 / day',
     supportPage: 'mailto:support@xanpool.com',
-    minOrderValue: 1,
+    minOrderValue: 30,
     maxOrderValue: 2500,
     validCurrencies: ['SGD', 'HKD', 'MYR', 'PHP', 'INR', 'VND', 'THB', 'IDR'],
     validCryptoCurrencies: ['ETH', 'USDT'],
