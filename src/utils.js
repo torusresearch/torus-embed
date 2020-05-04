@@ -27,7 +27,8 @@ export const validatePaymentProvider = (provider, params) => {
   if (selectedParams.fiatValue) {
     const requestedOrderAmount = +parseFloat(selectedParams.fiatValue) || 0
     if (requestedOrderAmount < selectedProvider.minOrderValue) errors.fiatValue = 'Requested amount is lower than supported'
-    if (requestedOrderAmount > selectedProvider.maxOrderValue) errors.fiatValue = 'Requested amount is higher than supported'
+    if (requestedOrderAmount > selectedProvider.maxOrderValue && selectedProvider.enforceMax)
+      errors.fiatValue = 'Requested amount is higher than supported'
   }
   if (selectedParams.selectedCurrency && !selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) {
     errors.selectedCurrency = 'Unsupported currency'

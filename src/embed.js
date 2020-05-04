@@ -55,7 +55,7 @@ function restoreContextAfterImports() {
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-BG21WxsKIkqcIgKimXR8sPF79DxSVlQf54qY2TzxKUGKhEJ5i64VD+ToFJxxyVBr'
+const iframeIntegrity = 'sha384-7XIMUCMc9VIpZOS7NSujXbS/GsZ40qaknfX5aJUy3S6TZqIpHsjVj9jRt9Y8Bnoa'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -969,7 +969,7 @@ class Torus {
    * Allows the dapp to trigger a payment method directly
    * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
    * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork
+   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork, xanpool
    * @param {PaymentParams} params PaymentParams
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */
