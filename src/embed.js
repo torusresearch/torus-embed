@@ -958,6 +958,7 @@ class Torus {
             closed: true,
           },
         })
+        windowStream.removeListener('data', closeHandler)
       })
     }
   }
