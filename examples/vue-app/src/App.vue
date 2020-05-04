@@ -97,13 +97,13 @@ export default {
           showTorusButton: true,
           whiteLabel: {
             theme: {
-              isDark: true,
+              isDark: false,
               colors: {
                 torusBrand1: '#EF8102',
                 torusGray2: '#FBF7F3'
               }
             },
-            defaultLanguage: 'de',
+            defaultLanguage: 'ja',
             logo: 'https://kyber.network/app/images/kyber-logo.svg',
             topupHide: false,
             featuredBillboardHide: false
