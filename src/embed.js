@@ -43,6 +43,7 @@ window.addEventListener('message', receiveMessage, false)
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
+    // TODO: respect buttonPosition
     this.buttonPosition = buttonPosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
@@ -76,7 +77,7 @@ class Torus {
       chainId: 1,
       networkName: 'mainnet',
     },
-    showTorusButton = true,
+    showTorusButton = false,
     integrity = {
       check: false,
       hash: iframeIntegrity,
@@ -106,6 +107,7 @@ class Torus {
 
     const attachIFrame = () => {
       window.document.body.appendChild(this.torusIframe)
+      this._displayIframe()
     }
     const handleSetup = async () => {
       await runOnLoad(attachIFrame)
@@ -165,16 +167,13 @@ class Torus {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
-      this.torusIframe.style.display = 'block'
       this.requestedVerifier = ''
       return this.ethereum.enable()
     }
     if (configuration.verifierList.includes(verifier)) {
-      this.torusIframe.style.display = 'block'
       this.requestedVerifier = verifier
       return this.ethereum.enable()
     }
-    this.torusIframe.style.display = 'none'
     throw new Error('Unsupported verifier')
   }
 
@@ -302,6 +301,7 @@ class Torus {
   }
 
   _showLoggedOut() {
+    this._displayIframe()
     // this.torusMenuBtn.style.display = 'none'
     // this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
     // this.torusLoadingBtn.style.display = 'none'
@@ -311,24 +311,19 @@ class Torus {
   }
 
   _showLoggingIn() {
-    // this.torusMenuBtn.style.display = 'none'
-    // this.torusLogin.style.display = 'none'
-    // this.torusLoadingBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    // this.torusLoginModal.style.display = this.requestedVerifier === '' ? 'block' : 'none'
+    this._displayIframe(true)
   }
 
   _showLoggedIn() {
-    // this.torusMenuBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    // this.torusLogin.style.display = 'none'
-    // this.torusLoadingBtn.style.display = 'none'
-    // this.torusLoginModal.style.display = 'none'
+    this._displayIframe()
   }
 
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
-    // this.torusButtonVisibility = false
+    this.torusButtonVisibility = false
+    this._displayIframe()
     // this.torusMenuBtn.style.display = 'none'
     // this.torusLogin.style.display = 'none'
     // this.torusLoadingBtn.style.display = 'none'
@@ -341,9 +336,49 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
-    // this.torusButtonVisibility = true
-    // if (this.isLoggedIn) this._showLoggedIn()
-    // else this._showLoggedOut()
+    this.torusButtonVisibility = true
+    if (this.isLoggedIn) this._showLoggedIn()
+    else this._showLoggedOut()
+  }
+
+  _displayIframe(isFull = false) {
+    this.torusIframe.style.display = this.torusButtonVisibility ? 'block' : 'none'
+    // reset phase
+    this.torusIframe.style.width = 'auto'
+    this.torusIframe.style.height = 'auto'
+    this.torusIframe.style.top = 'auto'
+    this.torusIframe.style.left = 'auto'
+    this.torusIframe.style.bottom = 'auto'
+    this.torusIframe.style.right = 'auto'
+    // set phase
+    if (!isFull) {
+      this.torusIframe.style.width = '56px'
+      this.torusIframe.style.height = '56px'
+      switch (this.buttonPosition) {
+        case 'top-left':
+          this.torusIframe.style.top = '34px'
+          this.torusIframe.style.left = '34px'
+          break
+        case 'top-right':
+          this.torusIframe.style.top = '34px'
+          this.torusIframe.style.right = '34px'
+          break
+        case 'bottom-right':
+          this.torusIframe.style.bottom = '34px'
+          this.torusIframe.style.right = '34px'
+          break
+        case 'bottom-left':
+        default:
+          this.torusIframe.style.bottom = '34px'
+          this.torusIframe.style.left = '34px'
+          break
+      }
+    } else {
+      this.torusIframe.style.width = '100%'
+      this.torusIframe.style.height = '100%'
+      this.torusIframe.style.top = '0px'
+      this.torusIframe.style.right = '0px'
+    }
   }
 
   _setupWeb3() {
@@ -491,7 +526,7 @@ class Torus {
 
   // Exposing login function, if called from embed, flag as true
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    // this._showLoggingIn()
+    this._showLoggingIn()
     const loginHandler = (data) => {
       const { err, selectedAddress } = data
       if (err) {
