@@ -72,6 +72,20 @@ interface TorusParams {
   showTorusButton?: boolean;
   enabledVerifiers?: VerifierStatus;
   integrity?: IntegrityParams;
+  whiteLabel?: WhiteLabelParams;
+}
+
+interface WhiteLabelParams {
+  theme: ThemeParams;
+  defaultLanguage: string;
+  logo: string;
+  topupHide: boolean;
+  featuredBillboardHide: boolean;
+}
+
+interface ThemeParams {
+  isDark: boolean;
+  colors: any;
 }
 
 interface IntegrityParams {
