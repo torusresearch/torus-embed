@@ -97,6 +97,7 @@ class Torus {
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
     this.torusJs = new TorusJs()
+    this.whiteLabel = {}
   }
 
   async init({
@@ -114,12 +115,14 @@ class Torus {
       hash: iframeIntegrity,
       version,
     },
+    whiteLabel = {},
   } = {}) {
     if (this.isInitalized) return Promise.reject(new Error('Already initialized'))
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
     this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
+    this.whiteLabel = whiteLabel
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
     else log.disableAll()
@@ -132,6 +135,9 @@ class Torus {
       await runOnLoad(attachIFrame)
       await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
+        const initStream = this.communicationMux.getStream('init_stream')
+        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel } })
+
         await this._setProvider(network)
         this.isInitalized = true
       })
@@ -270,6 +276,8 @@ class Torus {
       })
     }
 
+    this.setEmbedWhiteLabel(this.torusAlert)
+
     const attachOnLoad = () => {
       window.document.body.appendChild(this.torusAlert)
     }
@@ -299,6 +307,8 @@ class Torus {
         torusAlert.remove()
       })
     }
+
+    this.setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(torusAlert)
@@ -443,6 +453,9 @@ class Torus {
 
     // Append login codes to widget
     this.torusWidget.appendChild(this.torusLoginModal)
+
+    // Set whitelabel
+    this.setEmbedWhiteLabel(this.torusWidget)
 
     // Iframe code
     this.torusIframe = htmlToElement(`<iframe id="torusIframe" frameBorder="0" src="${torusUrl}/popup"></iframe>`)
@@ -958,6 +971,7 @@ class Torus {
             closed: true,
           },
         })
+        windowStream.removeListener('data', closeHandler)
       })
     }
   }
@@ -997,6 +1011,18 @@ class Torus {
         topupStream.write({ name: 'topup_request', data: { provider, params, preopenInstanceId } })
       } else reject(new Error('User has not initialized in yet'))
     })
+  }
+
+  setEmbedWhiteLabel(element) {
+    // Set whitelabel
+    if (this.whiteLabel.theme) {
+      const isDark = this.whiteLabel.theme.isDark || false
+      const theme = this.whiteLabel.theme.colors
+      if (isDark) element.classList.add('torus-dark')
+
+      if (theme.torusBrand1) element.style.setProperty('--torus-brand-1', theme.torusBrand1)
+      if (theme.torusGray2) element.style.setProperty('--torus-gray-2', theme.torusGray2)
+    }
   }
 }
 
