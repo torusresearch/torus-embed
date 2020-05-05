@@ -55,7 +55,7 @@ function restoreContextAfterImports() {
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-7XIMUCMc9VIpZOS7NSujXbS/GsZ40qaknfX5aJUy3S6TZqIpHsjVj9jRt9Y8Bnoa'
+const iframeIntegrity = 'sha384-ejsd4Wlxgdy+Efc6E82hf5VqhqjqNEgbJYbb7HPar73jRF4gezfpSZ+9s7lhgIei'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -971,6 +971,7 @@ class Torus {
             closed: true,
           },
         })
+        windowStream.removeListener('data', closeHandler)
       })
     }
   }
