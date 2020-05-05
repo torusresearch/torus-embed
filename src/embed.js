@@ -114,7 +114,10 @@ class Torus {
       await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
         const initStream = this.communicationMux.getStream('init_stream')
-        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel } })
+        initStream.write({
+          name: 'init_stream',
+          data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel, buttonPosition: this.buttonPosition },
+        })
         await this._setProvider(network)
         this.isInitalized = true
       })
