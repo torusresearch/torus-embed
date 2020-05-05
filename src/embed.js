@@ -347,43 +347,48 @@ class Torus {
   }
 
   _displayIframe(isFull = false) {
-    this.torusIframe.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    // reset phase
-    this.torusIframe.style.width = 'auto'
-    this.torusIframe.style.height = 'auto'
-    this.torusIframe.style.top = 'auto'
-    this.torusIframe.style.left = 'auto'
-    this.torusIframe.style.bottom = 'auto'
-    this.torusIframe.style.right = 'auto'
+    const style = {}
+    style.display = this.torusButtonVisibility ? 'block' : 'none'
     // set phase
     if (!isFull) {
-      this.torusIframe.style.width = '56px'
-      this.torusIframe.style.height = '56px'
+      style.height = '56px'
+      style.width = '56px'
       switch (this.buttonPosition) {
         case 'top-left':
-          this.torusIframe.style.top = '34px'
-          this.torusIframe.style.left = '34px'
+          style.top = '34px'
+          style.left = '34px'
+          style.right = 'auto'
+          style.bottom = 'auto'
           break
         case 'top-right':
-          this.torusIframe.style.top = '34px'
-          this.torusIframe.style.right = '34px'
+          style.top = '34px'
+          style.right = '34px'
+          style.left = 'auto'
+          style.bottom = 'auto'
           break
         case 'bottom-right':
-          this.torusIframe.style.bottom = '34px'
-          this.torusIframe.style.right = '34px'
+          style.bottom = '34px'
+          style.right = '34px'
+          style.top = 'auto'
+          style.left = 'auto'
           break
         case 'bottom-left':
         default:
-          this.torusIframe.style.bottom = '34px'
-          this.torusIframe.style.left = '34px'
+          style.bottom = '34px'
+          style.left = '34px'
+          style.top = 'auto'
+          style.right = 'auto'
           break
       }
     } else {
-      this.torusIframe.style.width = '100%'
-      this.torusIframe.style.height = '100%'
-      this.torusIframe.style.top = '0px'
-      this.torusIframe.style.right = '0px'
+      style.width = '100%'
+      style.height = '100%'
+      style.top = '0px'
+      style.right = '0px'
+      style.left = '0px'
+      style.bottom = '0px'
     }
+    Object.assign(this.torusIframe.style, style)
   }
 
   _setupWeb3() {
@@ -489,6 +494,13 @@ class Torus {
       if (chunk.name === 'create_window') {
         this._createPopupBlockAlert(chunk.data.preopenInstanceId)
       }
+    })
+
+    // show torus widget if button clicked
+    const widgetStream = communicationMux.getStream('widget')
+    widgetStream.on('data', (chunk) => {
+      const { data } = chunk
+      this._displayIframe(data)
     })
 
     // Show torus button if wallet has been hydrated/detected
