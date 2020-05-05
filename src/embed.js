@@ -107,7 +107,9 @@ class Torus {
 
     const attachIFrame = () => {
       window.document.body.appendChild(this.torusIframe)
-      this._displayIframe()
+      this.torusIframe.onload = () => {
+        this._displayIframe()
+      }
     }
     const handleSetup = async () => {
       await runOnLoad(attachIFrame)
@@ -355,25 +357,25 @@ class Torus {
     this.torusIframe.style.right = 'auto'
     // set phase
     if (!isFull) {
-      this.torusIframe.style.width = '90px'
-      this.torusIframe.style.height = '90px'
+      this.torusIframe.style.width = '56px'
+      this.torusIframe.style.height = '56px'
       switch (this.buttonPosition) {
         case 'top-left':
-          this.torusIframe.style.top = '0'
-          this.torusIframe.style.left = '0'
+          this.torusIframe.style.top = '34px'
+          this.torusIframe.style.left = '34px'
           break
         case 'top-right':
-          this.torusIframe.style.top = '0'
-          this.torusIframe.style.right = '0'
+          this.torusIframe.style.top = '34px'
+          this.torusIframe.style.right = '34px'
           break
         case 'bottom-right':
-          this.torusIframe.style.bottom = '0'
-          this.torusIframe.style.right = '0'
+          this.torusIframe.style.bottom = '34px'
+          this.torusIframe.style.right = '34px'
           break
         case 'bottom-left':
         default:
-          this.torusIframe.style.bottom = '0'
-          this.torusIframe.style.left = '0'
+          this.torusIframe.style.bottom = '34px'
+          this.torusIframe.style.left = '34px'
           break
       }
     } else {
