@@ -355,25 +355,25 @@ class Torus {
     this.torusIframe.style.right = 'auto'
     // set phase
     if (!isFull) {
-      this.torusIframe.style.width = '56px'
-      this.torusIframe.style.height = '56px'
+      this.torusIframe.style.width = '90px'
+      this.torusIframe.style.height = '90px'
       switch (this.buttonPosition) {
         case 'top-left':
-          this.torusIframe.style.top = '34px'
-          this.torusIframe.style.left = '34px'
+          this.torusIframe.style.top = '0'
+          this.torusIframe.style.left = '0'
           break
         case 'top-right':
-          this.torusIframe.style.top = '34px'
-          this.torusIframe.style.right = '34px'
+          this.torusIframe.style.top = '0'
+          this.torusIframe.style.right = '0'
           break
         case 'bottom-right':
-          this.torusIframe.style.bottom = '34px'
-          this.torusIframe.style.right = '34px'
+          this.torusIframe.style.bottom = '0'
+          this.torusIframe.style.right = '0'
           break
         case 'bottom-left':
         default:
-          this.torusIframe.style.bottom = '34px'
-          this.torusIframe.style.left = '34px'
+          this.torusIframe.style.bottom = '0'
+          this.torusIframe.style.left = '0'
           break
       }
     } else {
