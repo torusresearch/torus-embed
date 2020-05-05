@@ -1,6 +1,7 @@
 const path = require('path')
 
 const pkgName = 'torus'
+const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1)
 
 const externals = ['@chaitanyapotti/random-id', '@toruslabs/fetch-node-details', '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel']
 
@@ -11,7 +12,7 @@ const baseConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     // filename: 'bundle.js',
-    library: pkgName,
+    library: libraryName,
     libraryExport: 'default',
     // libraryTarget: 'umd',
   },
@@ -98,8 +99,8 @@ const cjsConfig = {
   externals: [...externals, /^(@babel\/runtime)/i],
 }
 
-// module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
-module.exports = [cjsConfig]
+module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
+// module.exports = [cjsConfig]
 
 // V5
 // experiments: {

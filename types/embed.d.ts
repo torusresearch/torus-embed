@@ -8,7 +8,7 @@ declare class Torus {
   getPublicAddress(verifierArgs: VerifierArgs): Promise<string | TorusPublicKey>;
   setProvider(networkParams: NetworkInterface): Promise<void>;
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history'): void;
-  initiateTopup(provider: 'moonpay' | 'wyre' | 'rampnetwork', params?: PaymentParams): Promise<boolean>;
+  initiateTopup(provider: 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool', params?: PaymentParams): Promise<boolean>;
   showTorusButton(): void;
   hideTorusButton(): void;
   getUserInfo(message: string): Promise<UserInfo>;
@@ -18,7 +18,7 @@ declare class Torus {
   cleanUp(): Promise<void>;
 }
 
-export as namespace torus;
+export as namespace Torus;
 
 export = Torus;
 
@@ -72,6 +72,20 @@ interface TorusParams {
   showTorusButton?: boolean;
   enabledVerifiers?: VerifierStatus;
   integrity?: IntegrityParams;
+  whiteLabel?: WhiteLabelParams;
+}
+
+interface WhiteLabelParams {
+  theme: ThemeParams;
+  defaultLanguage: string;
+  logo: string;
+  topupHide: boolean;
+  featuredBillboardHide: boolean;
+}
+
+interface ThemeParams {
+  isDark: boolean;
+  colors: any;
 }
 
 interface IntegrityParams {

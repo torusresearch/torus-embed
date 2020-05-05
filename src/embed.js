@@ -56,7 +56,7 @@ function restoreContextAfterImports() {
 
 cleanContextForImports()
 
-const iframeIntegrity = 'sha384-7XIMUCMc9VIpZOS7NSujXbS/GsZ40qaknfX5aJUy3S6TZqIpHsjVj9jRt9Y8Bnoa'
+const iframeIntegrity = 'sha384-ejsd4Wlxgdy+Efc6E82hf5VqhqjqNEgbJYbb7HPar73jRF4gezfpSZ+9s7lhgIei'
 const expectedCacheControlHeader = 'max-age=3600'
 
 restoreContextAfterImports()
@@ -98,6 +98,7 @@ class Torus {
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
     this.torusJs = new TorusJs()
+    this.whiteLabel = {}
   }
 
   async init({
@@ -115,12 +116,14 @@ class Torus {
       hash: iframeIntegrity,
       version,
     },
+    whiteLabel = {},
   } = {}) {
     if (this.isInitalized) return Promise.reject(new Error('Already initialized'))
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
     this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
+    this.whiteLabel = whiteLabel
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
     else log.disableAll()
@@ -143,7 +146,8 @@ class Torus {
       await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
         const initStream = this.communicationMux.getStream('init_stream')
-        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers } })
+        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel } })
+
         await this._setProvider(network)
         this.isInitalized = true
       })
@@ -285,6 +289,8 @@ class Torus {
       })
     }
 
+    this.setEmbedWhiteLabel(this.torusAlert)
+
     const attachOnLoad = () => {
       window.document.body.appendChild(this.torusAlert)
     }
@@ -314,6 +320,8 @@ class Torus {
         torusAlert.remove()
       })
     }
+
+    this.setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(torusAlert)
@@ -759,6 +767,7 @@ class Torus {
             closed: true,
           },
         })
+        windowStream.removeListener('data', closeHandler)
       })
     }
   }
@@ -770,7 +779,7 @@ class Torus {
    * Allows the dapp to trigger a payment method directly
    * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
    * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork
+   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork, xanpool
    * @param {PaymentParams} params PaymentParams
    * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
    */
@@ -798,6 +807,18 @@ class Torus {
         topupStream.write({ name: 'topup_request', data: { provider, params, preopenInstanceId } })
       } else reject(new Error('User has not initialized in yet'))
     })
+  }
+
+  setEmbedWhiteLabel(element) {
+    // Set whitelabel
+    if (this.whiteLabel.theme) {
+      const isDark = this.whiteLabel.theme.isDark || false
+      const theme = this.whiteLabel.theme.colors
+      if (isDark) element.classList.add('torus-dark')
+
+      if (theme.torusBrand1) element.style.setProperty('--torus-brand-1', theme.torusBrand1)
+      if (theme.torusGray2) element.style.setProperty('--torus-gray-2', theme.torusGray2)
+    }
   }
 }
 
