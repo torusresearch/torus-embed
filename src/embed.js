@@ -7,7 +7,7 @@ import Web3 from 'web3'
 
 import { version } from '../package.json'
 import configuration from './config'
-import { handleEvent, handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
+import { handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
 import generateIntegrity from './integrity'
 import PopupHandler from './PopupHandler'
@@ -24,42 +24,8 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-// need to make sure we aren't affected by overlapping namespaces
-// and that we dont affect the app with our namespace
-// mostly a fix for web3's BigNumber if AMD's "define" is defined...
-let __define
-
-/**
- * Caches reference to global define object and deletes it to
- * avoid conflicts with other global define objects, such as
- * AMD's define function
- */
-function cleanContextForImports() {
-  try {
-    __define = global.define
-    global.define = undefined
-  } catch (_) {
-    log.warn('Torus - global.define could not be deleted.')
-  }
-}
-
-/**
- * Restores global define object from cached reference
- */
-function restoreContextAfterImports() {
-  try {
-    global.define = __define
-  } catch (_) {
-    log.warn('Torus - global.define could not be overwritten.')
-  }
-}
-
-cleanContextForImports()
-
 const iframeIntegrity = 'sha384-ejsd4Wlxgdy+Efc6E82hf5VqhqjqNEgbJYbb7HPar73jRF4gezfpSZ+9s7lhgIei'
 const expectedCacheControlHeader = 'max-age=3600'
-
-restoreContextAfterImports()
 
 let thirdPartyCookiesSupported = true
 const receiveMessage = (evt) => {
@@ -134,7 +100,7 @@ class Torus {
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
-        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0; z-index: 2147483647;"
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;"
       ></iframe>`
     )
 
@@ -147,11 +113,11 @@ class Torus {
       await runOnLoad(async () => {
         const initStream = this.communicationMux.getStream('init_stream')
         initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel } })
-
         await this._setProvider(network)
         this.isInitalized = true
       })
     }
+
     if (buildEnv === 'production' && integrity.check) {
       // hacky solution to check for iframe integrity
       const fetchUrl = `${torusUrl}/popup`
@@ -424,6 +390,7 @@ class Torus {
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
       this._showLoggingIn()
+      if (!thirdPartyCookiesSupported) return Promise.reject(new Error('Third party cookies not supported'))
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
@@ -524,35 +491,24 @@ class Torus {
 
   // Exposing login function, if called from embed, flag as true
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    this._showLoggingIn()
-    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
-      this.modalCloseHandler = () => {
+    // this._showLoggingIn()
+    const loginHandler = (data) => {
+      const { err, selectedAddress } = data
+      if (err) {
+        log.error(err)
         this._showLoggedOut()
-        if (reject) reject(new Error('Modal has been closed'))
+        if (reject) reject(err)
+      } else {
+        // returns an array (cause accounts expects it)
+        if (resolve) resolve([transformEthAddress(selectedAddress)])
+        this._showLoggedIn()
       }
-      const loginHandler = (verifier) => {
-        this.requestedVerifier = verifier
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      Object.keys(this.enabledVerifiers).forEach((verifier) => {
-        if (this.enabledVerifiers[verifier]) {
-          handleEvent(this[`${verifier}Login`], 'click', loginHandler, [verifier])
-        }
-      })
+    }
+    const oauthStream = this.communicationMux.getStream('oauth')
+    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+      handleStream(oauthStream, 'data', loginHandler)
+      oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
-      const oauthStream = this.communicationMux.getStream('oauth')
-      const loginHandler = (data) => {
-        const { err, selectedAddress } = data
-        if (err) {
-          log.error(err)
-          this._showLoggedOut()
-          if (reject) reject(err)
-        } else {
-          // returns an array (cause accounts expects it)
-          if (resolve) resolve([transformEthAddress(selectedAddress)])
-          this._showLoggedIn()
-        }
-      }
       handleStream(oauthStream, 'data', loginHandler)
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId)
