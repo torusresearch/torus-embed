@@ -111,8 +111,8 @@ class Torus {
     this.styleLink = link
 
     const attachIFrame = () => {
+      window.document.head.appendChild(this.styleLink)
       window.document.body.appendChild(this.torusIframe)
-      window.document.head.appendChild(link)
       this.torusIframe.onload = () => {
         this._displayIframe()
       }
