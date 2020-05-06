@@ -43,7 +43,6 @@ window.addEventListener('message', receiveMessage, false)
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
-    // TODO: respect buttonPosition
     this.buttonPosition = buttonPosition
     this.torusWidget = {}
     this.torusMenuBtn = {}
@@ -105,8 +104,15 @@ class Torus {
       ></iframe>`
     )
 
+    const link = window.document.createElement('link')
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('type', 'text/css')
+    link.setAttribute('href', `${torusUrl}/css/widget.css`)
+    this.styleLink = link
+
     const attachIFrame = () => {
       window.document.body.appendChild(this.torusIframe)
+      window.document.head.appendChild(link)
       this.torusIframe.onload = () => {
         this._displayIframe()
       }
