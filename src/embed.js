@@ -351,31 +351,31 @@ class Torus {
     style.display = this.torusButtonVisibility ? 'block' : 'none'
     // set phase
     if (!isFull) {
-      style.height = '56px'
-      style.width = '56px'
+      style.height = '70px'
+      style.width = '70px'
       switch (this.buttonPosition) {
         case 'top-left':
-          style.top = '34px'
-          style.left = '34px'
+          style.top = '0px'
+          style.left = '0px'
           style.right = 'auto'
           style.bottom = 'auto'
           break
         case 'top-right':
-          style.top = '34px'
-          style.right = '34px'
+          style.top = '0px'
+          style.right = '0px'
           style.left = 'auto'
           style.bottom = 'auto'
           break
         case 'bottom-right':
-          style.bottom = '34px'
-          style.right = '34px'
+          style.bottom = '0px'
+          style.right = '0px'
           style.top = 'auto'
           style.left = 'auto'
           break
         case 'bottom-left':
         default:
-          style.bottom = '34px'
-          style.left = '34px'
+          style.bottom = '0px'
+          style.left = '0px'
           style.top = 'auto'
           style.right = 'auto'
           break
