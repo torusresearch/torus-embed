@@ -99,14 +99,14 @@ export default {
             theme: {
               isDark: false,
               colors: {
-                torusBrand1: '#EF8102',
+                torusBrand1: '#000000',
                 torusGray2: '#FBF7F3'
               }
             },
             defaultLanguage: 'ja',
-            logo: 'https://kyber.network/app/images/kyber-logo.svg',
+            logo: 'https://fibc.info/wp-content/uploads/2016/04/startbahn_logo_480.png',
             topupHide: false,
-            featuredBillboardHide: false
+            featuredBillboardHide: true
           }
         })
         await torus.login() // await torus.ethereum.enable()
