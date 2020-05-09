@@ -103,11 +103,12 @@ export default {
                 torusGray2: '#FBF7F3'
               }
             },
-            defaultLanguage: 'ja',
-            logo: 'https://fibc.info/wp-content/uploads/2016/04/startbahn_logo_480.png',
+            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
+            logoLight: 'https://startrail.io/images/front/startrail-top__main.svg', //light logo for dark background
             topupHide: true,
-            featuredBillboardHide: true,
+            featuredBillboardHide: false,
             tncLink: 'http://starbahn.org/tnc',
+            defaultLanguage: 'ja',
             customTranslations: {
               "en": {
                 "embed": {
@@ -118,8 +119,32 @@ export default {
                   "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
                   "forMoreInfo": "For more info, ",
                   "clickHere": "click here",
+                },
+                "login": {
+                  "acceptTerms": "By logging in, you accept Startrails'",
+                },
+                "dappTransfer": {
+                  "data": "Data to sign"
+                },
+                "dappPermission": {
+                  "permission": "Permission",
+                  "requestFrom": "Request from",
+                  "accessUserInfo": "To access your Google Email Address, Profile Photo and Name"
                 }
               },
+              "ja": {
+                "login": {
+                  "acceptTerms": "ログインすると、Startrails 'を受け入れます",
+                },
+                "dappTransfer": {
+                  "data": "あなたがサインするデータ"
+                },
+                "dappPermission": {
+                  "permission": "下記の内容を許可しますか",
+                  "requestFrom": "許可を求めているアプリケーション",
+                  "accessUserInfo": "受け取る情報: Googleメール、プロフィール写真、名前"
+                }
+              }
             }
           }
         })
