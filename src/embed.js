@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
+import deepmerge from 'deepmerge'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
@@ -13,7 +14,7 @@ import generateIntegrity from './integrity'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
-import { getPreopenInstanceId, getTorusUrl, validatePaymentProvider } from './utils'
+import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -111,6 +112,11 @@ class Torus {
     link.setAttribute('href', `${torusUrl}/css/widget.css`)
     this.styleLink = link
 
+    const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel
+    const mergedTranslations = deepmerge(configuration.translations, customTranslations)
+    const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()]
+    this.embedTranslations = languageTranslations.embed
+
     const attachIFrame = () => {
       window.document.head.appendChild(this.styleLink)
       window.document.body.appendChild(this.torusIframe)
@@ -163,9 +169,10 @@ class Torus {
     if (!thirdPartyCookiesSupported) {
       this._createAlert(
         '<div id="torusAlert" class="torus-alert">' +
-          '<h1>Cookies Required</h1>' +
-          '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
-          '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
+          `<h1>${this.embedTranslations.cookiesRequired}</h1>` +
+          `<p>${this.embedTranslations.enableCookies}</p>` +
+          `<p>${this.embedTranslations.forMoreInfo}<a href="https://docs.tor.us/faq/users#cookies" target="_blank"` +
+          `rel="noreferrer noopener">${this.embedTranslations.clickHere}</a></p>` +
           '</div>'
       )
       throw new Error('Third party cookies not supported')
@@ -266,7 +273,7 @@ class Torus {
       })
     }
 
-    this.setEmbedWhiteLabel(this.torusAlert)
+    this._setEmbedWhiteLabel(this.torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(this.torusAlert)
@@ -282,11 +289,11 @@ class Torus {
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert">' +
-        '<h1 id="torusAlert__title">Action Required</h1>' +
-        '<p id="torusAlert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
+        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
+        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
 
-    const successAlert = htmlToElement('<div><button id="torusAlert__btn">Confirm</button></div>')
+    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.confirm}</button></div>`)
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
@@ -298,7 +305,7 @@ class Torus {
       })
     }
 
-    this.setEmbedWhiteLabel(torusAlert)
+    this._setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(torusAlert)
@@ -824,15 +831,15 @@ class Torus {
     })
   }
 
-  setEmbedWhiteLabel(element) {
+  _setEmbedWhiteLabel(element) {
     // Set whitelabel
-    if (this.whiteLabel.theme) {
-      const isDark = this.whiteLabel.theme.isDark || false
-      const theme = this.whiteLabel.theme.colors
+    const { theme } = this.whiteLabel
+    if (theme) {
+      const { isDark = false, colors = {} } = theme
       if (isDark) element.classList.add('torus-dark')
 
-      if (theme.torusBrand1) element.style.setProperty('--torus-brand-1', theme.torusBrand1)
-      if (theme.torusGray2) element.style.setProperty('--torus-gray-2', theme.torusGray2)
+      if (colors.torusBrand1) element.style.setProperty('--torus-brand-1', colors.torusBrand1)
+      if (colors.torusGray2) element.style.setProperty('--torus-gray-2', colors.torusGray2)
     }
   }
 }

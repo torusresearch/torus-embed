@@ -81,6 +81,8 @@ interface WhiteLabelParams {
   logo: string;
   topupHide: boolean;
   featuredBillboardHide: boolean;
+  tncLink: string;
+  customTranslations: any;
 }
 
 interface ThemeParams {

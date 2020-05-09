@@ -105,8 +105,22 @@ export default {
             },
             defaultLanguage: 'ja',
             logo: 'https://fibc.info/wp-content/uploads/2016/04/startbahn_logo_480.png',
-            topupHide: false,
-            featuredBillboardHide: true
+            topupHide: true,
+            featuredBillboardHide: true,
+            tncLink: 'http://starbahn.org/tnc',
+            customTranslations: {
+              "en": {
+                "embed": {
+                  "confirm": "Confirm",
+                  "actionRequired": "Action Required",
+                  "pendingAction": "You have a pending action that needs to be completed in a pop-up window ",
+                  "cookiesRequired": "Cookies Required",
+                  "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
+                  "forMoreInfo": "For more info, ",
+                  "clickHere": "click here",
+                }
+              },
+            }
           }
         })
         await torus.login() // await torus.ethereum.enable()
