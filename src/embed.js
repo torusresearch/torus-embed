@@ -24,7 +24,8 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-lySMdrJZggHZ3knaroyxnl6TXlFdg6jZXIN1GLzBeJVU18oA56BKtWCDGxDT/ak/'
+const iframeIntegrity = 'sha384-Pfhm83NpqQLkwzWtezbc0wuuPjlGjhHwLNwVFeL6GCzsOovqGmULlJTP4sDdUxqc'
+
 const expectedCacheControlHeader = 'max-age=3600'
 
 let thirdPartyCookiesSupported = true
