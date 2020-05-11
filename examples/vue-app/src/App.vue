@@ -106,7 +106,7 @@ export default {
             logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
             logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
             topupHide: true,
-            featuredBillboardHide: false,
+            featuredBillboardHide: true,
             tncLink: 'http://starbahn.org/tnc',
             defaultLanguage: 'ja',
             customTranslations: {
