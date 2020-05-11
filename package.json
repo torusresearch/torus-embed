@@ -30,6 +30,7 @@
     "@toruslabs/fetch-node-details": "^2.2.1",
     "@toruslabs/torus.js": "^2.1.2",
     "create-hash": "^1.2.0",
+    "deepmerge": "^4.2.2",
     "eth-json-rpc-errors": "^2.0.2",
     "fast-deep-equal": "^3.1.1",
     "json-rpc-engine": "^5.1.8",
