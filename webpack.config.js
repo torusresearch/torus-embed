@@ -100,6 +100,7 @@ const cjsConfig = {
 }
 
 module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
+// module.exports = [cjsConfig]
 
 // V5
 // experiments: {

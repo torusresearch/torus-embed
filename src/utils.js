@@ -175,3 +175,10 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   }
   return { torusUrl, logLevel }
 }
+
+export const getUserLanguage = () => {
+  let userLanguage = window.navigator.userLanguage || window.navigator.language || 'en-US'
+  userLanguage = userLanguage.split('-')
+  userLanguage = Object.prototype.hasOwnProperty.call(config.translations, userLanguage[0]) ? userLanguage[0] : 'en'
+  return userLanguage
+}

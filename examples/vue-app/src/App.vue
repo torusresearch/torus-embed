@@ -99,14 +99,53 @@ export default {
             theme: {
               isDark: false,
               colors: {
-                torusBrand1: '#EF8102',
+                torusBrand1: '#000000',
                 torusGray2: '#FBF7F3'
               }
             },
+            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
+            logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
+            topupHide: true,
+            featuredBillboardHide: true,
+            tncLink: 'http://starbahn.org/tnc',
             defaultLanguage: 'ja',
-            logo: 'https://kyber.network/app/images/kyber-logo.svg',
-            topupHide: false,
-            featuredBillboardHide: false
+            customTranslations: {
+              "en": {
+                "embed": {
+                  "confirm": "Confirm",
+                  "actionRequired": "Action Required",
+                  "pendingAction": "You have a pending action that needs to be completed in a pop-up window ",
+                  "cookiesRequired": "Cookies Required",
+                  "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
+                  "forMoreInfo": "For more info, ",
+                  "clickHere": "click here",
+                },
+                "login": {
+                  "acceptTerms": "By logging in, you accept Startrails'",
+                },
+                "dappTransfer": {
+                  "data": "Data to sign"
+                },
+                "dappPermission": {
+                  "permission": "Permission",
+                  "requestFrom": "Request from",
+                  "accessUserInfo": "To access your Google Email Address, Profile Photo and Name"
+                }
+              },
+              "ja": {
+                "login": {
+                  "acceptTerms": "ログインすると、Startrails 'を受け入れます",
+                },
+                "dappTransfer": {
+                  "data": "あなたがサインするデータ"
+                },
+                "dappPermission": {
+                  "permission": "下記の内容を許可しますか",
+                  "requestFrom": "許可を求めているアプリケーション",
+                  "accessUserInfo": "受け取る情報: Googleメール、プロフィール写真、名前"
+                }
+              }
+            }
           }
         })
         await torus.login() // await torus.ethereum.enable()
