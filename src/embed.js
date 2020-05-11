@@ -75,8 +75,8 @@ class Torus {
     enabledVerifiers = defaultVerifiers,
     network = {
       host: 'mainnet',
-      chainId: 1,
-      networkName: 'mainnet',
+      chainId: null,
+      networkName: '',
     },
     showTorusButton = false,
     integrity = {
@@ -582,7 +582,7 @@ class Torus {
     }
   }
 
-  setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+  setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream('provider_change')
       const handler = (chunk) => {
@@ -616,7 +616,7 @@ class Torus {
     })
   }
 
-  _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+  _setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
         const providerChangeStream = this.communicationMux.getStream('provider_change')
