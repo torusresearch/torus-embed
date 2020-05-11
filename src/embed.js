@@ -78,7 +78,7 @@ class Torus {
       chainId: null,
       networkName: '',
     },
-    showTorusButton = false,
+    showTorusButton = true,
     integrity = {
       check: false,
       hash: iframeIntegrity,
@@ -321,12 +321,6 @@ class Torus {
 
   _showLoggedOut() {
     this._displayIframe()
-    // this.torusMenuBtn.style.display = 'none'
-    // this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    // this.torusLoadingBtn.style.display = 'none'
-    // this.torusLoginModal.style.display = 'none'
-    // this.torusSpeedDial.style.display = 'none'
-    // this.torusSpeedDial.style.opacity = '0'
   }
 
   _showLoggingIn() {
@@ -343,11 +337,6 @@ class Torus {
   hideTorusButton() {
     this.torusButtonVisibility = false
     this._displayIframe()
-    // this.torusMenuBtn.style.display = 'none'
-    // this.torusLogin.style.display = 'none'
-    // this.torusLoadingBtn.style.display = 'none'
-    // this.torusSpeedDial.style.display = 'none'
-    // this.torusSpeedDial.style.opacity = '0'
   }
 
   /**
