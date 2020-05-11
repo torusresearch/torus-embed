@@ -1,18 +1,20 @@
+/* eslint-disable class-methods-use-this */
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
+import deepmerge from 'deepmerge'
 import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 
 import { version } from '../package.json'
 import configuration from './config'
-import { handleEvent, handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
+import { handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
 import generateIntegrity from './integrity'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
-import { getPreopenInstanceId, getTorusUrl, validatePaymentProvider } from './utils'
+import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -23,42 +25,9 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-// need to make sure we aren't affected by overlapping namespaces
-// and that we dont affect the app with our namespace
-// mostly a fix for web3's BigNumber if AMD's "define" is defined...
-let __define
-
-/**
- * Caches reference to global define object and deletes it to
- * avoid conflicts with other global define objects, such as
- * AMD's define function
- */
-function cleanContextForImports() {
-  try {
-    __define = global.define
-    global.define = undefined
-  } catch (_) {
-    log.warn('Torus - global.define could not be deleted.')
-  }
-}
-
-/**
- * Restores global define object from cached reference
- */
-function restoreContextAfterImports() {
-  try {
-    global.define = __define
-  } catch (_) {
-    log.warn('Torus - global.define could not be overwritten.')
-  }
-}
-
-cleanContextForImports()
-
 const iframeIntegrity = 'sha384-Pfhm83NpqQLkwzWtezbc0wuuPjlGjhHwLNwVFeL6GCzsOovqGmULlJTP4sDdUxqc'
-const expectedCacheControlHeader = 'max-age=3600'
 
-restoreContextAfterImports()
+const expectedCacheControlHeader = 'max-age=3600'
 
 let thirdPartyCookiesSupported = true
 const receiveMessage = (evt) => {
@@ -77,15 +46,8 @@ window.addEventListener('message', receiveMessage, false)
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
     this.buttonPosition = buttonPosition
-    this.torusWidget = {}
-    this.torusMenuBtn = {}
-    this.torusLogin = {}
-    this.torusLoadingBtn = {}
     this.torusUrl = ''
     this.torusIframe = {}
-    this.torusLoginModal = {}
-    this.torusSpeedDial = {}
-    this.keyBtn = {}
     this.styleLink = {}
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
@@ -106,8 +68,8 @@ class Torus {
     enabledVerifiers = defaultVerifiers,
     network = {
       host: 'mainnet',
-      chainId: 1,
-      networkName: 'mainnet',
+      chainId: null,
+      networkName: '',
     },
     showTorusButton = true,
     integrity = {
@@ -127,21 +89,48 @@ class Torus {
     if (enableLogging) log.enableAll()
     else log.disableAll()
     this.torusButtonVisibility = showTorusButton
-    this._createWidget(torusUrl)
+    // Iframe code
+    this.torusIframe = htmlToElement(
+      `<iframe 
+        id="torusIframe"
+        class="torusIframe"
+        src="${torusUrl}/popup"
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;"
+      ></iframe>`
+    )
+
+    const link = window.document.createElement('link')
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('type', 'text/css')
+    link.setAttribute('href', `${torusUrl}/css/widget.css`)
+    this.styleLink = link
+
+    const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel
+    const mergedTranslations = deepmerge(configuration.translations, customTranslations)
+    const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()]
+    this.embedTranslations = languageTranslations.embed
+
     const attachIFrame = () => {
+      window.document.head.appendChild(this.styleLink)
       window.document.body.appendChild(this.torusIframe)
+      this.torusIframe.onload = () => {
+        this._displayIframe()
+      }
     }
     const handleSetup = async () => {
       await runOnLoad(attachIFrame)
       await runOnLoad(this._setupWeb3.bind(this))
       await runOnLoad(async () => {
         const initStream = this.communicationMux.getStream('init_stream')
-        initStream.write({ name: 'init_stream', data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel } })
-
+        initStream.write({
+          name: 'init_stream',
+          data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel, buttonPosition: this.buttonPosition },
+        })
         await this._setProvider(network)
         this.isInitalized = true
       })
     }
+
     if (buildEnv === 'production' && integrity.check) {
       // hacky solution to check for iframe integrity
       const fetchUrl = `${torusUrl}/popup`
@@ -173,9 +162,10 @@ class Torus {
     if (!thirdPartyCookiesSupported) {
       this._createAlert(
         '<div id="torusAlert" class="torus-alert">' +
-          '<h1>Cookies Required</h1>' +
-          '<p>Please enable cookies in your browser preferences to access Torus.</p>' +
-          '<p>For more info, <a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">click here</a></p>' +
+          `<h1>${this.embedTranslations.cookiesRequired}</h1>` +
+          `<p>${this.embedTranslations.enableCookies}</p>` +
+          `<p>${this.embedTranslations.forMoreInfo}<a href="https://docs.tor.us/faq/users#cookies" target="_blank"` +
+          `rel="noreferrer noopener">${this.embedTranslations.clickHere}</a></p>` +
           '</div>'
       )
       throw new Error('Third party cookies not supported')
@@ -242,14 +232,6 @@ class Torus {
       this.styleLink.remove()
       this.styleLink = {}
     }
-    if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
-      this.torusWidget.remove()
-      this.torusWidget = {}
-      this.torusLogin = {}
-      this.torusMenuBtn = {}
-      this.torusLoadingBtn = {}
-      this.torusLoginModal = {}
-    }
     if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
       this.torusIframe.remove()
       this.torusIframe = {}
@@ -276,7 +258,7 @@ class Torus {
       })
     }
 
-    this.setEmbedWhiteLabel(this.torusAlert)
+    this._setEmbedWhiteLabel(this.torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(this.torusAlert)
@@ -292,11 +274,11 @@ class Torus {
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert">' +
-        '<h1 id="torusAlert__title">Action Required</h1>' +
-        '<p id="torusAlert__desc">You have a pending action that needs to be completed in a pop-up window </p></div>'
+        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
+        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
 
-    const successAlert = htmlToElement('<div><button id="torusAlert__btn">Confirm</button></div>')
+    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.confirm}</button></div>`)
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
@@ -308,7 +290,7 @@ class Torus {
       })
     }
 
-    this.setEmbedWhiteLabel(torusAlert)
+    this._setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
       window.document.body.appendChild(torusAlert)
@@ -318,248 +300,16 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
-  /**
-   * Creates the widget
-   */
-  _createWidget(torusUrl) {
-    const link = window.document.createElement('link')
-
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('type', 'text/css')
-    link.setAttribute('href', `${torusUrl}/css/widget.css`)
-
-    this.styleLink = link
-
-    this.torusWidget = htmlToElement('<div id="torusWidget" class="widget"></div>')
-
-    // Loading spinner
-    const spinner = htmlToElement(
-      '<div id="torusSpinner">' +
-        '<div class="torusSpinner__beat beat-odd"></div>' +
-        '<div class="torusSpinner__beat beat-even"></div>' +
-        '<div class="torusSpinner__beat beat-odd"></div>' +
-        '</div>'
-    )
-    this.torusLoadingBtn = htmlToElement('<button disabled class="torus-btn torus-btn--loading"></button>')
-    if (!this.torusButtonVisibility) {
-      this.torusLoadingBtn.style.display = 'none'
-    }
-    this.torusLoadingBtn.appendChild(spinner)
-    this.torusWidget.appendChild(this.torusLoadingBtn)
-
-    // Login button code
-    this.torusLogin = htmlToElement('<button id="torusLogin" class="torus-btn torus-btn--login"></button>')
-    if (!this.torusButtonVisibility) {
-      this.torusLogin.style.display = 'none'
-    }
-    this.torusWidget.appendChild(this.torusLogin)
-
-    // Menu button
-    this.torusMenuBtn = htmlToElement('<button id="torusMenuBtn" class="torus-btn torus-btn--main" />')
-    if (!this.torusButtonVisibility) {
-      this.torusMenuBtn.style.display = 'none'
-    }
-    this.torusWidget.appendChild(this.torusMenuBtn)
-
-    // Speed dial list
-    this.torusSpeedDial = htmlToElement('<ul id="torusWidget__speed-dial-list" style="transition-delay: 0.05s;display: none">')
-    this.torusSpeedDial.style.opacity = '0'
-    const homeBtn = htmlToElement('<li><button class="torus-btn torus-btn--home" title="Wallet Home Page"></button></li>')
-
-    const tooltipNote = htmlToElement('<div class="torus-tooltip-text torus-tooltip-note">Copy public address to clipboard</div>')
-    const tooltipCopied = htmlToElement('<div class="torus-tooltip-text torus-tooltip-copied">Copied!</div>')
-    this.keyBtn = htmlToElement('<button class="torus-btn torus-btn--text">0xe5..</button>')
-    const keyContainer = htmlToElement('<li class="torus-tooltip"></li>')
-
-    keyContainer.appendChild(this.keyBtn)
-    keyContainer.appendChild(tooltipNote)
-    keyContainer.appendChild(tooltipCopied)
-
-    const transferBtn = htmlToElement('<li><button class="torus-btn torus-btn--transfer" title="Wallet Transfer Page"></button></li>')
-
-    this.torusSpeedDial.appendChild(homeBtn)
-    this.torusSpeedDial.appendChild(keyContainer)
-    this.torusSpeedDial.appendChild(transferBtn)
-
-    this.torusWidget.prepend(this.torusSpeedDial)
-
-    // Multiple login modal
-    this.torusLoginModal = htmlToElement('<div id="torus-login-modal"></div>')
-    this.torusLoginModal.style.display = 'none'
-    const modalContainer = htmlToElement(
-      '<div id="torus-login-modal__modal-container">' +
-        '<div id="torus-login-modal__close-container">' +
-        '<span id="torus-login-modal__close">&times;</span>' +
-        '</div>' +
-        '</div>'
-    )
-
-    const modalContent = htmlToElement(
-      `${'<div id="torus-login-modal__modal-content"><div id="torus-login-modal__header-container"><img src="'}` +
-        `${torusUrl}/images/torus-logo-blue.svg` +
-        '"><div id="torus-login-modal__login-header">Login</div></div>' +
-        '</div>'
-    )
-
-    const formContainer = htmlToElement(
-      '<div id="torus-login-modal__form-container">' +
-        '<p id="torus-login-modal__login-subtitle">You are just one step away from your digital wallet</p>' +
-        '</div>'
-    )
-
-    this.googleLogin = htmlToElement(
-      `<button id="torus-login-modal__login-google"><img src="${torusUrl}/img/icons/google.svg">Sign in with Google</button>`
-    )
-
-    // List for other logins
-    const loginList = htmlToElement('<ul id="torus-login-modal__login-list"></ul>')
-    this.facebookLogin = htmlToElement(
-      `${'<li><button id="torus-login-modal__login-btn--facebook" title="Login with Facebook"><img src="'}` +
-        `${torusUrl}/img/icons/facebook.svg"></button></li>`
-    )
-    this.twitchLogin = htmlToElement(
-      `<li><button id="torus-login-modal__login-btn--twitch" title="Login with Twitch"><img src="${torusUrl}/img/icons/twitch.svg` +
-        '"></button></li>'
-    )
-    this.redditLogin = htmlToElement(
-      `<li><button id="torus-login-modal__login-btn--reddit" title="Login with Reddit"><img src="${torusUrl}/img/icons/reddit.svg` +
-        '"></button></li>'
-    )
-    this.discordLogin = htmlToElement(
-      `${'<li><button id="torus-login-modal__login-btn--discord" title="Login with Discord"><img src="'}${torusUrl}/img/icons/discord.svg` +
-        '"></button></li>'
-    )
-
-    if (this.enabledVerifiers[FACEBOOK]) loginList.appendChild(this.facebookLogin)
-    if (this.enabledVerifiers[REDDIT]) loginList.appendChild(this.redditLogin)
-    if (this.enabledVerifiers[TWITCH]) loginList.appendChild(this.twitchLogin)
-    if (this.enabledVerifiers[DISCORD]) loginList.appendChild(this.discordLogin)
-
-    if (this.enabledVerifiers[GOOGLE]) {
-      formContainer.appendChild(this.googleLogin)
-    }
-    formContainer.appendChild(loginList)
-
-    const loginNote = htmlToElement(
-      '<div id="torus-login-modal__login-note">By logging in, you accept Torus\' ' +
-        '<a href="https://docs.tor.us/legal/terms-and-conditions" target="_blank">Terms and Conditions</a></div>'
-    )
-
-    formContainer.appendChild(loginNote)
-    modalContent.appendChild(formContainer)
-
-    modalContainer.appendChild(modalContent)
-    this.torusLoginModal.appendChild(modalContainer)
-
-    // Append login codes to widget
-    this.torusWidget.appendChild(this.torusLoginModal)
-
-    // Set whitelabel
-    this.setEmbedWhiteLabel(this.torusWidget)
-
-    // Iframe code
-    this.torusIframe = htmlToElement(`<iframe id="torusIframe" frameBorder="0" src="${torusUrl}/popup"></iframe>`)
-    // Setup on load code
-    const bindOnLoad = () => {
-      this.torusLogin.addEventListener('click', () => {
-        this._showLoginPopup(false)
-      })
-
-      homeBtn.addEventListener('click', () => {
-        this.showWallet()
-        this._toggleSpeedDial()
-      })
-
-      transferBtn.addEventListener('click', () => {
-        this.showWallet('transfer')
-        this._toggleSpeedDial()
-      })
-
-      this.keyBtn.addEventListener('click', () => {
-        const publicKey = htmlToElement(`<input type="text" value="${this.ethereum.selectedAddress}">`)
-        this.torusWidget.prepend(publicKey)
-        publicKey.select()
-        publicKey.setSelectionRange(0, 99999) // For mobile
-
-        document.execCommand('copy')
-        this.torusWidget.removeChild(publicKey)
-
-        tooltipCopied.classList.add('active')
-        tooltipNote.classList.add('active')
-
-        setTimeout(() => {
-          tooltipCopied.classList.remove('active')
-          tooltipNote.classList.remove('active')
-          this._toggleSpeedDial()
-        }, 1000)
-      })
-
-      this.torusMenuBtn.addEventListener('click', () => {
-        this._toggleSpeedDial()
-      })
-
-      // Login Modal Listeners
-      modalContainer.querySelector('#torus-login-modal__close').addEventListener('click', () => {
-        this.torusLoginModal.style.display = 'none'
-        if (this.modalCloseHandler) this.modalCloseHandler()
-        delete this.modalCloseHandler
-      })
-    }
-
-    const attachOnLoad = () => {
-      window.document.head.appendChild(link)
-      window.document.body.appendChild(this.torusWidget)
-    }
-
-    runOnLoad(attachOnLoad)
-    runOnLoad(bindOnLoad)
-
-    switch (this.buttonPosition) {
-      case 'top-left':
-        this.torusWidget.style.top = '34px'
-        this.torusWidget.style.left = '34px'
-        break
-      case 'top-right':
-        this.torusWidget.style.top = '34px'
-        this.torusWidget.style.right = '34px'
-        break
-      case 'bottom-right':
-        this.torusWidget.style.bottom = '34px'
-        this.torusWidget.style.right = '34px'
-        break
-      case 'bottom-left':
-      default:
-        this.torusWidget.style.bottom = '34px'
-        this.torusWidget.style.left = '34px'
-        break
-    }
-  }
-
-  _updateKeyBtnAddress(selectedAddress) {
-    this.keyBtn.innerText = selectedAddress && `${selectedAddress.slice(0, 4)}..`
-  }
-
   _showLoggedOut() {
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLoginModal.style.display = 'none'
-    this.torusSpeedDial.style.display = 'none'
-    this.torusSpeedDial.style.opacity = '0'
+    this._displayIframe()
   }
 
   _showLoggingIn() {
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLoginModal.style.display = this.requestedVerifier === '' ? 'block' : 'none'
+    this._displayIframe(true)
   }
 
   _showLoggedIn() {
-    this.torusMenuBtn.style.display = this.torusButtonVisibility ? 'block' : 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusLoginModal.style.display = 'none'
+    this._displayIframe()
   }
 
   /**
@@ -567,11 +317,7 @@ class Torus {
    */
   hideTorusButton() {
     this.torusButtonVisibility = false
-    this.torusMenuBtn.style.display = 'none'
-    this.torusLogin.style.display = 'none'
-    this.torusLoadingBtn.style.display = 'none'
-    this.torusSpeedDial.style.display = 'none'
-    this.torusSpeedDial.style.opacity = '0'
+    this._displayIframe()
   }
 
   /**
@@ -582,6 +328,51 @@ class Torus {
     this.torusButtonVisibility = true
     if (this.isLoggedIn) this._showLoggedIn()
     else this._showLoggedOut()
+  }
+
+  _displayIframe(isFull = false) {
+    const style = {}
+    style.display = this.torusButtonVisibility ? 'block' : 'none'
+    // set phase
+    if (!isFull) {
+      style.height = '70px'
+      style.width = '70px'
+      switch (this.buttonPosition) {
+        case 'top-left':
+          style.top = '0px'
+          style.left = '0px'
+          style.right = 'auto'
+          style.bottom = 'auto'
+          break
+        case 'top-right':
+          style.top = '0px'
+          style.right = '0px'
+          style.left = 'auto'
+          style.bottom = 'auto'
+          break
+        case 'bottom-right':
+          style.bottom = '0px'
+          style.right = '0px'
+          style.top = 'auto'
+          style.left = 'auto'
+          break
+        case 'bottom-left':
+        default:
+          style.bottom = '0px'
+          style.left = '0px'
+          style.top = 'auto'
+          style.right = 'auto'
+          break
+      }
+    } else {
+      style.width = '100%'
+      style.height = '100%'
+      style.top = '0px'
+      style.right = '0px'
+      style.left = '0px'
+      style.bottom = '0px'
+    }
+    Object.assign(this.torusIframe.style, style)
   }
 
   _setupWeb3() {
@@ -628,6 +419,7 @@ class Torus {
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
       this._showLoggingIn()
+      if (!thirdPartyCookiesSupported) return Promise.reject(new Error('Third party cookies not supported'))
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
@@ -688,6 +480,13 @@ class Torus {
       }
     })
 
+    // show torus widget if button clicked
+    const widgetStream = communicationMux.getStream('widget')
+    widgetStream.on('data', (chunk) => {
+      const { data } = chunk
+      this._displayIframe(data)
+    })
+
     // Show torus button if wallet has been hydrated/detected
     const statusStream = communicationMux.getStream('status')
     statusStream.on('data', (status) => {
@@ -718,9 +517,6 @@ class Torus {
     }
     // pretend to be Metamask for dapp compatibility reasons
     this.web3.currentProvider.isTorus = true
-    inpageProvider.on('accountsChanged', (accounts) => {
-      this._updateKeyBtnAddress((accounts && accounts[0]) || '')
-    })
     sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
@@ -729,34 +525,23 @@ class Torus {
   // Exposing login function, if called from embed, flag as true
   _showLoginPopup(calledFromEmbed, resolve, reject) {
     this._showLoggingIn()
-    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
-      this.modalCloseHandler = () => {
+    const loginHandler = (data) => {
+      const { err, selectedAddress } = data
+      if (err) {
+        log.error(err)
         this._showLoggedOut()
-        if (reject) reject(new Error('Modal has been closed'))
+        if (reject) reject(err)
+      } else {
+        // returns an array (cause accounts expects it)
+        if (resolve) resolve([transformEthAddress(selectedAddress)])
+        this._showLoggedIn()
       }
-      const loginHandler = (verifier) => {
-        this.requestedVerifier = verifier
-        this._showLoginPopup(calledFromEmbed, resolve, reject)
-      }
-      Object.keys(this.enabledVerifiers).forEach((verifier) => {
-        if (this.enabledVerifiers[verifier]) {
-          handleEvent(this[`${verifier}Login`], 'click', loginHandler, [verifier])
-        }
-      })
+    }
+    const oauthStream = this.communicationMux.getStream('oauth')
+    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+      handleStream(oauthStream, 'data', loginHandler)
+      oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
-      const oauthStream = this.communicationMux.getStream('oauth')
-      const loginHandler = (data) => {
-        const { err, selectedAddress } = data
-        if (err) {
-          log.error(err)
-          this._showLoggedOut()
-          if (reject) reject(err)
-        } else {
-          // returns an array (cause accounts expects it)
-          if (resolve) resolve([transformEthAddress(selectedAddress)])
-          this._showLoggedIn()
-        }
-      }
       handleStream(oauthStream, 'data', loginHandler)
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId)
@@ -764,7 +549,7 @@ class Torus {
     }
   }
 
-  setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+  setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream('provider_change')
       const handler = (chunk) => {
@@ -798,7 +583,7 @@ class Torus {
     })
   }
 
-  _setProvider({ host = 'mainnet', chainId = 1, networkName = 'mainnet' } = {}) {
+  _setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
         const providerChangeStream = this.communicationMux.getStream('provider_change')
@@ -847,34 +632,6 @@ class Torus {
     }
 
     handleStream(showWalletStream, 'data', showWalletHandler)
-  }
-
-  _toggleSpeedDial() {
-    this.torusMenuBtn.classList.toggle('active')
-    const isActive = this.torusMenuBtn.classList.contains('active')
-
-    const { torusSpeedDial } = this
-    if (isActive) {
-      torusSpeedDial.style.display = 'block'
-    }
-
-    torusSpeedDial.style.opacity = torusSpeedDial.style.opacity === '0' ? '1' : '0'
-    torusSpeedDial.classList.toggle('active')
-    const mainTime = isActive ? 0.05 : 1.2
-    torusSpeedDial.style.transitionDelay = `${mainTime}s`
-
-    setTimeout(() => {
-      let time = isActive ? 0.05 : 0.15
-      const values = Object.values(torusSpeedDial.children)
-      for (let index = 0; index < values.length; index += 1) {
-        const element = values[index]
-        element.style.transitionDelay = `${time}s`
-        time += isActive ? 0.05 : -0.05
-      }
-      if (!isActive) {
-        torusSpeedDial.style.display = 'none'
-      }
-    }, 500)
   }
 
   /**
@@ -1013,15 +770,15 @@ class Torus {
     })
   }
 
-  setEmbedWhiteLabel(element) {
+  _setEmbedWhiteLabel(element) {
     // Set whitelabel
-    if (this.whiteLabel.theme) {
-      const isDark = this.whiteLabel.theme.isDark || false
-      const theme = this.whiteLabel.theme.colors
+    const { theme } = this.whiteLabel
+    if (theme) {
+      const { isDark = false, colors = {} } = theme
       if (isDark) element.classList.add('torus-dark')
 
-      if (theme.torusBrand1) element.style.setProperty('--torus-brand-1', theme.torusBrand1)
-      if (theme.torusGray2) element.style.setProperty('--torus-gray-2', theme.torusGray2)
+      if (colors.torusBrand1) element.style.setProperty('--torus-brand-1', colors.torusBrand1)
+      if (colors.torusGray2) element.style.setProperty('--torus-gray-2', colors.torusGray2)
     }
   }
 }

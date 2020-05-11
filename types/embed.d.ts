@@ -78,9 +78,12 @@ interface TorusParams {
 interface WhiteLabelParams {
   theme: ThemeParams;
   defaultLanguage: string;
-  logo: string;
+  logoDark: string;
+  logoLight: string;
   topupHide: boolean;
   featuredBillboardHide: boolean;
+  tncLink: string;
+  customTranslations: any;
 }
 
 interface ThemeParams {
