@@ -96,6 +96,7 @@ class Torus {
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
+        style="display: block; border: none; border-width: 0px;"
       ></iframe>`
     )
 
@@ -121,7 +122,7 @@ class Torus {
       window.document.body.appendChild(this.torusIframeContainer)
       this.torusIframeContainer.appendChild(this.torusIframe)
       this.torusIframe.onload = () => {
-        this._displayIframe()
+        this._displayIframe(false)
       }
     }
     const handleSetup = async () => {
@@ -309,7 +310,7 @@ class Torus {
   }
 
   _showLoggedOut() {
-    this._displayIframe()
+    this._displayIframe(false)
   }
 
   _showLoggingIn() {
@@ -317,7 +318,7 @@ class Torus {
   }
 
   _showLoggedIn() {
-    this._displayIframe()
+    this._displayIframe(false)
   }
 
   /**
@@ -325,7 +326,7 @@ class Torus {
    */
   hideTorusButton() {
     this.torusButtonVisibility = false
-    this._displayIframe()
+    this._displayIframe(false)
   }
 
   /**
@@ -343,36 +344,38 @@ class Torus {
     style.display = this.torusButtonVisibility ? 'block' : 'none'
     // set phase
     if (!isFull) {
-      style.height = '70px'
-      style.width = '70px'
+      style.borderRadius = '50%'
+      style.height = '56px'
+      style.width = '56px'
       switch (this.buttonPosition) {
         case 'top-left':
-          style.top = '0px'
-          style.left = '0px'
+          style.top = '14px'
+          style.left = '14px'
           style.right = 'auto'
           style.bottom = 'auto'
           break
         case 'top-right':
-          style.top = '0px'
-          style.right = '0px'
+          style.top = '14px'
+          style.right = '14px'
           style.left = 'auto'
           style.bottom = 'auto'
           break
         case 'bottom-right':
-          style.bottom = '0px'
-          style.right = '0px'
+          style.bottom = '14px'
+          style.right = '14px'
           style.top = 'auto'
           style.left = 'auto'
           break
         case 'bottom-left':
         default:
-          style.bottom = '0px'
-          style.left = '0px'
+          style.bottom = '14px'
+          style.left = '14px'
           style.top = 'auto'
           style.right = 'auto'
           break
       }
     } else {
+      style.borderRadius = '0px'
       style.width = '100%'
       style.height = '100%'
       style.top = '0px'
