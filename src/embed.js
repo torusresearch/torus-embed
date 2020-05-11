@@ -46,15 +46,9 @@ window.addEventListener('message', receiveMessage, false)
 class Torus {
   constructor({ buttonPosition = 'bottom-left' } = {}) {
     this.buttonPosition = buttonPosition
-    this.torusWidget = {}
-    this.torusMenuBtn = {}
-    this.torusLogin = {}
-    this.torusLoadingBtn = {}
     this.torusUrl = ''
     this.torusIframe = {}
-    this.torusLoginModal = {}
-    this.torusSpeedDial = {}
-    this.keyBtn = {}
+    this.torusIframeContainer = {}
     this.styleLink = {}
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
@@ -102,8 +96,13 @@ class Torus {
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
-        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;"
       ></iframe>`
+    )
+
+    this.torusIframeContainer = htmlToElement(
+      '<div id="torusIframeContainer" class="torusIframeContainer"' +
+        'style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;">' +
+        '</div>'
     )
 
     const link = window.document.createElement('link')
@@ -119,7 +118,8 @@ class Torus {
 
     const attachIFrame = () => {
       window.document.head.appendChild(this.styleLink)
-      window.document.body.appendChild(this.torusIframe)
+      window.document.body.appendChild(this.torusIframeContainer)
+      this.torusIframeContainer.appendChild(this.torusIframe)
       this.torusIframe.onload = () => {
         this._displayIframe()
       }
@@ -239,16 +239,9 @@ class Torus {
       this.styleLink.remove()
       this.styleLink = {}
     }
-    if (isElement(this.torusWidget) && window.document.body.contains(this.torusWidget)) {
-      this.torusWidget.remove()
-      this.torusWidget = {}
-      this.torusLogin = {}
-      this.torusMenuBtn = {}
-      this.torusLoadingBtn = {}
-      this.torusLoginModal = {}
-    }
-    if (isElement(this.torusIframe) && window.document.body.contains(this.torusIframe)) {
-      this.torusIframe.remove()
+    if (isElement(this.torusIframeContainer) && window.document.body.contains(this.torusIframeContainer)) {
+      this.torusIframeContainer.remove()
+      this.torusIframeContainer = {}
       this.torusIframe = {}
     }
     if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
@@ -313,10 +306,6 @@ class Torus {
 
     runOnLoad(attachOnLoad)
     runOnLoad(bindOnLoad)
-  }
-
-  _updateKeyBtnAddress(selectedAddress) {
-    this.keyBtn.innerText = selectedAddress && `${selectedAddress.slice(0, 4)}..`
   }
 
   _showLoggedOut() {
@@ -391,7 +380,7 @@ class Torus {
       style.left = '0px'
       style.bottom = '0px'
     }
-    Object.assign(this.torusIframe.style, style)
+    Object.assign(this.torusIframeContainer.style, style)
   }
 
   _setupWeb3() {
@@ -536,9 +525,6 @@ class Torus {
     }
     // pretend to be Metamask for dapp compatibility reasons
     this.web3.currentProvider.isTorus = true
-    inpageProvider.on('accountsChanged', (accounts) => {
-      this._updateKeyBtnAddress((accounts && accounts[0]) || '')
-    })
     sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
@@ -654,34 +640,6 @@ class Torus {
     }
 
     handleStream(showWalletStream, 'data', showWalletHandler)
-  }
-
-  _toggleSpeedDial() {
-    this.torusMenuBtn.classList.toggle('active')
-    const isActive = this.torusMenuBtn.classList.contains('active')
-
-    const { torusSpeedDial } = this
-    if (isActive) {
-      torusSpeedDial.style.display = 'block'
-    }
-
-    torusSpeedDial.style.opacity = torusSpeedDial.style.opacity === '0' ? '1' : '0'
-    torusSpeedDial.classList.toggle('active')
-    const mainTime = isActive ? 0.05 : 1.2
-    torusSpeedDial.style.transitionDelay = `${mainTime}s`
-
-    setTimeout(() => {
-      let time = isActive ? 0.05 : 0.15
-      const values = Object.values(torusSpeedDial.children)
-      for (let index = 0; index < values.length; index += 1) {
-        const element = values[index]
-        element.style.transitionDelay = `${time}s`
-        time += isActive ? 0.05 : -0.05
-      }
-      if (!isActive) {
-        torusSpeedDial.style.display = 'none'
-      }
-    }, 500)
   }
 
   /**
