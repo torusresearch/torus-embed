@@ -375,7 +375,7 @@ class Torus {
           break
       }
     } else {
-      style.borderRadius = '0px'
+      style.borderRadius = '50%'
       style.width = '100%'
       style.height = '100%'
       style.top = '0px'
