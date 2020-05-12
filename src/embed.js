@@ -778,8 +778,11 @@ class Torus {
           }
         }
         handleStream(topupStream, 'data', topupHandler)
-        const preopenInstanceId = getPreopenInstanceId()
-        this._handleWindow(preopenInstanceId)
+        let preopenInstanceId
+        if (provider) {
+          preopenInstanceId = getPreopenInstanceId()
+          this._handleWindow(preopenInstanceId)
+        }
         topupStream.write({ name: 'topup_request', data: { provider, params, preopenInstanceId } })
       } else reject(new Error('User has not initialized in yet'))
     })
