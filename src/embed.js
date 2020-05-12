@@ -25,7 +25,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-Ym0Fgfm45O6DVlu0XwnImUB5bVDDnGKtS5uhoQ5t93fG8xMCdrZadjbVPLUzgtlm'
+const iframeIntegrity = 'sha384-g3BE8fGzE+PjK7Gt2kS0IV5NQjsQdCY4j6OZ4BiDUbQET8LbIAd/23HAk4q4XBso'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -51,7 +51,7 @@ class Torus {
     this.styleLink = {}
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
-    this.torusButtonVisibility = true
+    this.torusWidgetVisibility = true
     this.requestedVerifier = ''
     this.currentVerifier = ''
     this.enabledVerifiers = {}
@@ -88,7 +88,7 @@ class Torus {
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
     else log.disableAll()
-    this.torusButtonVisibility = showTorusButton
+    this.torusWidgetVisibility = showTorusButton
     // Iframe code
     this.torusIframe = htmlToElement(
       `<iframe 
@@ -124,7 +124,12 @@ class Torus {
         const initStream = this.communicationMux.getStream('init_stream')
         initStream.write({
           name: 'init_stream',
-          data: { enabledVerifiers: this.enabledVerifiers, whiteLabel: this.whiteLabel, buttonPosition: this.buttonPosition },
+          data: {
+            enabledVerifiers: this.enabledVerifiers,
+            whiteLabel: this.whiteLabel,
+            buttonPosition: this.buttonPosition,
+            torusWidgetVisibility: this.torusWidgetVisibility,
+          },
         })
         await this._setProvider(network)
         this.isInitalized = true
@@ -312,11 +317,19 @@ class Torus {
     this._displayIframe()
   }
 
+  _sendWidgetVisibilityStatus(status) {
+    const torusWidgetVisibilityStream = this.communicationMux.getStream('torus-widget-visibility')
+    torusWidgetVisibilityStream.write({
+      data: status,
+    })
+  }
+
   /**
    * Hides the torus button in the dapp context
    */
   hideTorusButton() {
-    this.torusButtonVisibility = false
+    this.torusWidgetVisibility = false
+    this._sendWidgetVisibilityStatus(false)
     this._displayIframe()
   }
 
@@ -325,16 +338,17 @@ class Torus {
    * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
    */
   showTorusButton() {
-    this.torusButtonVisibility = true
+    this.torusWidgetVisibility = true
+    this._sendWidgetVisibilityStatus(true)
     if (this.isLoggedIn) this._showLoggedIn()
     else this._showLoggedOut()
   }
 
   _displayIframe(isFull = false) {
     const style = {}
-    style.display = this.torusButtonVisibility ? 'block' : 'none'
     // set phase
     if (!isFull) {
+      style.display = this.torusWidgetVisibility ? 'block' : 'none'
       style.height = '70px'
       style.width = '70px'
       switch (this.buttonPosition) {
@@ -365,6 +379,7 @@ class Torus {
           break
       }
     } else {
+      style.display = 'block'
       style.width = '100%'
       style.height = '100%'
       style.top = '0px'
