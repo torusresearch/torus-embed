@@ -94,7 +94,7 @@ export default {
             host: 'rinkeby', // mandatory
             chainId: 4
           },
-          showTorusButton: true,
+          showTorusButton: false,
           whiteLabel: {
             theme: {
               isDark: false,
@@ -108,7 +108,7 @@ export default {
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: 'http://starbahn.org/tnc',
-            defaultLanguage: 'ja',
+            // defaultLanguage: 'ja',
             customTranslations: {
               "en": {
                 "embed": {
@@ -122,6 +122,8 @@ export default {
                 },
                 "login": {
                   "acceptTerms": "By logging in, you accept Startrails'",
+                  "your": "Your",
+                  "digitalWallet": "digital wallet instantly"
                 },
                 "dappTransfer": {
                   "data": "Data to sign"
@@ -135,6 +137,8 @@ export default {
               "ja": {
                 "login": {
                   "acceptTerms": "ログインすると、Startrails 'を受け入れます",
+                  "your": "君の",
+                  "digitalWallet": "すぐにデジタルウォレット"
                 },
                 "dappTransfer": {
                   "data": "あなたがサインするデータ"
