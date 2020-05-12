@@ -94,7 +94,7 @@ export default {
             host: 'rinkeby', // mandatory
             chainId: 4
           },
-          showTorusButton: false,
+          showTorusButton: true,
           whiteLabel: {
             theme: {
               isDark: false,
@@ -108,7 +108,7 @@ export default {
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: 'http://starbahn.org/tnc',
-            // defaultLanguage: 'ja',
+            defaultLanguage: 'ja',
             customTranslations: {
               "en": {
                 "embed": {
