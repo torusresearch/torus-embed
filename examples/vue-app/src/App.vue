@@ -107,7 +107,10 @@ export default {
             logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
             topupHide: true,
             featuredBillboardHide: true,
-            tncLink: 'http://starbahn.org/tnc',
+            tncLink: {
+              "en": 'http://starbahn.org/tnc/en',
+              "ja": 'http://starbahn.org/tnc/ja',
+            },
             defaultLanguage: 'ja',
             customTranslations: {
               "en": {
