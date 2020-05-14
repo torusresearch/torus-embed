@@ -107,7 +107,10 @@ export default {
             logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
             topupHide: true,
             featuredBillboardHide: true,
-            tncLink: 'http://starbahn.org/tnc',
+            tncLink: {
+              "en": 'http://example.com/tnc/en',
+              "ja": 'http://example.com/tnc/ja',
+            },
             defaultLanguage: 'ja',
             customTranslations: {
               "en": {
@@ -121,7 +124,7 @@ export default {
                   "clickHere": "click here",
                 },
                 "login": {
-                  "acceptTerms": "By logging in, you accept Startrails'",
+                  "acceptTerms": "By logging in, you accept Examples'",
                   "your": "Your",
                   "digitalWallet": "digital wallet instantly"
                 },
@@ -136,7 +139,7 @@ export default {
               },
               "ja": {
                 "login": {
-                  "acceptTerms": "ログインすると、Startrails 'を受け入れます",
+                  "acceptTerms": "ログインすると、Examples 'を受け入れます",
                   "your": "君の",
                   "digitalWallet": "すぐにデジタルウォレット"
                 },
