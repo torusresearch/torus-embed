@@ -108,8 +108,8 @@ export default {
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: {
-              "en": 'http://starbahn.org/tnc/en',
-              "ja": 'http://starbahn.org/tnc/ja',
+              "en": 'http://example.com/tnc/en',
+              "ja": 'http://example.com/tnc/ja',
             },
             defaultLanguage: 'ja',
             customTranslations: {
@@ -124,7 +124,7 @@ export default {
                   "clickHere": "click here",
                 },
                 "login": {
-                  "acceptTerms": "By logging in, you accept Startrails'",
+                  "acceptTerms": "By logging in, you accept Examples'",
                   "your": "Your",
                   "digitalWallet": "digital wallet instantly"
                 },
@@ -139,7 +139,7 @@ export default {
               },
               "ja": {
                 "login": {
-                  "acceptTerms": "ログインすると、Startrails 'を受け入れます",
+                  "acceptTerms": "ログインすると、Examples 'を受け入れます",
                   "your": "君の",
                   "digitalWallet": "すぐにデジタルウォレット"
                 },
