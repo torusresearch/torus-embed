@@ -82,7 +82,7 @@ interface WhiteLabelParams {
   logoLight: string;
   topupHide: boolean;
   featuredBillboardHide: boolean;
-  tncLink: string;
+  tncLink: any;
   customTranslations: any;
 }
 
