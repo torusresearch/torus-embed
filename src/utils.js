@@ -147,8 +147,8 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   let logLevel
   let versionUsed = integrity.version || version
   try {
-    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.check) {
-      const response = await get(`${config.api}/latestversion?name=${name}&version=${integrity.version || version}`)
+    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.version) {
+      const response = await get(`${config.api}/latestversion?name=${name}&version=${version}`)
       versionUsed = response.data
     }
   } catch (error) {
