@@ -39,9 +39,12 @@ declare class Torus {
   showWallet(path: 'transfer' | 'topup' | 'home' | 'settings' | 'history', params?: object): void;
   /**
    * Exposes the topup api of torus
+   * 
    * Allows the dapp to trigger a payment method directly
+   * 
    * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
    * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
+   * 
    * Initiates the topup flow of torus for the provider. Opens a popup of the specified provider
    * @param provider Name of the provider
    * @param params Optional params to pre-fill in provider's site
@@ -133,7 +136,9 @@ interface VerifierArgs {
   verifier: 'google' | 'reddit' | 'discord';
   /**
    * email for google
+   * 
    * username for reddit
+   * 
    * id for discord
    */
   verifierId: string;
@@ -149,7 +154,7 @@ interface LoginParams {
 
 interface TorusCtorArgs {
   /**
-   * Determines where the torus widget is visible on the page
+   * Determines where the torus widget is visible on the page.
    * Defaults to `bottom-left`
    */
   buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
@@ -174,10 +179,11 @@ interface UserInfo {
   verifier: string;
   /**
    * Verifier Id of the logged in user
-   * email for google
-   * id for facebook
-   * username for reddit
-   * id for twitch
+   * 
+   * email for google,
+   * id for facebook,
+   * username for reddit,
+   * id for twitch,
    * id for discord
    */
   verifierId: string;
@@ -189,21 +195,27 @@ interface TorusParams {
    */
   network?: NetworkInterface;
   /**
-   * Build Environment of Torus
-   * production uses https://app.tor.us
-   * development uses https://localhost:3000 (expects torus-website to be run locally)
-   * staging uses https://staging.tor.us
+   * Build Environment of Torus.
+   * 
+   * production uses https://app.tor.us,
+   * 
+   * development uses https://localhost:3000 (expects torus-website to be run locally),
+   * 
+   * staging uses https://staging.tor.us,
+   * 
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
   buildEnv?: 'production' | 'development' | 'staging' | 'testing';
   /**
-   * Enables or disables logging
+   * Enables or disables logging.
+   * 
    * Defaults to false in prod and true in other environments
    */
   enableLogging?: boolean;
   /**
-   * whether to show/hide torus widget
+   * whether to show/hide torus widget.
+   * 
    * Defaults to true
    * @default true
    */
@@ -228,7 +240,8 @@ interface WhiteLabelParams {
    */
   theme: ThemeParams;
   /**
-   * Language of whitelabel
+   * Language of whitelabel.
+   * 
    * order of preference: Whitelabel language > user language (in torus-website) > browser language
    */
   defaultLanguage: string;
@@ -241,13 +254,13 @@ interface WhiteLabelParams {
    */
   logoLight: string;
   /**
-   * Shows/hides topup option in torus-website/widget
+   * Shows/hides topup option in torus-website/widget.
    * Defaults to false
    * @default false
    */
   topupHide: boolean;
   /**
-   * Shows/hides billboard in torus-website
+   * Shows/hides billboard in torus-website.
    * Defaults to false
    * @default false
    */
@@ -270,7 +283,8 @@ interface ThemeParams {
    */
   isDark: boolean;
   /**
-   * Colors object to customize colors in torus theme
+   * Colors object to customize colors in torus theme.
+   * 
    * Contact us for whitelabel. Example provided in `examples/vue-app`
    */
   colors: any;
