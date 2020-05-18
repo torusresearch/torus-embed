@@ -163,6 +163,7 @@ class Torus {
     return undefined
   }
 
+  /** @ignore */
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
       this._createAlert(
@@ -177,9 +178,6 @@ class Torus {
     }
   }
 
-  /**
-   * Logs the user in
-   */
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
@@ -194,9 +192,6 @@ class Torus {
     throw new Error('Unsupported verifier')
   }
 
-  /**
-   * Logs the user out
-   */
   logout() {
     return new Promise((resolve, reject) => {
       if (!this.isLoggedIn) {
@@ -219,9 +214,6 @@ class Torus {
     })
   }
 
-  /**
-   * Logs the user out and then cleans up (removes iframe, widget, css)
-   */
   async cleanUp() {
     if (this.isLoggedIn) {
       await this.logout()
@@ -229,6 +221,7 @@ class Torus {
     this._cleanUp()
   }
 
+  /** @ignore */
   _cleanUp() {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
@@ -248,9 +241,7 @@ class Torus {
     this.isInitalized = false
   }
 
-  /**
-   * Show alert for Cookies Required
-   */
+  /** @ignore */
   _createAlert(alertContent) {
     this.torusAlert = htmlToElement(alertContent)
 
@@ -273,9 +264,7 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
-  /**
-   * Show alert for when popup is blocked
-   */
+  /** @ignore */
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert">' +
@@ -305,18 +294,22 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
+  /** @ignore */
   _showLoggedOut() {
     this._displayIframe()
   }
 
+  /** @ignore */
   _showLoggingIn() {
     this._displayIframe(true)
   }
 
+  /** @ignore */
   _showLoggedIn() {
     this._displayIframe()
   }
 
+  /** @ignore */
   _sendWidgetVisibilityStatus(status) {
     const torusWidgetVisibilityStream = this.communicationMux.getStream('torus-widget-visibility')
     torusWidgetVisibilityStream.write({
@@ -324,19 +317,12 @@ class Torus {
     })
   }
 
-  /**
-   * Hides the torus button in the dapp context
-   */
   hideTorusButton() {
     this.torusWidgetVisibility = false
     this._sendWidgetVisibilityStatus(false)
     this._displayIframe()
   }
 
-  /**
-   * Shows the torus button in the dapp context.
-   * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
-   */
   showTorusButton() {
     this.torusWidgetVisibility = true
     this._sendWidgetVisibilityStatus(true)
@@ -344,6 +330,7 @@ class Torus {
     else this._showLoggedOut()
   }
 
+  /** @ignore */
   _displayIframe(isFull = false) {
     const style = {}
     // set phase
@@ -390,6 +377,7 @@ class Torus {
     Object.assign(this.torusIframe.style, style)
   }
 
+  /** @ignore */
   _setupWeb3() {
     log.info('setupWeb3 running')
     // setup background connection
@@ -537,7 +525,7 @@ class Torus {
     log.debug('Torus - injected web3')
   }
 
-  // Exposing login function, if called from embed, flag as true
+  /** @ignore */
   _showLoginPopup(calledFromEmbed, resolve, reject) {
     this._showLoggingIn()
     const loginHandler = (data) => {
@@ -598,6 +586,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
@@ -628,19 +617,22 @@ class Torus {
     })
   }
 
-  /**
-   * Shows the wallet popup
-   * @param {string} path the route to open
-   */
-  showWallet(path) {
+  showWallet(path, params = {}) {
     const showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
     showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
 
     const showWalletHandler = (chunk) => {
       if (chunk.name === 'show_wallet_instance') {
+        // Let the error propogate up (hence, no try catch)
         const { instanceId } = chunk.data
-        const finalUrl = `${this.torusUrl}/wallet${finalPath}?integrity=true&instanceId=${instanceId}`
+        const finalUrl = new URL(`${this.torusUrl}/wallet${finalPath}`)
+        // Using URL constructor to prevent js injection and allow parameter validation.!
+        finalUrl.searchParams.append('integrity', true)
+        finalUrl.searchParams.append('instanceId', instanceId)
+        Object.keys(params).forEach((x) => {
+          finalUrl.searchParams.append(x, params[x])
+        })
         const walletWindow = new PopupHandler({ url: finalUrl })
         walletWindow.open()
       }
@@ -649,10 +641,6 @@ class Torus {
     handleStream(showWalletStream, 'data', showWalletHandler)
   }
 
-  /**
-   * Gets the public address of an user with email
-   * @param {VerifierArgs} verifierArgs Verifier Arguments
-   */
   async getPublicAddress({ verifier, verifierId, isExtended = false }) {
     // Select random node from the list of endpoints
     if (!configuration.supportedVerifierList.includes(verifier)) throw new Error('Unsupported verifier')
@@ -668,10 +656,6 @@ class Torus {
     )
   }
 
-  /**
-   * Exposes the loggedin user info to the Dapp
-   * @param {String} message Message to be displayed to the user
-   */
   getUserInfo(message) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
@@ -713,6 +697,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _handleWindow(preopenInstanceId, { target, features } = {}) {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream('window')
@@ -750,15 +735,6 @@ class Torus {
 
   paymentProviders = configuration.paymentProviders
 
-  /**
-   * Exposes the topup api of torus
-   * Allows the dapp to trigger a payment method directly
-   * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
-   * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork, xanpool
-   * @param {PaymentParams} params PaymentParams
-   * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
-   */
   initiateTopup(provider, params) {
     return new Promise((resolve, reject) => {
       if (this.isInitalized) {
@@ -785,6 +761,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _setEmbedWhiteLabel(element) {
     // Set whitelabel
     const { theme } = this.whiteLabel
