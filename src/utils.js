@@ -1,9 +1,9 @@
 import randomId from '@chaitanyapotti/random-id'
 import { serializeError } from 'eth-json-rpc-errors'
-import log from 'loglevel'
 
 import { name, version } from '../package.json'
 import config from './config'
+import log from './loglevel'
 
 const { paymentProviders } = config
 
