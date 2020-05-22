@@ -295,21 +295,6 @@ class Torus {
   }
 
   /** @ignore */
-  _showLoggedOut() {
-    this._displayIframe()
-  }
-
-  /** @ignore */
-  _showLoggingIn() {
-    this._displayIframe(true)
-  }
-
-  /** @ignore */
-  _showLoggedIn() {
-    this._displayIframe()
-  }
-
-  /** @ignore */
   _sendWidgetVisibilityStatus(status) {
     const torusWidgetVisibilityStream = this.communicationMux.getStream('torus-widget-visibility')
     torusWidgetVisibilityStream.write({
@@ -326,8 +311,7 @@ class Torus {
   showTorusButton() {
     this.torusWidgetVisibility = true
     this._sendWidgetVisibilityStatus(true)
-    if (this.isLoggedIn) this._showLoggedIn()
-    else this._showLoggedOut()
+    this._displayIframe()
   }
 
   /** @ignore */
@@ -421,14 +405,14 @@ class Torus {
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
-      this._showLoggingIn()
+      this._displayIframe(true)
       if (!thirdPartyCookiesSupported) return Promise.reject(new Error('Third party cookies not supported'))
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
           if (err) {
             setTimeout(() => {
-              this._showLoggedOut()
+              this._displayIframe()
               reject(err)
             }, 50)
           } else if (Array.isArray(res) && res.length > 0) {
@@ -446,7 +430,7 @@ class Torus {
                   })
                   .catch((error) => reject(error))
               } else {
-                this._showLoggedIn()
+                this._displayIframe()
                 resolve(res)
               }
             }
@@ -473,7 +457,7 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     const communicationMux = setupMultiplex(this.communicationStream)
-    communicationMux.setMaxListeners(20)
+    communicationMux.setMaxListeners(50)
     this.communicationMux = communicationMux
 
     const windowStream = communicationMux.getStream('window')
@@ -498,7 +482,7 @@ class Torus {
         this.isLoggedIn = status.loggedIn
         this.currentVerifier = status.verifier
       } // logout
-      else this._showLoggedOut()
+      else this._displayIframe()
       if (this.isLoginCallback) {
         this.isLoginCallback()
         delete this.isLoginCallback
@@ -527,17 +511,17 @@ class Torus {
 
   /** @ignore */
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    this._showLoggingIn()
+    this._displayIframe(true)
     const loginHandler = (data) => {
       const { err, selectedAddress } = data
       if (err) {
         log.error(err)
-        this._showLoggedOut()
+        this._displayIframe()
         if (reject) reject(err)
       } else {
         // returns an array (cause accounts expects it)
         if (resolve) resolve([transformEthAddress(selectedAddress)])
-        this._showLoggedIn()
+        this._displayIframe()
       }
     }
     const oauthStream = this.communicationMux.getStream('oauth')
