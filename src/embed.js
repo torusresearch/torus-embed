@@ -2,7 +2,6 @@
 import NodeDetailManager from '@toruslabs/fetch-node-details'
 import TorusJs from '@toruslabs/torus.js'
 import deepmerge from 'deepmerge'
-import log from 'loglevel'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 
@@ -11,6 +10,7 @@ import configuration from './config'
 import { handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
 import generateIntegrity from './integrity'
+import log from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
@@ -25,7 +25,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-gARQfbKkVXm8CFx9R23Sasy4sLWSxgkazGyDFqtANnVltGtqGeL+vezMLzEpuOq3'
+const iframeIntegrity = 'sha384-MIHm8RuEYP4b2zQf3umG0kQ3WJZewFpfTHQB7wmFfRxPdjYTtG06Q7KIDV5rca0E'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -163,6 +163,7 @@ class Torus {
     return undefined
   }
 
+  /** @ignore */
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
       this._createAlert(
@@ -177,9 +178,6 @@ class Torus {
     }
   }
 
-  /**
-   * Logs the user in
-   */
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
     if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
@@ -194,9 +192,6 @@ class Torus {
     throw new Error('Unsupported verifier')
   }
 
-  /**
-   * Logs the user out
-   */
   logout() {
     return new Promise((resolve, reject) => {
       if (!this.isLoggedIn) {
@@ -219,9 +214,6 @@ class Torus {
     })
   }
 
-  /**
-   * Logs the user out and then cleans up (removes iframe, widget, css)
-   */
   async cleanUp() {
     if (this.isLoggedIn) {
       await this.logout()
@@ -229,6 +221,7 @@ class Torus {
     this._cleanUp()
   }
 
+  /** @ignore */
   _cleanUp() {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
@@ -248,9 +241,7 @@ class Torus {
     this.isInitalized = false
   }
 
-  /**
-   * Show alert for Cookies Required
-   */
+  /** @ignore */
   _createAlert(alertContent) {
     this.torusAlert = htmlToElement(alertContent)
 
@@ -273,9 +264,7 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
-  /**
-   * Show alert for when popup is blocked
-   */
+  /** @ignore */
   _createPopupBlockAlert(preopenInstanceId) {
     const torusAlert = htmlToElement(
       '<div id="torusAlert">' +
@@ -305,18 +294,7 @@ class Torus {
     runOnLoad(bindOnLoad)
   }
 
-  _showLoggedOut() {
-    this._displayIframe()
-  }
-
-  _showLoggingIn() {
-    this._displayIframe(true)
-  }
-
-  _showLoggedIn() {
-    this._displayIframe()
-  }
-
+  /** @ignore */
   _sendWidgetVisibilityStatus(status) {
     const torusWidgetVisibilityStream = this.communicationMux.getStream('torus-widget-visibility')
     torusWidgetVisibilityStream.write({
@@ -324,26 +302,19 @@ class Torus {
     })
   }
 
-  /**
-   * Hides the torus button in the dapp context
-   */
   hideTorusButton() {
     this.torusWidgetVisibility = false
     this._sendWidgetVisibilityStatus(false)
     this._displayIframe()
   }
 
-  /**
-   * Shows the torus button in the dapp context.
-   * If user is not logged in, it shows login btn. Else, it shows Torus logo btn
-   */
   showTorusButton() {
     this.torusWidgetVisibility = true
     this._sendWidgetVisibilityStatus(true)
-    if (this.isLoggedIn) this._showLoggedIn()
-    else this._showLoggedOut()
+    this._displayIframe()
   }
 
+  /** @ignore */
   _displayIframe(isFull = false) {
     const style = {}
     // set phase
@@ -390,6 +361,7 @@ class Torus {
     Object.assign(this.torusIframe.style, style)
   }
 
+  /** @ignore */
   _setupWeb3() {
     log.info('setupWeb3 running')
     // setup background connection
@@ -433,14 +405,14 @@ class Torus {
     inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
-      this._showLoggingIn()
+      this._displayIframe(true)
       if (!thirdPartyCookiesSupported) return Promise.reject(new Error('Third party cookies not supported'))
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
           if (err) {
             setTimeout(() => {
-              this._showLoggedOut()
+              this._displayIframe()
               reject(err)
             }, 50)
           } else if (Array.isArray(res) && res.length > 0) {
@@ -458,7 +430,7 @@ class Torus {
                   })
                   .catch((error) => reject(error))
               } else {
-                this._showLoggedIn()
+                this._displayIframe()
                 resolve(res)
               }
             }
@@ -485,7 +457,7 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     const communicationMux = setupMultiplex(this.communicationStream)
-    communicationMux.setMaxListeners(20)
+    communicationMux.setMaxListeners(50)
     this.communicationMux = communicationMux
 
     const windowStream = communicationMux.getStream('window')
@@ -510,7 +482,7 @@ class Torus {
         this.isLoggedIn = status.loggedIn
         this.currentVerifier = status.verifier
       } // logout
-      else this._showLoggedOut()
+      else this._displayIframe()
       if (this.isLoginCallback) {
         this.isLoginCallback()
         delete this.isLoginCallback
@@ -537,19 +509,19 @@ class Torus {
     log.debug('Torus - injected web3')
   }
 
-  // Exposing login function, if called from embed, flag as true
+  /** @ignore */
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    this._showLoggingIn()
+    this._displayIframe(true)
     const loginHandler = (data) => {
       const { err, selectedAddress } = data
       if (err) {
         log.error(err)
-        this._showLoggedOut()
+        this._displayIframe()
         if (reject) reject(err)
       } else {
         // returns an array (cause accounts expects it)
         if (resolve) resolve([transformEthAddress(selectedAddress)])
-        this._showLoggedIn()
+        this._displayIframe()
       }
     }
     const oauthStream = this.communicationMux.getStream('oauth')
@@ -598,6 +570,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
@@ -628,19 +601,22 @@ class Torus {
     })
   }
 
-  /**
-   * Shows the wallet popup
-   * @param {string} path the route to open
-   */
-  showWallet(path) {
+  showWallet(path, params = {}) {
     const showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
     showWalletStream.write({ name: 'show_wallet', data: { path: finalPath } })
 
     const showWalletHandler = (chunk) => {
       if (chunk.name === 'show_wallet_instance') {
+        // Let the error propogate up (hence, no try catch)
         const { instanceId } = chunk.data
-        const finalUrl = `${this.torusUrl}/wallet${finalPath}?integrity=true&instanceId=${instanceId}`
+        const finalUrl = new URL(`${this.torusUrl}/wallet${finalPath}`)
+        // Using URL constructor to prevent js injection and allow parameter validation.!
+        finalUrl.searchParams.append('integrity', true)
+        finalUrl.searchParams.append('instanceId', instanceId)
+        Object.keys(params).forEach((x) => {
+          finalUrl.searchParams.append(x, params[x])
+        })
         const walletWindow = new PopupHandler({ url: finalUrl })
         walletWindow.open()
       }
@@ -649,10 +625,6 @@ class Torus {
     handleStream(showWalletStream, 'data', showWalletHandler)
   }
 
-  /**
-   * Gets the public address of an user with email
-   * @param {VerifierArgs} verifierArgs Verifier Arguments
-   */
   async getPublicAddress({ verifier, verifierId, isExtended = false }) {
     // Select random node from the list of endpoints
     if (!configuration.supportedVerifierList.includes(verifier)) throw new Error('Unsupported verifier')
@@ -668,10 +640,6 @@ class Torus {
     )
   }
 
-  /**
-   * Exposes the loggedin user info to the Dapp
-   * @param {String} message Message to be displayed to the user
-   */
   getUserInfo(message) {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
@@ -713,6 +681,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _handleWindow(preopenInstanceId, { target, features } = {}) {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream('window')
@@ -750,15 +719,6 @@ class Torus {
 
   paymentProviders = configuration.paymentProviders
 
-  /**
-   * Exposes the topup api of torus
-   * Allows the dapp to trigger a payment method directly
-   * If no params are provided, it defaults to { selectedAddress? = 'TORUS' fiatValue = MIN_FOR_PROVIDER;
-   * selectedCurrency? = 'USD'; selectedCryptoCurrency? = 'ETH'; }
-   * @param {Enum} provider Supported options are moonpay, wyre, rampnetwork, xanpool
-   * @param {PaymentParams} params PaymentParams
-   * @returns {Promise<boolean>} boolean indicates whether user has successfully completed the topup flow
-   */
   initiateTopup(provider, params) {
     return new Promise((resolve, reject) => {
       if (this.isInitalized) {
@@ -785,6 +745,7 @@ class Torus {
     })
   }
 
+  /** @ignore */
   _setEmbedWhiteLabel(element) {
     // Set whitelabel
     const { theme } = this.whiteLabel
