@@ -25,7 +25,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-MIHm8RuEYP4b2zQf3umG0kQ3WJZewFpfTHQB7wmFfRxPdjYTtG06Q7KIDV5rca0E'
+const iframeIntegrity = 'sha384-6KtbmWjxs83EbpVqMH+ugBc0201rUHIq9/K4PcJNB6+hs8KTRurW36N9NMaY67v/'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
