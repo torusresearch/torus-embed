@@ -3,7 +3,7 @@ const path = require('path')
 const pkgName = 'torus'
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1)
 
-const externals = ['@chaitanyapotti/random-id', '@toruslabs/fetch-node-details', '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel']
+const externals = ['@chaitanyapotti/random-id', '@toruslabs/fetch-node-details', '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel', 'deepmerge']
 
 const baseConfig = {
   mode: 'production',
@@ -11,10 +11,14 @@ const baseConfig = {
   target: 'web',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    // filename: 'bundle.js',
     library: libraryName,
     libraryExport: 'default',
-    // libraryTarget: 'umd',
+  },
+  resolve: {
+    alias: {
+      'bn.js': path.resolve(__dirname, 'node_modules/bn.js'),
+      lodash: path.resolve(__dirname, 'node_modules/lodash'),
+    },
   },
   module: {
     rules: [],
@@ -36,15 +40,9 @@ const babelLoaderWithPolyfills = {
   },
 }
 
-const optimization = {
-  optimization: {
-    minimize: false,
-  },
-}
-
 const babelLoader = { ...babelLoaderWithPolyfills, use: { loader: 'babel-loader', options: { plugins: ['@babel/transform-runtime'] } } }
 
-const umdPolyfilledConfigMinified = {
+const umdPolyfilledConfig = {
   ...baseConfig,
   output: {
     ...baseConfig.output,
@@ -56,16 +54,7 @@ const umdPolyfilledConfigMinified = {
   },
 }
 
-const umdPolyfilledConfig = {
-  ...umdPolyfilledConfigMinified,
-  ...optimization,
-  output: {
-    ...umdPolyfilledConfigMinified.output,
-    filename: `${pkgName}.polyfill.umd.js`,
-  },
-}
-
-const umdConfigMinified = {
+const umdConfig = {
   ...baseConfig,
   output: {
     ...baseConfig.output,
@@ -77,17 +66,9 @@ const umdConfigMinified = {
   },
 }
 
-const umdConfig = {
-  ...umdConfigMinified,
-  ...optimization,
-  output: {
-    ...umdConfigMinified.output,
-    filename: `${pkgName}.umd.js`,
-  },
-}
-
 const cjsConfig = {
   ...baseConfig,
+  // ...optimization,
   output: {
     ...baseConfig.output,
     filename: `${pkgName}.cjs.js`,
@@ -99,7 +80,7 @@ const cjsConfig = {
   externals: [...externals, /^(@babel\/runtime)/i],
 }
 
-module.exports = [umdPolyfilledConfig, umdPolyfilledConfigMinified, umdConfig, umdConfigMinified, cjsConfig]
+module.exports = [umdPolyfilledConfig, umdConfig, cjsConfig]
 // module.exports = [cjsConfig]
 
 // V5

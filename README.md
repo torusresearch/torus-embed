@@ -21,12 +21,10 @@ Please refer to docs for API Reference available [here](https://docs.tor.us/api-
 
 ### Bundling
 
-This module is distributed in 6 formats
+This module is distributed in 3 formats
 
 - `commonjs` build `dist/torus.cjs.js` in es5 format
-- `umd` build `dist/torus.umd.js` in es5 format without polyfilling corejs
 - `umd` build `dist/torus.umd.min.js` in es5 format without polyfilling corejs minified
-- `umd` build `dist/torus.polyfill.umd.js` in es5 format with polyfilling corejs
 - `umd` build `dist/torus.polyfill.umd.min.js` in es5 format with polyfilling corejs minified
 
 By default, the appropriate format is used for your specified usecase
@@ -89,7 +87,7 @@ entry-point: `index.js`
 
 ## Requirements
 
-- This package requires a peer dependency of `@babel/runtime` or `@babel/runtime-corejs3`
+- This package requires a peer dependency of `@babel/runtime`
 - Node 10+
 
 ## License
