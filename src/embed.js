@@ -14,16 +14,13 @@ import log from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
-import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
+import { getDefaultVerifier, getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
 
-const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
-const defaultVerifiers = {
-  [GOOGLE]: true,
-  [FACEBOOK]: true,
-  [REDDIT]: true,
-  [TWITCH]: true,
-  [DISCORD]: true,
-}
+const { JWT } = configuration.enums
+const defaultTypesOfLogin = configuration.typesOfLoginList.reduce((acc, x) => {
+  acc[x] = x !== JWT
+  return acc
+}, {})
 
 const iframeIntegrity = 'sha384-L7xLIMrz1/l3Fnq9p15uFPU5zyBFqeAz55bBRg9nG2qVjE0TZvs2olPcPzmtr9bp'
 
@@ -52,9 +49,10 @@ class Torus {
     this.isLoggedIn = false // ethereum.enable working
     this.isInitalized = false // init done
     this.torusWidgetVisibility = true
-    this.requestedVerifier = ''
-    this.currentVerifier = ''
-    this.enabledVerifiers = {}
+    // use requested params
+    this.requestedVerifier = { verifier: '', typeOfLogin: '', jwtParameters: {} }
+    this.currentVerifier = { verifier: '', typeOfLogin: '', jwtParameters: {} }
+    this.enabledTypesOfLogin = {}
     this.Web3 = Web3
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
@@ -65,7 +63,9 @@ class Torus {
   async init({
     buildEnv = 'production',
     enableLogging = false,
-    enabledVerifiers = defaultVerifiers,
+    // Deprecated
+    enabledVerifiers = {},
+    enabledTypesOfLogin = {},
     network = {
       host: 'mainnet',
       chainId: null,
@@ -83,7 +83,7 @@ class Torus {
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
-    this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
+    this.enabledTypesOfLogin = { ...defaultTypesOfLogin, ...enabledVerifiers, ...enabledTypesOfLogin }
     this.whiteLabel = whiteLabel
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
@@ -125,7 +125,7 @@ class Torus {
         initStream.write({
           name: 'init_stream',
           data: {
-            enabledVerifiers: this.enabledVerifiers,
+            enabledVerifiers: this.enabledTypesOfLogin,
             whiteLabel: this.whiteLabel,
             buttonPosition: this.buttonPosition,
             torusWidgetVisibility: this.torusWidgetVisibility,
@@ -178,15 +178,18 @@ class Torus {
     }
   }
 
-  login({ verifier } = {}) {
+  login({ verifier, typeOfLogin, jwtParameters } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
-    if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
-    if (!verifier) {
-      this.requestedVerifier = ''
+    // This is to maintain backward compatibility
+    let internalTypeOfLogin = typeOfLogin
+    if (!internalTypeOfLogin) internalTypeOfLogin = verifier
+    if (internalTypeOfLogin && !this.enabledTypesOfLogin[internalTypeOfLogin]) throw new Error('Given type of login is not enabled')
+    if (!internalTypeOfLogin) {
+      this.requestedVerifier = getDefaultVerifier()
       return this.ethereum.enable()
     }
-    if (configuration.verifierList.includes(verifier)) {
-      this.requestedVerifier = verifier
+    if (configuration.typesOfLoginList.includes(internalTypeOfLogin)) {
+      this.requestedVerifier = { verifier, typeOfLogin: internalTypeOfLogin, jwtParameters }
       return this.ethereum.enable()
     }
     throw new Error('Unsupported verifier')
@@ -205,8 +208,8 @@ class Torus {
       const statusStreamHandler = (status) => {
         if (!status.loggedIn) {
           this.isLoggedIn = false
-          this.currentVerifier = ''
-          this.requestedVerifier = ''
+          this.currentVerifier = getDefaultVerifier()
+          this.requestedVerifier = getDefaultVerifier()
           resolve()
         } else reject(new Error('Some Error Occured'))
       }
@@ -419,13 +422,14 @@ class Torus {
             // If user is already rehydrated, resolve this
             // else wait for something to be written to status stream
             const handleLoginCb = () => {
-              if (this.requestedVerifier !== '' && this.currentVerifier !== this.requestedVerifier) {
-                const { requestedVerifier } = this
+              const { typeOfLogin, verifier, jwtParameters } = this.requestedVerifier
+              const { typeOfLogin: currentTypeOfLogin } = this.currentVerifier
+              if (typeOfLogin !== '' && currentTypeOfLogin !== typeOfLogin) {
                 // eslint-disable-next-line promise/no-promise-in-callback
                 this.logout()
                   // eslint-disable-next-line promise/always-return
                   .then((_) => {
-                    this.requestedVerifier = requestedVerifier
+                    this.requestedVerifier = { typeOfLogin, verifier, jwtParameters }
                     this._showLoginPopup(true, resolve, reject)
                   })
                   .catch((error) => reject(error))
@@ -525,14 +529,15 @@ class Torus {
       }
     }
     const oauthStream = this.communicationMux.getStream('oauth')
-    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+    const { typeOfLogin } = this.requestedVerifier
+    if (typeOfLogin === undefined || typeOfLogin === '') {
       handleStream(oauthStream, 'data', loginHandler)
       oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
       handleStream(oauthStream, 'data', loginHandler)
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId)
-      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId } })
+      oauthStream.write({ name: 'oauth', data: { calledFromEmbed, ...this.requestedVerifier, preopenInstanceId } })
     }
   }
 

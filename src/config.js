@@ -4,16 +4,26 @@ const enums = {
   TWITCH: 'twitch',
   REDDIT: 'reddit',
   DISCORD: 'discord',
+  GITHUB: 'github',
+  LINKEDIN: 'linkedin',
+  TWITTER: 'twitter',
+  WEIBO: 'weibo',
+  EMAIL_PASSWORD: 'email_password',
+  PASSWORDLESS: 'passwordless',
+  JWT: 'jwt',
+}
+
+const typesOfLoginList = Object.values(enums)
+
+const paymentEnums = {
   MOONPAY: 'moonpay',
   WYRE: 'wyre',
   RAMPNETWORK: 'rampnetwork',
   XANPOOL: 'xanpool',
 }
 
-const verifierList = Object.values(enums)
-
 const paymentProviders = {
-  [enums.RAMPNETWORK]: {
+  [paymentEnums.RAMPNETWORK]: {
     line1: 'Bank transfer',
     line2: '0% - 2.5%',
     line3: '10,000€/purchase, 10,000€/mo',
@@ -25,7 +35,7 @@ const paymentProviders = {
     includeFees: true,
     enforceMax: true,
   },
-  [enums.MOONPAY]: {
+  [paymentEnums.MOONPAY]: {
     line1: 'Credit / Debit Card / Apple Pay',
     line2: '4.5% or 5 USD',
     line3: '2,000€/day, 10,000€/mo',
@@ -37,7 +47,7 @@ const paymentProviders = {
     includeFees: true,
     enforceMax: true,
   },
-  [enums.WYRE]: {
+  [paymentEnums.WYRE]: {
     line1: 'Apple Pay/Debit Card',
     line2: '1.5% + 30¢',
     line3: '$250/day',
@@ -49,7 +59,7 @@ const paymentProviders = {
     includeFees: false,
     enforceMax: true,
   },
-  [enums.XANPOOL]: {
+  [paymentEnums.XANPOOL]: {
     line1: 'PayNow/ InstaPay/ FPS/ GoJekPay/ UPI/ PromptPay/ VietelPay/ DuitNow',
     line2: '2.5% buying, 3% selling',
     line3: '$2,500 / day',
@@ -125,7 +135,7 @@ const translations = {
 export default {
   networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
   enums,
-  verifierList,
+  typesOfLoginList,
   supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD],
   paymentProviders,
   api: 'https://api.tor.us',

@@ -182,3 +182,8 @@ export const getUserLanguage = () => {
   userLanguage = Object.prototype.hasOwnProperty.call(config.translations, userLanguage[0]) ? userLanguage[0] : 'en'
   return userLanguage
 }
+
+export const getDefaultVerifier = () => {
+  // Return a cloned copy
+  return JSON.parse(JSON.stringify({ verifier: '', typeOfLogin: '', jwtParameters: {} }))
+}
