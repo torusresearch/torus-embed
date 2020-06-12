@@ -100,65 +100,65 @@ export default {
           //   version: '1.4.2',
           //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9'
           // }
-          // whiteLabel: {
-          //   theme: {
-          //     isDark: false,
-          //     colors: {
-          //       torusBrand1: '#000000',
-          //       torusGray2: '#FBF7F3'
-          //     }
-          //   },
-          //   logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
-          //   logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
-          //   topupHide: true,
-          //   featuredBillboardHide: true,
-          //   tncLink: {
-          //     "en": 'http://example.com/tnc/en',
-          //     "ja": 'http://example.com/tnc/ja',
-          //   },
-          //   defaultLanguage: 'ja',
-          //   customTranslations: {
-          //     "en": {
-          //       "embed": {
-          //         "confirm": "Confirm",
-          //         "actionRequired": "Action Required",
-          //         "pendingAction": "You have a pending action that needs to be completed in a pop-up window ",
-          //         "cookiesRequired": "Cookies Required",
-          //         "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
-          //         "forMoreInfo": "For more info, ",
-          //         "clickHere": "click here",
-          //       },
-          //       "login": {
-          //         "acceptTerms": "By logging in, you accept Examples'",
-          //         "your": "Your",
-          //         "digitalWallet": "digital wallet instantly"
-          //       },
-          //       "dappTransfer": {
-          //         "data": "Data to sign"
-          //       },
-          //       "dappPermission": {
-          //         "permission": "Permission",
-          //         "requestFrom": "Request from",
-          //         "accessUserInfo": "To access your Google Email Address, Profile Photo and Name"
-          //       }
-          //     },
-          //     "ja": {
-          //       "login": {
-          //         "acceptTerms": "ログインすると、Examples 'を受け入れます",
-          //         "your": "君の",
-          //         "digitalWallet": "すぐにデジタルウォレット"
-          //       },
-          //       "dappTransfer": {
-          //         "data": "あなたがサインするデータ"
-          //       },
-          //       "dappPermission": {
-          //         "permission": "下記の内容を許可しますか",
-          //         "requestFrom": "許可を求めているアプリケーション",
-          //         "accessUserInfo": "受け取る情報: Googleメール、プロフィール写真、名前"
-          //       }
-          //     }
-          //   }
-          // }
+          whiteLabel: {
+            theme: {
+              isDark: false,
+              colors: {
+                torusBrand1: '#000000',
+                torusGray2: '#FBF7F3'
+              }
+            },
+            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
+            logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
+            topupHide: true,
+            featuredBillboardHide: true,
+            tncLink: {
+              "en": 'http://example.com/tnc/en',
+              "ja": 'http://example.com/tnc/ja',
+            },
+            defaultLanguage: 'ja',
+            customTranslations: {
+              "en": {
+                "embed": {
+                  "confirm": "Confirm",
+                  "actionRequired": "Action Required",
+                  "pendingAction": "You have a pending action that needs to be completed in a pop-up window ",
+                  "cookiesRequired": "Cookies Required",
+                  "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
+                  "forMoreInfo": "For more info, ",
+                  "clickHere": "click here",
+                },
+                "login": {
+                  "acceptTerms": "By logging in, you accept Examples'",
+                  "your": "Your",
+                  "digitalWallet": "digital wallet instantly"
+                },
+                "dappTransfer": {
+                  "data": "Data to sign"
+                },
+                "dappPermission": {
+                  "permission": "Permission",
+                  "requestFrom": "Request from",
+                  "accessUserInfo": "To access your Google Email Address, Profile Photo and Name"
+                }
+              },
+              "ja": {
+                "login": {
+                  "acceptTerms": "ログインすると、Examples 'を受け入れます",
+                  "your": "君の",
+                  "digitalWallet": "すぐにデジタルウォレット"
+                },
+                "dappTransfer": {
+                  "data": "あなたがサインするデータ"
+                },
+                "dappPermission": {
+                  "permission": "下記の内容を許可しますか",
+                  "requestFrom": "許可を求めているアプリケーション",
+                  "accessUserInfo": "受け取る情報: Googleメール、プロフィール写真、名前"
+                }
+              }
+            }
+          }
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
