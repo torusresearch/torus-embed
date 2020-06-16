@@ -99,15 +99,15 @@ export default {
           // integrity: {
           //   check: true,
           //   version: '1.4.2',
-          //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9',
-          // },
+          //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9'
+          // }
           whiteLabel: {
             theme: {
               isDark: false,
               colors: {
                 torusBrand1: '#000000',
-                torusGray2: '#FBF7F3',
-              },
+                torusGray2: '#FBF7F3'
+              }
             },
             logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
             logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
