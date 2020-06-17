@@ -4,9 +4,9 @@
       <p>Build Environment</p>
       <select name="buildEnv" v-model="buildEnv">
         <option value="production">Production</option>
-        <option selected value="staging">Staging</option>
+        <option value="staging">Staging</option>
         <option value="testing">Testing</option>
-        <option value="development">Development</option>
+        <option selected value="development">Development</option>
       </select>
       <button v-if="publicAddress === ''">Login</button>
     </form>
@@ -17,6 +17,7 @@
       <button @click="sendEth">Send Eth</button>
       <button @click="logout">Logout</button>
       <br />
+      <button @click="signTorusMessage">sign Torus msg</button>
       <button @click="signMessage">sign_eth</button>
       <button @click="signTypedData_v1">sign typed data v1</button>
       <button @click="signTypedData_v3">sign typed data v3</button>
@@ -24,6 +25,8 @@
       <button @click="changeProvider">Change Provider</button>
       <button @click="sendDai">Send DAI</button>
       <button @click="approveKnc">Approve Knc</button>
+      <button @click="requestPermission">Request Connext Permission</button>
+      <button @click="signConnextMessage">Sign Connext Message</button>
       <div :style="{marginTop: '20px'}">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
           <option selected value="google">Google</option>
@@ -48,6 +51,7 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
+import { keccak } from 'ethereumjs-util'
 const tokenAbi = require('human-standard-token-abi')
 
 export default {
@@ -58,7 +62,7 @@ export default {
       verifierId: '',
       selectedVerifier: 'google',
       placeholder: 'Enter google email',
-      buildEnv: 'testing'
+      buildEnv: 'development'
     }
   },
   methods: {
@@ -90,10 +94,10 @@ export default {
             reddit: false
           },
           enableLogging: false,
-          network: {
-            host: 'rinkeby', // mandatory
-            chainId: 4
-          },
+          // network: {
+          //   host: 'rinkeby', // mandatory
+          //   chainId: 4
+          // },
           showTorusButton: true,
           whiteLabel: {
             theme: {
@@ -108,7 +112,7 @@ export default {
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: 'http://starbahn.org/tnc',
-            defaultLanguage: 'ja',
+            defaultLanguage: 'en',
             customTranslations: {
               "en": {
                 "embed": {
@@ -179,6 +183,57 @@ export default {
     },
     sendEth() {
       window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
+    },
+    signTorusMessage() {
+      const self = this
+      // hex message
+      function hashTorusMessage(message) {
+        if (!Buffer.isBuffer(message)) {
+          throw new TypeError('trying to hash Torus message when message is not buffer')
+        }
+        const prefix = Buffer.from(`\u0019Torus Signed Message:\n${message.length.toString()}`, 'utf-8')
+        return keccak(Buffer.concat([prefix, message]))
+      }
+      const hash = '0x'+hashTorusMessage(Buffer.from("Hello World", 'utf-8')).toString('hex')
+      window.torus.web3.currentProvider.send(
+        {
+          method: 'eth_sign',
+          params: [this.publicAddress, hash, {"customPrefix": "\u0019Torus Signed Message:\n", "customMessage": "Hello World"}],
+          from: this.publicAddress
+        },
+        function(err, result) {
+          if (err) {
+            return console.error(err)
+          }
+          self.console('sign message => true \n', result)
+        }
+      )
+    },
+    signConnextMessage() {
+      const self = this
+      // hex message
+      function hashConnextMessage(message) {
+        if (!Buffer.isBuffer(message)) {
+          throw new TypeError('trying to hash Connext message when message is not buffer')
+        }
+        const prefix = Buffer.from(`\u0015Indra Signed Message:\n${message.length.toString()}`, 'utf-8')
+        return keccak(Buffer.concat([prefix, message]))
+      }
+      const hash = '0x'+hashConnextMessage(Buffer.from("Hello World", 'utf-8')).toString('hex')
+      
+      window.torus.web3.currentProvider.send(
+        {
+          method: 'eth_sign',
+          params: [this.publicAddress, hash, {"customPrefix": "\u0015Indra Signed Message:\n", "customMessage": "Hello World"}],
+          from: this.publicAddress
+        },
+        function(err, result) {
+          if (err) {
+            return console.error(err)
+          }
+          self.console('sign message => true \n', result)
+        }
+      )
     },
     signMessage() {
       const self = this
@@ -380,6 +435,22 @@ export default {
           }
         )
       })
+    },
+    requestPermission() {
+      window.web3.currentProvider.send(
+        {
+          method: 'torus_requestPermission',
+          params: [{ permissionType: 'eth_sign_indra_prefix_message'}],
+          from: this.publicAddress,
+        },
+        (error, response) => {
+          if (error) {
+            this.console(error)
+          } else {
+            this.console(response)
+          }
+        }
+      )
     },
     async getUserInfo() {
       window.torus.getUserInfo().then(this.console).catch(this.console)
