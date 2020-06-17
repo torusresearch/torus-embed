@@ -55,6 +55,7 @@ class Torus {
     this.requestedVerifier = ''
     this.currentVerifier = ''
     this.enabledVerifiers = {}
+    this.loginConfig = {}
     this.Web3 = Web3
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
@@ -65,12 +66,14 @@ class Torus {
   async init({
     buildEnv = 'production',
     enableLogging = false,
+    // deprecated: use loginConfig instead
     enabledVerifiers = defaultVerifiers,
     network = {
       host: 'mainnet',
       chainId: null,
       networkName: '',
     },
+    loginConfig = {},
     showTorusButton = true,
     integrity = {
       check: false,
@@ -83,7 +86,14 @@ class Torus {
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
-    this.enabledVerifiers = { ...defaultVerifiers, ...enabledVerifiers }
+    this.enabledVerifiers = enabledVerifiers
+    // Object.keys(enabledVerifiers).forEach((x) => {
+    //   // Have to do this way because there can be multiple configs with same typeOfLogin
+    //   if (!loginConfig.find((y) => y.typeOfLogin === x)) {
+    //     loginConfig.push({ typeOfLogin: x, enabled: enabledVerifiers[x] })
+    //   }
+    // })
+    this.loginConfig = loginConfig
     this.whiteLabel = whiteLabel
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
@@ -126,6 +136,7 @@ class Torus {
           name: 'init_stream',
           data: {
             enabledVerifiers: this.enabledVerifiers,
+            loginConfig: this.loginConfig,
             whiteLabel: this.whiteLabel,
             buttonPosition: this.buttonPosition,
             torusWidgetVisibility: this.torusWidgetVisibility,
@@ -180,16 +191,12 @@ class Torus {
 
   login({ verifier } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
-    if (verifier && !this.enabledVerifiers[verifier]) throw new Error('Given verifier is not enabled')
     if (!verifier) {
       this.requestedVerifier = ''
       return this.ethereum.enable()
     }
-    if (configuration.verifierList.includes(verifier)) {
-      this.requestedVerifier = verifier
-      return this.ethereum.enable()
-    }
-    throw new Error('Unsupported verifier')
+    this.requestedVerifier = verifier
+    return this.ethereum.enable()
   }
 
   logout() {
