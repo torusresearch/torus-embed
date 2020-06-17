@@ -117,6 +117,7 @@ interface LoginConfigItem {
   typeOfLogin: LOGIN_TYPE
   description?: string
   clientId?: string
+  logoHover?: string
   logoLight?: string
   logoDark?: string
   showOnModal?: boolean
