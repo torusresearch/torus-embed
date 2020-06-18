@@ -87,12 +87,6 @@ class Torus {
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
     this.enabledVerifiers = enabledVerifiers
-    // Object.keys(enabledVerifiers).forEach((x) => {
-    //   // Have to do this way because there can be multiple configs with same typeOfLogin
-    //   if (!loginConfig.find((y) => y.typeOfLogin === x)) {
-    //     loginConfig.push({ typeOfLogin: x, enabled: enabledVerifiers[x] })
-    //   }
-    // })
     this.loginConfig = loginConfig
     this.whiteLabel = whiteLabel
     log.setDefaultLevel(logLevel)

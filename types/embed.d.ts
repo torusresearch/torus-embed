@@ -108,19 +108,49 @@ type LOGIN_TYPE =
   | 'weibo'
   | 'line'
   | 'jwt'
+  | 'email-password'
+  | 'passwordless'
 
 interface LoginConfig {
+  /**
+   * Use the verifier provided by torus as a key or a default verifier used by torus 
+   * {@link https://docs.tor.us/torus-wallet/developing-with-torus-wallet/oauth | Documentation} 
+   */
   [verifier: string]: LoginConfigItem
 }
 
 interface LoginConfigItem {
+  /**
+   * The type of login. Refer to enum `LOGIN_TYPE`
+   */
   typeOfLogin: LOGIN_TYPE
+  /**
+   * Description for button. If provided, it renders as a full length button. else, icon button
+   */
   description?: string
+  /**
+   * Custom client_id. If not provided, we use the default for torus app
+   */
   clientId?: string
+  /**
+   * Logo to be shown on mouse hover. If not provided, we use the default for torus app
+   */
   logoHover?: string
+  /**
+   * Logo to be shown on dark background (dark theme). If not provided, we use the default for torus app
+   */
   logoLight?: string
+  /**
+   * Logo to be shown on light background (light theme). If not provided, we use the default for torus app
+   */
   logoDark?: string
+  /**
+   * Whether to show the login button on modal or not
+   */
   showOnModal?: boolean
+  /**
+   * Custom jwt parameters to configure the login. Useful for Auth0 configuration
+   */
   jwtParameters?: JwtParameters
 }
 
