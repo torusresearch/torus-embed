@@ -24,20 +24,15 @@
       <button @click="changeProvider">Change Provider</button>
       <button @click="sendDai">Send DAI</button>
       <button @click="approveKnc">Approve Knc</button>
-      <div :style="{marginTop: '20px'}">
+      <div :style="{ marginTop: '20px' }">
         <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
           <option selected value="google">Google</option>
           <option value="reddit">Reddit</option>
           <option value="discord">Discord</option>
         </select>
-        <input :style="{marginLeft: '20px'}" v-model="verifierId" :placeholder="placeholder" />
+        <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
       </div>
-      <button
-        :disabled="!verifierId"
-        :style="{marginTop: '20px'}"
-        v-if="publicAddress !== ''"
-        @click="getPublicAddress"
-      >Get Public Address</button>
+      <button :disabled="!verifierId" :style="{ marginTop: '20px' }" v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
     </div>
     <div id="console">
       <p></p>
@@ -58,7 +53,7 @@ export default {
       verifierId: '',
       selectedVerifier: 'google',
       placeholder: 'Enter google email',
-      buildEnv: 'testing'
+      buildEnv: 'testing',
     }
   },
   methods: {
@@ -81,18 +76,18 @@ export default {
     async login() {
       try {
         const torus = new Torus({
-          buttonPosition: 'bottom-left'
+          buttonPosition: 'bottom-left',
         })
         window.torus = torus
         await torus.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
-            reddit: false
+            reddit: false,
           },
           enableLogging: false,
           network: {
             host: 'rinkeby', // mandatory
-            chainId: 4
+            chainId: 4,
           },
           showTorusButton: true,
           // integrity: {
@@ -100,71 +95,87 @@ export default {
           //   version: '1.4.2',
           //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9'
           // }
+          loginConfig: {
+            'startrail-auth0-email-password': {
+              typeOfLogin: 'email_password',
+              description: 'login.buttonText',
+              clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
+              logoHover: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+              logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+              logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
+              showOnModal: true,
+              jwtParameters: {
+                domain: 'https://torusstartrail.au.auth0.com',
+              },
+            },
+          },
           whiteLabel: {
             theme: {
               isDark: false,
               colors: {
                 torusBrand1: '#000000',
-                torusGray2: '#FBF7F3'
-              }
+                torusGray2: '#FBF7F3',
+              },
             },
             logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
             logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: {
-              "en": 'http://example.com/tnc/en',
-              "ja": 'http://example.com/tnc/ja',
+              en: 'http://example.com/tnc/en',
+              ja: 'http://example.com/tnc/ja',
             },
             defaultLanguage: 'ja',
             customTranslations: {
-              "en": {
-                "embed": {
-                  "confirm": "Confirm",
-                  "actionRequired": "Action Required",
-                  "pendingAction": "You have a pending action that needs to be completed in a pop-up window ",
-                  "cookiesRequired": "Cookies Required",
-                  "enableCookies": "Please enable cookies in your browser preferences to access Torus.",
-                  "forMoreInfo": "For more info, ",
-                  "clickHere": "click here",
+              en: {
+                embed: {
+                  confirm: 'Confirm',
+                  actionRequired: 'Action Required',
+                  pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
+                  cookiesRequired: 'Cookies Required',
+                  enableCookies: 'Please enable cookies in your browser preferences to access Torus.',
+                  forMoreInfo: 'For more info, ',
+                  clickHere: 'click here',
                 },
-                "login": {
-                  "acceptTerms": "By logging in, you accept Examples'",
-                  "your": "Your",
-                  "digitalWallet": "digital wallet instantly"
+                login: {
+                  acceptTerms: "By logging in, you accept Examples'",
+                  your: 'Your',
+                  digitalWallet: 'digital wallet instantly',
+                  buttonText: 'Login with Startrail'
                 },
-                "dappTransfer": {
-                  "data": "Data to sign"
+                dappTransfer: {
+                  data: 'Data to sign',
                 },
-                "dappPermission": {
-                  "permission": "Permission",
-                  "requestFrom": "Request from",
-                  "accessUserInfo": "To access your Google Email Address, Profile Photo and Name"
-                }
+                dappPermission: {
+                  permission: 'Permission',
+                  requestFrom: 'Request from',
+                  accessUserInfo: 'To access your Google Email Address, Profile Photo and Name',
+                },
               },
-              "ja": {
-                "login": {
-                  "acceptTerms": "ログインすると、Examples 'を受け入れます",
-                  "your": "君の",
-                  "digitalWallet": "すぐにデジタルウォレット"
+              ja: {
+                login: {
+                  acceptTerms: "ログインすると、Examples 'を受け入れます",
+                  your: '君の',
+                  digitalWallet: 'すぐにデジタルウォレット',
+                  buttonText: 'Startrailでログイン'
                 },
-                "dappTransfer": {
-                  "data": "あなたがサインするデータ"
+                dappTransfer: {
+                  data: 'あなたがサインするデータ',
                 },
-                "dappPermission": {
-                  "permission": "下記の内容を許可しますか",
-                  "requestFrom": "許可を求めているアプリケーション",
-                  "accessUserInfo": "受け取る情報: Googleメール、プロフィール写真、名前"
-                }
-              }
-            }
-          }
+                dappPermission: {
+                  permission: '下記の内容を許可しますか',
+                  requestFrom: '許可を求めているアプリケーション',
+                  accessUserInfo: '受け取る情報: Googleメール、プロフィール写真、名前',
+                },
+              },
+            },
+          },
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
         torus.provider.on('chainChanged', (resp) => console.log(resp, 'chainchanged'))
         window.web3 = web3
-        web3.eth.getAccounts().then(accounts => {
+        web3.eth.getAccounts().then((accounts) => {
           this.publicAddress = accounts[0]
           web3.eth.getBalance(accounts[0]).then(console.log)
           // For testing typed messages
@@ -180,7 +191,7 @@ export default {
     createPaymentTx() {
       window.torus
         .initiateTopup('moonpay', {
-          selectedCurrency: 'USD'
+          selectedCurrency: 'USD',
         })
         .catch(console.error)
         .finally(console.log)
@@ -196,9 +207,9 @@ export default {
         {
           method: 'eth_sign',
           params: [this.publicAddress, message],
-          from: this.publicAddress
+          from: this.publicAddress,
         },
-        function(err, result) {
+        function (err, result) {
           if (err) {
             return console.error(err)
           }
@@ -211,22 +222,22 @@ export default {
         {
           type: 'string',
           name: 'message',
-          value: 'Hi, Alice!'
+          value: 'Hi, Alice!',
         },
         {
           type: 'uint8',
           name: 'value',
-          value: 10
-        }
+          value: 10,
+        },
       ]
       const self = this
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData',
           params: [typedData, this.publicAddress],
-          from: this.publicAddress
+          from: this.publicAddress,
         },
-        function(err, result) {
+        function (err, result) {
           if (err) {
             return console.error(err)
           }
@@ -242,45 +253,45 @@ export default {
             { name: 'name', type: 'string' },
             { name: 'version', type: 'string' },
             { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' }
+            { name: 'verifyingContract', type: 'address' },
           ],
           Person: [
             { name: 'name', type: 'string' },
-            { name: 'wallet', type: 'address' }
+            { name: 'wallet', type: 'address' },
           ],
           Mail: [
             { name: 'from', type: 'Person' },
             { name: 'to', type: 'Person' },
-            { name: 'contents', type: 'string' }
-          ]
+            { name: 'contents', type: 'string' },
+          ],
         },
         primaryType: 'Mail',
         domain: {
           name: 'Ether Mail',
           version: '1',
           chainId: 4,
-          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         },
         message: {
           from: {
             name: 'Cow',
-            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826'
+            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
           },
           to: {
             name: 'Bob',
-            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
           },
-          contents: 'Hello, Bob!'
-        }
+          contents: 'Hello, Bob!',
+        },
       }
       const self = this
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
           params: [this.publicAddress, JSON.stringify(typedData)],
-          from: this.publicAddress
+          from: this.publicAddress,
         },
-        function(err, result) {
+        function (err, result) {
           if (err) {
             return console.error(err)
           }
@@ -295,33 +306,33 @@ export default {
             { name: 'name', type: 'string' },
             { name: 'version', type: 'string' },
             { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' }
+            { name: 'verifyingContract', type: 'address' },
           ],
           Person: [
             { name: 'name', type: 'string' },
-            { name: 'wallets', type: 'address[]' }
+            { name: 'wallets', type: 'address[]' },
           ],
           Mail: [
             { name: 'from', type: 'Person' },
             { name: 'to', type: 'Person[]' },
-            { name: 'contents', type: 'string' }
+            { name: 'contents', type: 'string' },
           ],
           Group: [
             { name: 'name', type: 'string' },
-            { name: 'members', type: 'Person[]' }
-          ]
+            { name: 'members', type: 'Person[]' },
+          ],
         },
         domain: {
           name: 'Ether Mail',
           version: '1',
           chainId: 4,
-          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
         },
         primaryType: 'Mail',
         message: {
           from: {
             name: 'Cow',
-            wallets: ['0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826', '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF']
+            wallets: ['0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826', '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF'],
           },
           to: [
             {
@@ -329,21 +340,21 @@ export default {
               wallets: [
                 '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
                 '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
-                '0xB0B0b0b0b0b0B000000000000000000000000000'
-              ]
-            }
+                '0xB0B0b0b0b0b0B000000000000000000000000000',
+              ],
+            },
           ],
-          contents: 'Hello, Bob!'
-        }
+          contents: 'Hello, Bob!',
+        },
       }
       const self = this
       window.torus.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v4',
           params: [this.publicAddress, JSON.stringify(typedData)],
-          from: this.publicAddress
+          from: this.publicAddress,
         },
-        function(err, result) {
+        function (err, result) {
           if (err) {
             return console.error(err)
           }
@@ -364,7 +375,7 @@ export default {
         const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
         instance.methods.transfer(this.publicAddress, value).send(
           {
-            from: this.publicAddress
+            from: this.publicAddress,
           },
           (err, hash) => {
             if (err) this.console(err)
@@ -380,7 +391,7 @@ export default {
         const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
         instance.methods.approve(this.publicAddress, value).send(
           {
-            from: this.publicAddress
+            from: this.publicAddress,
           },
           (err, hash) => {
             if (err) this.console(err)
@@ -395,8 +406,8 @@ export default {
     getPublicAddress() {
       console.log(this.selectedVerifier, this.verifierId)
       window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console)
-    }
-  }
+    },
+  },
 }
 </script>
 
