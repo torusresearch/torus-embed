@@ -99,12 +99,13 @@ export default {
             'startrail-auth0-email-password': {
               typeOfLogin: 'email_password',
               description: 'login.buttonText',
-              clientId: 'AUTH0_CLIENT_ID',
-              logoLight: 'LOGO_LIGHT_URL',
-              logoDark: 'LOGO_DARK_URL',
+              clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
+              logoHover: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+              logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+              logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
               showOnModal: true,
               jwtParameters: {
-                domain: 'AUTH0_DOMAIN',
+                domain: 'https://torusstartrail.au.auth0.com',
               },
             },
           },
@@ -140,6 +141,7 @@ export default {
                   acceptTerms: "By logging in, you accept Examples'",
                   your: 'Your',
                   digitalWallet: 'digital wallet instantly',
+                  buttonText: 'Login with Startrail'
                 },
                 dappTransfer: {
                   data: 'Data to sign',
@@ -155,6 +157,7 @@ export default {
                   acceptTerms: "ログインすると、Examples 'を受け入れます",
                   your: '君の',
                   digitalWallet: 'すぐにデジタルウォレット',
+                  buttonText: 'Startrailでログイン'
                 },
                 dappTransfer: {
                   data: 'あなたがサインするデータ',
