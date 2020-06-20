@@ -23,12 +23,12 @@
     "test:build-embed": "mocha --exit ./test/compile/Web3Test.js"
   },
   "peerDependencies": {
-    "@babel/runtime": "^7.10.2"
+    "@babel/runtime": "^7.10.3"
   },
   "dependencies": {
     "@chaitanyapotti/random-id": "^1.0.3",
     "@toruslabs/fetch-node-details": "^2.2.6",
-    "@toruslabs/torus.js": "^2.1.8",
+    "@toruslabs/torus.js": "^2.1.9",
     "create-hash": "^1.2.0",
     "deepmerge": "^4.2.2",
     "eth-json-rpc-errors": "^2.0.2",
@@ -44,18 +44,18 @@
     "web3": "^0.20.7"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.1",
-    "@babel/core": "^7.10.2",
+    "@babel/cli": "^7.10.3",
+    "@babel/core": "^7.10.3",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.10.1",
-    "@babel/plugin-transform-runtime": "^7.10.1",
-    "@babel/preset-env": "^7.10.2",
-    "@babel/runtime-corejs3": "^7.10.2",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.3",
+    "@babel/plugin-transform-runtime": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
+    "@babel/runtime-corejs3": "^7.10.3",
     "assert": "^2.0.0",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.1.0",
     "cross-env": "^7.0.2",
-    "eslint": "^7.2.0",
+    "eslint": "^7.3.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-config-standard": "^14.1.1",
@@ -80,7 +80,7 @@
     "rimraf": "^3.0.2",
     "uglifyify": "^5.0.2",
     "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.12"
   },
   "mocha": {
     "timeout": 0
