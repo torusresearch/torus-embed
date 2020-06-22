@@ -265,11 +265,13 @@ interface TorusParams {
    * development uses https://localhost:3000 (expects torus-website to be run locally),
    *
    * staging uses https://staging.tor.us,
+   * 
+   * lrc uses https://lrc.tor.us,
    *
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
-  buildEnv?: 'production' | 'development' | 'staging' | 'testing'
+  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc'
   /**
    * Enables or disables logging.
    *
