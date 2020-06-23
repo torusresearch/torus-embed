@@ -25,7 +25,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-7SCWOAixjCi8zjlmjx0zrsO4PZQTl4U+KoqGGzzAVBLZ4GL4hEjWqGkrQdxhPhKM'
+const iframeIntegrity = 'sha384-z53ojRKmOUFvOGajYcRrvwbM9OGtylpWAYDTjRD9Q2ZwMH5hpA8TFDLv6eX5k6wb'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -124,8 +124,20 @@ class Torus {
     const handleSetup = async () => {
       await runOnLoad(attachIFrame)
       await runOnLoad(this._setupWeb3.bind(this))
+      const initStream = this.communicationMux.getStream('init_stream')
+      const initCompletePromise = new Promise((resolve, reject) => {
+        initStream.on('data', (chunk) => {
+          console.log(chunk)
+          const { name, data, error } = chunk
+          if (name === 'init_complete' && data.success) {
+            // resolve promise
+            resolve()
+          } else if (error) {
+            reject(new Error(error))
+          }
+        })
+      })
       await runOnLoad(async () => {
-        const initStream = this.communicationMux.getStream('init_stream')
         initStream.write({
           name: 'init_stream',
           data: {
@@ -137,6 +149,7 @@ class Torus {
           },
         })
         await this._setProvider(network)
+        await initCompletePromise
         this.isInitalized = true
       })
     }

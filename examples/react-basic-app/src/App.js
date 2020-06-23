@@ -290,6 +290,7 @@ class App extends React.Component {
               <option value="staging">Staging</option>
               <option value="testing">Testing</option>
               <option value="development">Development</option>
+              <option value="lrc">LRC</option>
             </select>
             <button>Login</button>
           </form>
