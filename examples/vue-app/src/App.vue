@@ -7,6 +7,7 @@
         <option selected value="staging">Staging</option>
         <option value="testing">Testing</option>
         <option value="development">Development</option>
+        <option selected value="lrc">LRC</option>
       </select>
       <button v-if="publicAddress === ''">Login</button>
     </form>

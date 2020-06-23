@@ -22,6 +22,10 @@ declare class Torus {
    */
   ethereum: Provider
   /**
+   * Returns the logged in verifier of the user
+   */
+  currentVerifier: string
+  /**
    * Gets the public address associated with a verifier & veriferId
    * @param verifierArgs Args of a verifer
    */
@@ -265,11 +269,13 @@ interface TorusParams {
    * development uses https://localhost:3000 (expects torus-website to be run locally),
    *
    * staging uses https://staging.tor.us,
+   * 
+   * lrc uses https://lrc.tor.us,
    *
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
-  buildEnv?: 'production' | 'development' | 'staging' | 'testing'
+  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc'
   /**
    * Enables or disables logging.
    *
