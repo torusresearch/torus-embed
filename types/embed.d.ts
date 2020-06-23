@@ -22,6 +22,10 @@ declare class Torus {
    */
   ethereum: Provider
   /**
+   * Returns the logged in verifier of the user
+   */
+  currentVerifier: string
+  /**
    * Gets the public address associated with a verifier & veriferId
    * @param verifierArgs Args of a verifer
    */
