@@ -124,7 +124,7 @@ const translations = {
 }
 
 export default {
-  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
+  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic', 'mumbai'],
   supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD],
   paymentProviders,
   enums,
