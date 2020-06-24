@@ -97,18 +97,21 @@ export default {
           //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9'
           // }
           loginConfig: {
-            'startrail-auth0-email-password': {
-              typeOfLogin: 'email_password',
-              description: 'login.buttonText',
-              clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
-              logoHover: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
-              logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
-              logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
-              showOnModal: true,
-              jwtParameters: {
-                domain: 'https://torusstartrail.au.auth0.com',
+            ...(this.buildEnv === 'lrc' && {
+              'startrail-auth0-email-password-qa': {
+                typeOfLogin: 'email_password',
+                description: 'login.buttonText',
+                clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
+                logoHover: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+                logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
+                logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
+                showOnModal: true,
+                jwtParameters: {
+                  domain: 'https://torusstartrail.au.auth0.com',
+                  ui_locales: 'ja',
+                },
               },
-            },
+            }),
           },
           whiteLabel: {
             theme: {
@@ -142,7 +145,7 @@ export default {
                   acceptTerms: "By logging in, you accept Examples'",
                   your: 'Your',
                   digitalWallet: 'digital wallet instantly',
-                  buttonText: 'Login with Startrail'
+                  buttonText: 'Login with Startrail',
                 },
                 dappTransfer: {
                   data: 'Data to sign',
@@ -158,7 +161,7 @@ export default {
                   acceptTerms: "ログインすると、Examples 'を受け入れます",
                   your: '君の',
                   digitalWallet: 'すぐにデジタルウォレット',
-                  buttonText: 'Startrailでログイン'
+                  buttonText: 'Startrailでログイン',
                 },
                 dappTransfer: {
                   data: 'あなたがサインするデータ',
