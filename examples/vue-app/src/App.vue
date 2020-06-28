@@ -44,6 +44,7 @@
 <script>
 import Torus from '@toruslabs/torus-embed'
 import Web3 from 'web3'
+
 const tokenAbi = require('human-standard-token-abi')
 
 export default {
@@ -121,8 +122,8 @@ export default {
                 torusGray2: '#FBF7F3',
               },
             },
-            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', //dark logo for light background
-            logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', //light logo for dark background
+            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', // dark logo for light background
+            logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', // light logo for dark background
             topupHide: true,
             featuredBillboardHide: true,
             tncLink: {
@@ -142,7 +143,7 @@ export default {
                   clickHere: 'click here',
                 },
                 login: {
-                  acceptTerms: "By logging in, you accept Examples'",
+                  acceptTerms: 'By logging in, you accept Examples',
                   your: 'Your',
                   digitalWallet: 'digital wallet instantly',
                   buttonText: 'Login with Startrail',
@@ -158,7 +159,7 @@ export default {
               },
               ja: {
                 login: {
-                  acceptTerms: "ログインすると、Examples 'を受け入れます",
+                  acceptTerms: 'ログインすると、Examples を受け入れます',
                   your: '君の',
                   digitalWallet: 'すぐにデジタルウォレット',
                   buttonText: 'Startrailでログイン',
@@ -179,12 +180,9 @@ export default {
         const web3 = new Web3(torus.provider)
         torus.provider.on('chainChanged', (resp) => console.log(resp, 'chainchanged'))
         window.web3 = web3
-        web3.eth.getAccounts().then((accounts) => {
-          this.publicAddress = accounts[0]
-          web3.eth.getBalance(accounts[0]).then(console.log)
-          // For testing typed messages
-          // this.requestFakeSignature()
-        })
+        const accounts = await web3.eth.getAccounts()
+        ;[this.publicAddress] = accounts
+        web3.eth.getBalance(accounts[0]).then(console.log).catch(console.error)
       } catch (error) {
         console.error(error)
       }
@@ -197,8 +195,8 @@ export default {
         .initiateTopup('moonpay', {
           selectedCurrency: 'USD',
         })
+        .then(console.log)
         .catch(console.error)
-        .finally(console.log)
     },
     sendEth() {
       window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
@@ -213,11 +211,11 @@ export default {
           params: [this.publicAddress, message],
           from: this.publicAddress,
         },
-        function (err, result) {
+        (err, result) => {
           if (err) {
             return console.error(err)
           }
-          self.console('sign message => true \n', result)
+          return self.console('sign message => true \n', result)
         }
       )
     },
@@ -241,11 +239,11 @@ export default {
           params: [typedData, this.publicAddress],
           from: this.publicAddress,
         },
-        function (err, result) {
+        (err, result) => {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v1 => true \n', result)
+          return self.console('sign typed message v1 => true \n', result)
         }
       )
     },
@@ -295,11 +293,11 @@ export default {
           params: [this.publicAddress, JSON.stringify(typedData)],
           from: this.publicAddress,
         },
-        function (err, result) {
+        (err, result) => {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v3 => true \n', result)
+          return self.console('sign typed message v3 => true \n', result)
         }
       )
     },
@@ -358,58 +356,70 @@ export default {
           params: [this.publicAddress, JSON.stringify(typedData)],
           from: this.publicAddress,
         },
-        function (err, result) {
+        (err, result) => {
           if (err) {
             return console.error(err)
           }
-          self.console('sign typed message v4 => true \n', result)
+          return self.console('sign typed message v4 => true \n', result)
         }
       )
     },
     logout() {
-      window.torus.logout().then(() => (this.publicAddress = ''))
+      window.torus
+        .logout()
+        .then(() => {
+          this.publicAddress = ''
+          return undefined
+        })
+        .catch(console.error)
     },
     changeProvider() {
       window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
     },
     sendDai() {
-      window.torus.setProvider({ host: 'mainnet' }).finally(() => {
-        const localWeb3 = window.web3
-        const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
-        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-        instance.methods.transfer(this.publicAddress, value).send(
-          {
-            from: this.publicAddress,
-          },
-          (err, hash) => {
-            if (err) this.console(err)
-            this.console(hash)
-          }
-        )
-      })
+      window.torus
+        .setProvider({ host: 'mainnet' })
+        .then(() => {
+          const localWeb3 = window.web3
+          const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
+          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+          return instance.methods.transfer(this.publicAddress, value).send(
+            {
+              from: this.publicAddress,
+            },
+            (err, hash) => {
+              if (err) this.console(err)
+              else this.console(hash)
+            }
+          )
+        })
+        .catch(console.error)
     },
     approveKnc() {
-      window.torus.setProvider({ host: 'mainnet' }).finally(() => {
-        const localWeb3 = window.web3
-        const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
-        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-        instance.methods.approve(this.publicAddress, value).send(
-          {
-            from: this.publicAddress,
-          },
-          (err, hash) => {
-            if (err) this.console(err)
-            this.console(hash)
-          }
-        )
-      })
+      window.torus
+        .setProvider({ host: 'mainnet' })
+        .then(() => {
+          const localWeb3 = window.web3
+          const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
+          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+          return instance.methods.approve(this.publicAddress, value).send(
+            {
+              from: this.publicAddress,
+            },
+            (err, hash) => {
+              if (err) this.console(err)
+              else this.console(hash)
+            }
+          )
+        })
+        .catch(console.error)
     },
     async getUserInfo() {
       window.torus.getUserInfo().then(this.console).catch(this.console)
     },
     getPublicAddress() {
       console.log(this.selectedVerifier, this.verifierId)
-      window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console)
+      window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console).catch(console.error)
     },
   },
 }
