@@ -134,7 +134,7 @@ export default {
             customTranslations: {
               en: {
                 embed: {
-                  confirm: 'Confirm',
+                  continue: 'Continue',
                   actionRequired: 'Action Required',
                   pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
                   cookiesRequired: 'Cookies Required',
