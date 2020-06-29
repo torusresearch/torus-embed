@@ -405,7 +405,9 @@ class Torus {
     })
     this.channelStream.setMaxListeners(100)
 
-    this.channelProvider = new TorusChannelProvider(this.channelStream)
+    const channelProvider = new TorusChannelProvider(this.channelStream)
+    
+    this.getChannelProvider = () => Promise.resolve(channelProvider)
 
     // Backward compatibility with Gotchi :)
     // window.metamaskStream = this.communicationStream
