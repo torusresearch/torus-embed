@@ -1,9 +1,9 @@
 import randomId from '@chaitanyapotti/random-id'
 import { serializeError } from 'eth-json-rpc-errors'
-import log from 'loglevel'
 
 import { name, version } from '../package.json'
 import config from './config'
+import log from './loglevel'
 
 const { paymentProviders } = config
 
@@ -27,7 +27,8 @@ export const validatePaymentProvider = (provider, params) => {
   if (selectedParams.fiatValue) {
     const requestedOrderAmount = +parseFloat(selectedParams.fiatValue) || 0
     if (requestedOrderAmount < selectedProvider.minOrderValue) errors.fiatValue = 'Requested amount is lower than supported'
-    if (requestedOrderAmount > selectedProvider.maxOrderValue) errors.fiatValue = 'Requested amount is higher than supported'
+    if (requestedOrderAmount > selectedProvider.maxOrderValue && selectedProvider.enforceMax)
+      errors.fiatValue = 'Requested amount is higher than supported'
   }
   if (selectedParams.selectedCurrency && !selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) {
     errors.selectedCurrency = 'Unsupported currency'
@@ -146,8 +147,8 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   let logLevel
   let versionUsed = integrity.version || version
   try {
-    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.check) {
-      const response = await get(`${config.api}/latestversion?name=${name}&version=${integrity.version || version}`)
+    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.version) {
+      const response = await get(`${config.api}/latestversion?name=${name}&version=${version}`)
       versionUsed = response.data
     }
   } catch (error) {
@@ -163,6 +164,10 @@ export const getTorusUrl = async (buildEnv, integrity) => {
       torusUrl = 'https://testing.tor.us'
       logLevel = 'debug'
       break
+    case 'lrc':
+      torusUrl = 'https://lrc.tor.us'
+      logLevel = 'debug'
+      break
     case 'development':
       torusUrl = 'https://localhost:3000'
       logLevel = 'debug'
@@ -173,4 +178,11 @@ export const getTorusUrl = async (buildEnv, integrity) => {
       break
   }
   return { torusUrl, logLevel }
+}
+
+export const getUserLanguage = () => {
+  let userLanguage = window.navigator.userLanguage || window.navigator.language || 'en-US'
+  userLanguage = userLanguage.split('-')
+  userLanguage = Object.prototype.hasOwnProperty.call(config.translations, userLanguage[0]) ? userLanguage[0] : 'en'
+  return userLanguage
 }

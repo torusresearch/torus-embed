@@ -10,13 +10,13 @@ const tokenAbi = require('human-standard-token-abi')
 export class AppComponent {
   address: string = ''
   balance: string = ''
-  buildEnvironment: 'production' | 'staging'| 'testing' | 'development' =  'production'
+  buildEnvironment: 'production' | 'staging'| 'testing' | 'development' | 'lrc' =  'production'
   console: string | object
   selectedVerifier: 'google' | 'reddit' | 'discord' = 'google'
   placeholder: string = 'Enter google email'
   selectedVerifierId: string
 
-  buildEnvironments = ['production', 'staging', 'testing', 'development']
+  buildEnvironments = ['production', 'staging', 'testing', 'development', 'lrc']
   selectedVerifiers = [
     { label: 'Google', value: 'google' },
     { label: 'Reddit', value: 'reddit' },

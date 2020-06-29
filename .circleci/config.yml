@@ -53,7 +53,10 @@ workflows:
   version: 2
   commit:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /^v.*/
       - publish-npm:
           requires:
             - build

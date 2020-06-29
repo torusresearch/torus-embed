@@ -1,5 +1,4 @@
-import log from 'loglevel'
-
+import log from './loglevel'
 import messages from './messages'
 
 const { errors } = messages
