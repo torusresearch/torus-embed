@@ -10,7 +10,11 @@ const { paymentProviders } = config
 export const validatePaymentProvider = (provider, params) => {
   const errors = {}
 
-  if (!paymentProviders[provider]) {
+  if (!provider) {
+    return { errors, isValid: true }
+  }
+
+  if (provider && !paymentProviders[provider]) {
     errors.provider = 'Invalid Provider'
     return { errors, isValid: Object.keys(errors).length === 0 }
   }
