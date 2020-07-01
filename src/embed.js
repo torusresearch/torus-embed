@@ -287,7 +287,7 @@ class Torus {
         `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
 
-    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.confirm}</button></div>`)
+    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.continue}</button></div>`)
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {

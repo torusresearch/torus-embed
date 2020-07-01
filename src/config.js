@@ -68,7 +68,7 @@ const paymentProviders = {
 const translations = {
   en: {
     embed: {
-      confirm: 'Confirm',
+      continue: 'Continue',
       actionRequired: 'Action Required',
       pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
       cookiesRequired: 'Cookies Required',
@@ -79,7 +79,7 @@ const translations = {
   },
   de: {
     embed: {
-      confirm: 'Bestätigen',
+      continue: 'Fortsetzen',
       actionRequired: 'Handlung erforderlich',
       pendingAction: 'Sie haben eine ausstehende Aktion, die in einem Popup-Fenster ausgeführt werden muss ',
       cookiesRequired: 'Cookies benötigt',
@@ -90,7 +90,7 @@ const translations = {
   },
   ja: {
     embed: {
-      confirm: '確認',
+      continue: '継続する',
       actionRequired: '必要なアクション',
       pendingAction: 'ポップアップウィンドウで完了する必要がある保留中のアクションがあります ',
       cookiesRequired: '必要なクッキー',
@@ -101,7 +101,7 @@ const translations = {
   },
   ko: {
     embed: {
-      confirm: '확인',
+      continue: '계속하다',
       actionRequired: '필요한 조치',
       pendingAction: '팝업 창에서 완료해야하는 보류중인 조치가 있습니다. ',
       cookiesRequired: '쿠키 필요',
@@ -112,7 +112,7 @@ const translations = {
   },
   zh: {
     embed: {
-      confirm: '确认',
+      continue: '继续',
       actionRequired: '需要采取的行动',
       pendingAction: '您有一个待处理的操作，需要在弹出窗口中完成 ',
       cookiesRequired: '必填Cookie',
