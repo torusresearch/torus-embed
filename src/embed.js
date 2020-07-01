@@ -82,7 +82,8 @@ class Torus {
     },
     whiteLabel = {},
   } = {}) {
-    if (this.isInitalized) return Promise.reject(new Error('Already initialized'))
+    if (!window.isSecureContext) throw new Error('Torus can only be used in secure contexts')
+    if (this.isInitalized) throw new Error('Already initialized')
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
