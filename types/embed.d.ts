@@ -534,6 +534,14 @@ interface JwtParameters extends BaseLoginOptions {
    */
   leeway?: number;
 
-  // The field in jwt token which maps to verifier id
+  /**
+   * The field in jwt token which maps to verifier id
+   */
   verifierIdField?: string;
+
+  /**
+   * Whether the verifier id field is case sensitive
+   * @default true
+   */
+  isVerifierIdCaseSensitive?: boolean;
 }

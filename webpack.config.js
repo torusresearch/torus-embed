@@ -3,10 +3,13 @@ const path = require('path')
 const pkgName = 'torus'
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1)
 
-const externals = ['@chaitanyapotti/random-id', '@toruslabs/fetch-node-details', '@toruslabs/torus.js', 'fast-deep-equal', 'loglevel', 'deepmerge']
+const externals = ['@chaitanyapotti/random-id', 'fast-deep-equal', 'loglevel', 'deepmerge']
+
+const { NODE_ENV = 'production' } = process.env
 
 const baseConfig = {
-  mode: 'production',
+  mode: NODE_ENV,
+  devtool: NODE_ENV === 'production' ? false : 'source-map',
   entry: './index.js',
   target: 'web',
   output: {
@@ -18,6 +21,7 @@ const baseConfig = {
     alias: {
       'bn.js': path.resolve(__dirname, 'node_modules/bn.js'),
       lodash: path.resolve(__dirname, 'node_modules/lodash'),
+      'js-sha3': path.resolve(__dirname, 'node_modules/js-sha3'),
     },
   },
   module: {
