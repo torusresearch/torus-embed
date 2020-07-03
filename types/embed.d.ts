@@ -125,7 +125,7 @@ interface LoginConfig {
 
 interface LoginConfigItem {
   /**
-   * Display Name
+   * Display Name. If not provided, we use the default for torus app
    */
   name?: string
   /**
