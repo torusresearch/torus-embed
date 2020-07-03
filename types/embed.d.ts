@@ -125,6 +125,10 @@ interface LoginConfig {
 
 interface LoginConfigItem {
   /**
+   * Display Name
+   */
+  name?: string
+  /**
    * The type of login. Refer to enum `LOGIN_TYPE`
    */
   typeOfLogin: LOGIN_TYPE
