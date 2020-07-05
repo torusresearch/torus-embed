@@ -82,7 +82,8 @@ class Torus {
     },
     whiteLabel = {},
   } = {}) {
-    if (this.isInitalized) return Promise.reject(new Error('Already initialized'))
+    if (!window.isSecureContext) throw new Error('Torus can only be used in secure contexts')
+    if (this.isInitalized) throw new Error('Already initialized')
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
     this.torusUrl = torusUrl
@@ -286,7 +287,7 @@ class Torus {
         `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
 
-    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.confirm}</button></div>`)
+    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.continue}</button></div>`)
     torusAlert.appendChild(successAlert)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
@@ -755,7 +756,7 @@ class Torus {
         const preopenInstanceId = getPreopenInstanceId()
         this._handleWindow(preopenInstanceId)
         topupStream.write({ name: 'topup_request', data: { provider, params, preopenInstanceId } })
-      } else reject(new Error('User has not initialized in yet'))
+      } else reject(new Error('Torus is not initialized yet'))
     })
   }
 

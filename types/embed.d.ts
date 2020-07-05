@@ -96,8 +96,8 @@ declare class Provider {
 }
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
-type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic'
-type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool'
+type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai'
+type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | ''
 
 type LOGIN_TYPE =
   | 'google'
@@ -124,6 +124,10 @@ interface LoginConfig {
 }
 
 interface LoginConfigItem {
+  /**
+   * Display Name. If not provided, we use the default for torus app
+   */
+  name?: string
   /**
    * The type of login. Refer to enum `LOGIN_TYPE`
    */
@@ -534,6 +538,14 @@ interface JwtParameters extends BaseLoginOptions {
    */
   leeway?: number;
 
-  // The field in jwt token which maps to verifier id
+  /**
+   * The field in jwt token which maps to verifier id
+   */
   verifierIdField?: string;
+
+  /**
+   * Whether the verifier id field is case sensitive
+   * @default true
+   */
+  isVerifierIdCaseSensitive?: boolean;
 }
