@@ -128,7 +128,6 @@ class Torus {
       const initStream = this.communicationMux.getStream('init_stream')
       const initCompletePromise = new Promise((resolve, reject) => {
         initStream.on('data', (chunk) => {
-          console.log(chunk)
           const { name, data, error } = chunk
           if (name === 'init_complete' && data.success) {
             // resolve promise
