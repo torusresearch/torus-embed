@@ -5,7 +5,6 @@ import deepmerge from 'deepmerge'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 
-import { version } from '../package.json'
 import configuration from './config'
 import { handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
@@ -78,7 +77,7 @@ class Torus {
     integrity = {
       check: false,
       hash: iframeIntegrity,
-      version,
+      version: '',
     },
     whiteLabel = {},
   } = {}) {

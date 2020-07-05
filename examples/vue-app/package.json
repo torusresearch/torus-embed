@@ -8,7 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@toruslabs/torus-embed": "file:../../toruslabs-torus-embed-1.5.4.tgz",
+    "@toruslabs/torus-embed": "file:../../toruslabs-torus-embed-1.6.0.tgz",
     "core-js": "^3.6.5",
     "eth-sig-util": "^2.5.3",
     "human-standard-token-abi": "^2.0.0",
