@@ -68,9 +68,9 @@ const paymentProviders = {
 const translations = {
   en: {
     embed: {
-      confirm: 'Confirm',
+      continue: 'Continue',
       actionRequired: 'Action Required',
-      pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
+      pendingAction: 'Click continue to proceed with your request ',
       cookiesRequired: 'Cookies Required',
       enableCookies: 'Please enable cookies in your browser preferences to access Torus.',
       forMoreInfo: 'For more info, ',
@@ -79,9 +79,9 @@ const translations = {
   },
   de: {
     embed: {
-      confirm: 'Bestätigen',
+      continue: 'Fortsetzen',
       actionRequired: 'Handlung erforderlich',
-      pendingAction: 'Sie haben eine ausstehende Aktion, die in einem Popup-Fenster ausgeführt werden muss ',
+      pendingAction: 'Klicken Sie auf Weiter, um mit Ihrer Anfrage fortzufahren ',
       cookiesRequired: 'Cookies benötigt',
       enableCookies: 'Bitte aktivieren Sie Cookies in Ihren Browsereinstellungen, um auf Torus zuzugreifen.',
       forMoreInfo: 'Für mehr Information, ',
@@ -90,9 +90,9 @@ const translations = {
   },
   ja: {
     embed: {
-      confirm: '確認',
+      continue: '継続する',
       actionRequired: '必要なアクション',
-      pendingAction: 'ポップアップウィンドウで完了する必要がある保留中のアクションがあります ',
+      pendingAction: '続行をクリックしてリクエストを続行します ',
       cookiesRequired: '必要なクッキー',
       enableCookies: 'Torusにアクセスするには、ブラウザの設定でCookieを有効にしてください。',
       forMoreInfo: '詳細については、',
@@ -101,9 +101,9 @@ const translations = {
   },
   ko: {
     embed: {
-      confirm: '확인',
+      continue: '계속하다',
       actionRequired: '필요한 조치',
-      pendingAction: '팝업 창에서 완료해야하는 보류중인 조치가 있습니다. ',
+      pendingAction: '요청을 계속 진행하려면 계속을 클릭하십시오. ',
       cookiesRequired: '쿠키 필요',
       enableCookies: '브라우저 환경 설정에서 쿠키를 활성화하여 Torus에 액세스하십시오.',
       forMoreInfo: '더 많은 정보를 위해서, ',
@@ -112,9 +112,9 @@ const translations = {
   },
   zh: {
     embed: {
-      confirm: '确认',
+      continue: '继续',
       actionRequired: '需要采取的行动',
-      pendingAction: '您有一个待处理的操作，需要在弹出窗口中完成 ',
+      pendingAction: '点击继续以继续您的请求 ',
       cookiesRequired: '必填Cookie',
       enableCookies: '请在您的浏览器首选项中启用cookie以访问Torus。',
       forMoreInfo: '有关更多信息，',
@@ -124,7 +124,7 @@ const translations = {
 }
 
 export default {
-  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic'],
+  networkList: ['mainnet', 'rinkeby', 'ropsten', 'kovan', 'goerli', 'localhost', 'matic', 'mumbai'],
   supportedVerifierList: [enums.GOOGLE, enums.REDDIT, enums.DISCORD],
   paymentProviders,
   enums,
