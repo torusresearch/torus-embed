@@ -86,7 +86,7 @@ export default {
           enabledVerifiers: {
             reddit: false,
           },
-          enableLogging: false,
+          enableLogging: true,
           network: {
             host: 'rinkeby', // mandatory
             chainId: 4,
