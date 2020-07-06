@@ -125,6 +125,10 @@ interface LoginConfig {
 
 interface LoginConfigItem {
   /**
+   * Display Name. If not provided, we use the default for torus app
+   */
+  name?: string
+  /**
    * The type of login. Refer to enum `LOGIN_TYPE`
    */
   typeOfLogin: LOGIN_TYPE
@@ -319,7 +323,7 @@ interface WhiteLabelParams {
    *
    * order of preference: Whitelabel language > user language (in torus-website) > browser language
    */
-  defaultLanguage: string
+  defaultLanguage?: string
   /**
    * Logo Url to be used in light mode (dark logo)
    */
@@ -333,21 +337,58 @@ interface WhiteLabelParams {
    * Defaults to false
    * @default false
    */
-  topupHide: boolean
+  topupHide?: boolean
   /**
    * Shows/hides billboard in torus-website.
    * Defaults to false
    * @default false
    */
-  featuredBillboardHide: boolean
+  featuredBillboardHide?: boolean
+  /**
+   * Shows/hides disclaimers on login page. Only works if special logins are hidden
+   * Defaults to false
+   * @default false
+   */
+  disclaimerHide?: boolean
   /**
    * Language specific link for terms and conditions on torus-website. See (examples/vue-app) to configure
    */
-  tncLink: any
+  tncLink?: LocaleLinks<string>
+  /**
+   * Language specific link for privacy policy on torus-website. See (examples/vue-app) to configure
+   */
+  privacyPolicy?: LocaleLinks<string>
+  /**
+   * Language specific link for privacy policy on torus-website. See (examples/vue-app) to configure
+   */
+  contactLink?: LocaleLinks<string>
   /**
    * Custom translations. See (examples/vue-app) to configure
    */
-  customTranslations: any
+  customTranslations?: LocaleLinks<any>
+}
+
+interface LocaleLinks<T> {
+  /**
+   * Item corresponding to english
+   */
+  en?: T;
+  /**
+   * Item corresponding to japanese
+   */
+  ja?: T;
+  /**
+   * Item corresponding to korean
+   */
+  ko?: T;
+  /**
+   * Item corresponding to german
+   */
+  de?: T;
+  /**
+   * Item corresponding to chinese (simplified)
+   */
+  zh?: T;
 }
 
 interface ThemeParams {
@@ -534,6 +575,14 @@ interface JwtParameters extends BaseLoginOptions {
    */
   leeway?: number;
 
-  // The field in jwt token which maps to verifier id
+  /**
+   * The field in jwt token which maps to verifier id
+   */
   verifierIdField?: string;
+
+  /**
+   * Whether the verifier id field is case sensitive
+   * @default true
+   */
+  isVerifierIdCaseSensitive?: boolean;
 }

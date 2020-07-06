@@ -5,7 +5,6 @@ import deepmerge from 'deepmerge'
 import LocalMessageDuplexStream from 'post-message-stream'
 import Web3 from 'web3'
 
-import { version } from '../package.json'
 import configuration from './config'
 import { handleStream, htmlToElement, runOnLoad, transformEthAddress } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
@@ -25,7 +24,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-l05bLryIxmhdnoc0wB7esCvtects3uSo00DuQPoSBY6SYbNi+14FYkYuNi3y52xa'
+const iframeIntegrity = 'sha384-mCaw+aG05Yu9VyUKM7HU92t1vK8KZlWH008ypA/qQn39ECH+3h4hg+yBuOBMYa+j'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -78,7 +77,7 @@ class Torus {
     integrity = {
       check: false,
       hash: iframeIntegrity,
-      version,
+      version: '',
     },
     whiteLabel = {},
   } = {}) {
@@ -128,7 +127,6 @@ class Torus {
       const initStream = this.communicationMux.getStream('init_stream')
       const initCompletePromise = new Promise((resolve, reject) => {
         initStream.on('data', (chunk) => {
-          console.log(chunk)
           const { name, data, error } = chunk
           if (name === 'init_complete' && data.success) {
             // resolve promise
