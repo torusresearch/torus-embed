@@ -130,6 +130,15 @@ export default {
               en: 'http://example.com/tnc/en',
               ja: 'http://example.com/tnc/ja',
             },
+            privacyPolicy: {
+              en: 'http://example.com/tnc/en',
+              ja: 'http://example.com/tnc/ja',
+            },
+            contactLink: {
+              en: 'http://example.com/tnc/en',
+              ja: 'http://example.com/tnc/ja',
+            },
+            disclaimerHide: true,
             defaultLanguage: 'en',
             // customTranslations: {
             //   en: {
