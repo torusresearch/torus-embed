@@ -29,6 +29,7 @@ const iframeIntegrity = 'sha384-mCaw+aG05Yu9VyUKM7HU92t1vK8KZlWH008ypA/qQn39ECH+
 const expectedCacheControlHeader = 'max-age=3600'
 
 let thirdPartyCookiesSupported = true
+
 const receiveMessage = (evt) => {
   if (evt.data === 'torus:3PCunsupported') {
     log.info('unsupported 3rd party cookies')
