@@ -29,6 +29,7 @@ const iframeIntegrity = 'sha384-gN7UqXgjCMWpUYinRFvGfFCHkwD1u2ij28/B7xL9mi+QDD0B
 const expectedCacheControlHeader = 'max-age=3600'
 
 let thirdPartyCookiesSupported = true
+
 const receiveMessage = (evt) => {
   if (evt.data === 'torus:3PCunsupported') {
     log.info('unsupported 3rd party cookies')
@@ -81,7 +82,6 @@ class Torus {
     },
     whiteLabel = {},
   } = {}) {
-    if (!window.isSecureContext) throw new Error('Torus can only be used in secure contexts')
     if (this.isInitalized) throw new Error('Already initialized')
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
