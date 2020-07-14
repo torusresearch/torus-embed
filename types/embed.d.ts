@@ -220,7 +220,6 @@ interface VerifierArgs {
 
 interface LoginParams {
   verifier?: string
-  name?: string
 }
 
 interface TorusCtorArgs {
