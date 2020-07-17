@@ -76,8 +76,10 @@ export default {
       }
     },
     async login() {
+      window.L = Torus
       try {
         const torus = new Torus({
+          apiKey: 'torusf8d02a6c9b7d4aacbc2ec8a062b44a70',
           buttonPosition: 'bottom-left',
         })
         window.torus = torus
