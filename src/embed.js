@@ -61,9 +61,8 @@ class Torus {
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
     this.torusJs = new TorusJs({
-      enableLogging: true,
-      metadataHost: 'https://tyk.gateway.tor.us/torus-metadata',
-      allowHost: 'https://tyk.gateway.tor.us/torus-allow/',
+      metadataHost: 'https://metadata.tor.us',
+      allowHost: 'https://signer.tor.us/api/allow',
     })
     this.apiKey = apiKey
     TorusJs.setAPIKey(apiKey)
