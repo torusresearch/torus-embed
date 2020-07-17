@@ -25,7 +25,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-gN7UqXgjCMWpUYinRFvGfFCHkwD1u2ij28/B7xL9mi+QDD0BRznmKwmGtx+8NBXU'
+const iframeIntegrity = 'sha384-KwydHdFFlWleof6ciEPmB+JT2BqoOnifsfqXkKthE4vofwQ9An7zt61En/H0cCZJ'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -90,7 +90,6 @@ class Torus {
     },
     whiteLabel = {},
   } = {}) {
-    if (!window.isSecureContext) throw new Error('Torus can only be used in secure contexts')
     if (this.isInitalized) throw new Error('Already initialized')
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
     log.info(torusUrl, 'url loaded')
