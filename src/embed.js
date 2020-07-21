@@ -44,7 +44,7 @@ const receiveMessage = (evt) => {
 window.addEventListener('message', receiveMessage, false)
 
 class Torus {
-  constructor({ buttonPosition = 'bottom-left' } = {}) {
+  constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999 } = {}) {
     this.buttonPosition = buttonPosition
     this.torusUrl = ''
     this.torusIframe = {}
@@ -61,6 +61,7 @@ class Torus {
     this.nodeDetailManager = new NodeDetailManager()
     this.torusJs = new TorusJs()
     this.whiteLabel = {}
+    this.modalZIndex = modalZIndex
   }
 
   async init({
@@ -99,7 +100,8 @@ class Torus {
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
-        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;"
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%; 
+        height: 100%; border: none; border-radius: 0; z-index: ${this.modalZIndex}"
       ></iframe>`
     )
 
