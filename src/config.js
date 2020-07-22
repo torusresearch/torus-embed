@@ -24,7 +24,7 @@ const paymentProviders = {
     validCurrencies: ['GBP', 'EUR'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
     includeFees: true,
-    enforceMax: true,
+    enforceMax: false,
   },
   [paymentEnums.MOONPAY]: {
     line1: 'Credit / Debit Card / Apple Pay',
@@ -32,11 +32,11 @@ const paymentProviders = {
     line3: '2,000€/day, 10,000€/mo',
     supportPage: 'https://help.moonpay.io/en/',
     minOrderValue: 24.99,
-    maxOrderValue: 2000,
+    maxOrderValue: 50000,
     validCurrencies: ['USD', 'EUR', 'GBP'],
     validCryptoCurrencies: ['ETH', 'DAI', 'TUSD', 'USDC', 'USDT'],
     includeFees: true,
-    enforceMax: true,
+    enforceMax: false,
   },
   [paymentEnums.WYRE]: {
     line1: 'Apple Pay/Debit Card',
@@ -48,7 +48,7 @@ const paymentProviders = {
     validCurrencies: ['USD'],
     validCryptoCurrencies: ['ETH', 'DAI', 'USDC'],
     includeFees: false,
-    enforceMax: true,
+    enforceMax: false,
   },
   [paymentEnums.XANPOOL]: {
     line1: 'PayNow/ InstaPay/ FPS/ GoJekPay/ UPI/ PromptPay/ VietelPay/ DuitNow',
