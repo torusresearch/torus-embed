@@ -45,7 +45,7 @@ const receiveMessage = (evt) => {
 window.addEventListener('message', receiveMessage, false)
 
 class Torus {
-  constructor({ buttonPosition = 'bottom-left', apiKey = 'torus-default' } = {}) {
+  constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999, apiKey = 'torus-default' } = {}) {
     this.buttonPosition = buttonPosition
     this.torusUrl = ''
     this.torusIframe = {}
@@ -68,6 +68,7 @@ class Torus {
     TorusJs.setAPIKey(apiKey)
     setAPIKey(apiKey)
     this.whiteLabel = {}
+    this.modalZIndex = modalZIndex
   }
 
   async init({
@@ -106,7 +107,8 @@ class Torus {
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
-        style="display: none; position: fixed; top: 0; right: 0; width: 100%; height: 100%; border: none; border-radius: 0;"
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%; 
+        height: 100%; border: none; border-radius: 0; z-index: ${this.modalZIndex}"
       ></iframe>`
     )
 
@@ -424,7 +426,6 @@ class Torus {
     detectAccountRequestPrototypeModifier('send')
     detectAccountRequestPrototypeModifier('sendAsync')
 
-    inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
       this._displayIframe(true)
@@ -479,7 +480,7 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     const communicationMux = setupMultiplex(this.communicationStream)
-    communicationMux.setMaxListeners(50)
+    communicationMux.setMaxListeners(100)
     this.communicationMux = communicationMux
 
     const windowStream = communicationMux.getStream('window')
@@ -524,9 +525,7 @@ class Torus {
     this.web3.setProvider = () => {
       log.debug('Torus - overrode web3.setProvider')
     }
-    // pretend to be Metamask for dapp compatibility reasons
-    this.web3.currentProvider.isTorus = true
-    sendSiteMetadata(this.provider._rpcEngine)
+    if (this.provider.shouldSendMetadata) sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }
