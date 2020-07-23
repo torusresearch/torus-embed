@@ -220,15 +220,20 @@ interface VerifierArgs {
 
 interface LoginParams {
   verifier?: string
-  name?: string
 }
 
 interface TorusCtorArgs {
   /**
    * Determines where the torus widget is visible on the page.
-   * Defaults to `bottom-left`
+   * @default bottom-left
    */
   buttonPosition?: 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left'
+
+  /**
+   * Z-index of the modal and iframe
+   * @default 99999
+   */
+  modalZIndex: number
 }
 
 interface UserInfo {
