@@ -78,6 +78,7 @@ export default {
     async login() {
       try {
         const torus = new Torus({
+          apiKey: 'torus-default',
           buttonPosition: 'bottom-left',
         })
         window.torus = torus

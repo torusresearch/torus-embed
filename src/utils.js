@@ -1,4 +1,5 @@
 import randomId from '@chaitanyapotti/random-id'
+import { get } from '@toruslabs/http-helpers'
 import { ethErrors, serializeError } from 'eth-json-rpc-errors'
 
 import { name, version } from '../package.json'
@@ -99,31 +100,13 @@ export const getPreopenInstanceId = () => {
   return randomId()
 }
 
-export const get = (url = '', options_ = {}) => {
-  const defaultOptions = {
-    mode: 'cors',
-    cache: 'no-cache',
-  }
-  const options = {
-    ...defaultOptions,
-    ...options_,
-    ...{ method: 'GET' },
-  }
-  return fetch(url, options).then((response) => {
-    if (response.ok) {
-      return response.json()
-    }
-    throw response
-  })
-}
-
 export const getTorusUrl = async (buildEnv, integrity) => {
   let torusUrl
   let logLevel
   let versionUsed = integrity.version || version
   try {
     if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.version) {
-      const response = await get(`${config.api}/latestversion?name=${name}&version=${version}`)
+      const response = await get(`${config.api}/latestversion?name=${name}&version=${version}`, {}, { useAPIKey: true })
       versionUsed = response.data
     }
   } catch (error) {

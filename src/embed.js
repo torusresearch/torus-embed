@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import NodeDetailManager from '@toruslabs/fetch-node-details'
+import { setAPIKey } from '@toruslabs/http-helpers'
 import TorusJs from '@toruslabs/torus.js'
 import deepmerge from 'deepmerge'
 import LocalMessageDuplexStream from 'post-message-stream'
@@ -44,7 +45,7 @@ const receiveMessage = (evt) => {
 window.addEventListener('message', receiveMessage, false)
 
 class Torus {
-  constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999 } = {}) {
+  constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999, apiKey = 'torus-default' } = {}) {
     this.buttonPosition = buttonPosition
     this.torusUrl = ''
     this.torusIframe = {}
@@ -59,7 +60,13 @@ class Torus {
     this.Web3 = Web3
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
-    this.torusJs = new TorusJs()
+    this.torusJs = new TorusJs({
+      metadataHost: 'https://metadata.tor.us',
+      allowHost: 'https://signer.tor.us/api/allow',
+    })
+    this.apiKey = apiKey
+    TorusJs.setAPIKey(apiKey)
+    setAPIKey(apiKey)
     this.whiteLabel = {}
     this.modalZIndex = modalZIndex
   }
@@ -147,6 +154,7 @@ class Torus {
             whiteLabel: this.whiteLabel,
             buttonPosition: this.buttonPosition,
             torusWidgetVisibility: this.torusWidgetVisibility,
+            apiKey: this.apiKey,
           },
         })
         await this._setProvider(network)
