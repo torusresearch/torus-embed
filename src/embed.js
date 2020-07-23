@@ -146,7 +146,6 @@ class Torus {
         })
       })
       await runOnLoad(async () => {
-        log.info('passing init_stream apikey', this.apiKey)
         initStream.write({
           name: 'init_stream',
           data: {
