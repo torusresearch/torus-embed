@@ -417,7 +417,6 @@ class Torus {
     detectAccountRequestPrototypeModifier('send')
     detectAccountRequestPrototypeModifier('sendAsync')
 
-    inpageProvider.setMaxListeners(100)
     inpageProvider.enable = () => {
       this._checkThirdPartyCookies()
       this._displayIframe(true)
@@ -472,7 +471,7 @@ class Torus {
 
     this.ethereum = proxiedInpageProvider
     const communicationMux = setupMultiplex(this.communicationStream)
-    communicationMux.setMaxListeners(50)
+    communicationMux.setMaxListeners(100)
     this.communicationMux = communicationMux
 
     const windowStream = communicationMux.getStream('window')
@@ -517,9 +516,7 @@ class Torus {
     this.web3.setProvider = () => {
       log.debug('Torus - overrode web3.setProvider')
     }
-    // pretend to be Metamask for dapp compatibility reasons
-    this.web3.currentProvider.isTorus = true
-    sendSiteMetadata(this.provider._rpcEngine)
+    if (this.provider.shouldSendMetadata) sendSiteMetadata(this.provider._rpcEngine)
     // window.web3 = window.torus.web3
     log.debug('Torus - injected web3')
   }

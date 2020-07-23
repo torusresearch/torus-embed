@@ -208,7 +208,10 @@ export default {
         .catch(console.error)
     },
     sendEth() {
-      window.web3.eth.sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
+      window.web3.eth
+        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
+        .then((resp) => this.console(resp))
+        .catch(console.error)
     },
     signMessage() {
       const self = this

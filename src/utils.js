@@ -1,5 +1,5 @@
 import randomId from '@chaitanyapotti/random-id'
-import { serializeError } from 'eth-json-rpc-errors'
+import { ethErrors, serializeError } from 'eth-json-rpc-errors'
 
 import { name, version } from '../package.json'
 import config from './config'
@@ -56,7 +56,15 @@ export const validatePaymentProvider = (provider, params) => {
  * @returns {Function} json-rpc-engine middleware function
  */
 export const createErrorMiddleware = () => {
-  return (_req, res, next) => {
+  return (req, res, next) => {
+    // json-rpc-engine will terminate the request when it notices this error
+    if (!req.method || typeof req.method !== 'string') {
+      res.error = ethErrors.rpc.invalidRequest({
+        message: 'The request `method` must be a non-empty string.',
+        data: req,
+      })
+    }
+
     next((done) => {
       const { error } = res
       if (!error) {
@@ -77,7 +85,7 @@ export const createErrorMiddleware = () => {
  * @param {Error} err - The associated error to log.
  */
 export function logStreamDisconnectWarning(remoteLabel, err) {
-  let warningMsg = `MetamaskInpageProvider - lost connection to ${remoteLabel}`
+  let warningMsg = `TorusInpageProvider - lost connection to ${remoteLabel}`
   if (err) warningMsg += `\n${err.stack}`
   log.warn(warningMsg)
   if (this.emit && this.listenerCount) {
@@ -85,43 +93,6 @@ export function logStreamDisconnectWarning(remoteLabel, err) {
       this.emit('error', warningMsg)
     }
   }
-}
-
-/**
- * Adds hidden "then" and "catch" properties to the given object. When returned
- * from a function, the given object will appear unchanged. If, however, the
- * caller expects a Promise, it will behave like a Promise that resolves to
- * the value of the indicated property.
- *
- * @param {Object} obj - The object to make thenable.
- * @param {string} prop - The property whose value the object's then function resolves to.
- * @returns {Object} - The secretly thenable object.
- */
-export const makeThenable = (obj, prop) => {
-  // don't do anything to Promises
-  if (obj instanceof Promise) return obj
-
-  const defineOpts = {
-    configurable: true,
-    writable: true,
-    enumerable: false,
-  }
-
-  // strange wrapping of Promise functions to fully emulate .then behavior,
-  // specifically Promise chaining
-  // there may be a simpler way of doing it, but this works
-  const thenFunction = (consumerResolve, consumerCatch) => {
-    return Promise.resolve().then(() => consumerResolve(obj[prop]), consumerCatch)
-  }
-
-  Object.defineProperty(obj, 'then', { ...defineOpts, value: thenFunction })
-
-  // the Promise will never fail in our usage, so just make a no-op "catch"
-  Object.defineProperty(obj, 'catch', { ...defineOpts, value: Promise.prototype.catch })
-
-  Object.defineProperty(obj, 'finally', { ...defineOpts, value: Promise.prototype.finally })
-
-  return obj
 }
 
 export const getPreopenInstanceId = () => {
@@ -190,3 +161,9 @@ export const getUserLanguage = () => {
   userLanguage = Object.prototype.hasOwnProperty.call(config.translations, userLanguage[0]) ? userLanguage[0] : 'en'
   return userLanguage
 }
+
+export const EMITTED_NOTIFICATIONS = [
+  'eth_subscription', // per eth-json-rpc-filters/subscriptionManager
+]
+
+export const NOOP = () => {}
