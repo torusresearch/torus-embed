@@ -233,7 +233,13 @@ interface TorusCtorArgs {
    * Z-index of the modal and iframe
    * @default 99999
    */
-  modalZIndex: number
+  modalZIndex?: number
+
+  /**
+   * Api key
+   * Get yours today at {@link https://dashboard.tor.us | Dashboard}
+   */
+  apiKey?: string
 }
 
 interface UserInfo {
