@@ -213,6 +213,18 @@ export default {
         .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
         .then((resp) => this.console(resp))
         .catch(console.error)
+      // window.web3.eth
+      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.02') })
+      //   .then((resp) => this.console(resp))
+      //   .catch(console.error)
+      // window.web3.eth
+      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.03') })
+      //   .then((resp) => this.console(resp))
+      //   .catch(console.error)
+      // window.web3.eth
+      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.04') })
+      //   .then((resp) => this.console(resp))
+      //   .catch(console.error)
     },
     signMessage() {
       const self = this

@@ -26,17 +26,6 @@ export const htmlToElement = (html) => {
   return template.content.firstChild
 }
 
-export const transformEthAddress = (ethAddress) => {
-  // return ethAddress
-  if (Array.isArray(ethAddress)) {
-    return ethAddress.map((addr) => (typeof addr === 'string' ? addr.toLowerCase() : addr))
-  }
-  if (typeof ethAddress === 'string') {
-    return ethAddress.toLowerCase()
-  }
-  throw new Error('Unexpected Ethereum address format')
-}
-
 export const handleEvent = (handle, eventName, handler, handlerArgs) => {
   const handlerWrapper = () => {
     handler(...handlerArgs)
