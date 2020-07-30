@@ -69,6 +69,7 @@ class Torus {
     setAPIKey(apiKey)
     this.whiteLabel = {}
     this.modalZIndex = modalZIndex
+    this.alertZIndex = modalZIndex + 1000
   }
 
   async init({
@@ -294,6 +295,10 @@ class Torus {
         `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
         `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
+
+    torusAlert.style.setProperty('z-index', this.alertZIndex)
+    // Expect that we don't open more than 1000 alert modals in a session
+    this.alertZIndex -= 1
 
     const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.continue}</button></div>`)
     torusAlert.appendChild(successAlert)
