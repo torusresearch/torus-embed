@@ -194,14 +194,41 @@ class Torus {
   /** @ignore */
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
-      this._createAlert(
-        '<div id="torusAlert" class="torus-alert">' +
-          `<h1>${this.embedTranslations.cookiesRequired}</h1>` +
-          `<p>${this.embedTranslations.enableCookies}</p>` +
-          `<p>${this.embedTranslations.forMoreInfo}<a href="https://docs.tor.us/faq/users#cookies" target="_blank"` +
-          `rel="noreferrer noopener">${this.embedTranslations.clickHere}</a></p>` +
+      const logoUrl = this._getLogoUrl()
+      const torusAlert = htmlToElement(
+        '<div id="torusAlert" class="torus-alert torus-alert--v2 torus-alert--solo">' +
+          `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
+          `<h1 id="torusAlert__title">${this.embedTranslations.cookiesRequired}</h1>` +
+          `<p id="torusAlert__desc">${this.embedTranslations.enableCookies}</p>` +
           '</div>'
       )
+      const moreInfo = htmlToElement(
+        '<div id="torusAlert__btn-container" class="torusAlert__btn-container--solo">' +
+          '<div><a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
+          `<button id="torusAlert__btn" class="torusAlert__btn--solo">${this.embedTranslations.clickHere}</button>` +
+          '</a></div>' +
+          '</div>'
+      )
+
+      const closeAlert = htmlToElement(`<span id="torusAlert__close"><img src="${this.torusUrl}/images/close.svg" /><span>`)
+      torusAlert.appendChild(closeAlert)
+
+      const bindOnLoad = () => {
+        closeAlert.addEventListener('click', () => {
+          torusAlert.remove()
+        })
+      }
+
+      torusAlert.appendChild(moreInfo)
+
+      this._setEmbedWhiteLabel(torusAlert)
+
+      const attachOnLoad = () => {
+        window.document.body.appendChild(torusAlert)
+      }
+
+      runOnLoad(attachOnLoad)
+      runOnLoad(bindOnLoad)
       throw new Error('Third party cookies not supported')
     }
   }
@@ -266,32 +293,11 @@ class Torus {
   }
 
   /** @ignore */
-  _createAlert(alertContent) {
-    this.torusAlert = htmlToElement(alertContent)
-
-    const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
-    this.torusAlert.appendChild(closeAlert)
-
-    const bindOnLoad = () => {
-      closeAlert.addEventListener('click', () => {
-        this.torusAlert.remove()
-      })
-    }
-
-    this._setEmbedWhiteLabel(this.torusAlert)
-
-    const attachOnLoad = () => {
-      window.document.body.appendChild(this.torusAlert)
-    }
-
-    runOnLoad(attachOnLoad)
-    runOnLoad(bindOnLoad)
-  }
-
-  /** @ignore */
   _createPopupBlockAlert(preopenInstanceId) {
+    const logoUrl = this._getLogoUrl()
     const torusAlert = htmlToElement(
-      '<div id="torusAlert">' +
+      '<div id="torusAlert" class="torus-alert--v2">' +
+        `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
         `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
         `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
@@ -300,14 +306,23 @@ class Torus {
     // Expect that we don't open more than 1000 alert modals in a session
     this.alertZIndex -= 1
 
-    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.continue}</button></div>`)
-    torusAlert.appendChild(successAlert)
+    const cancelAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.cancel}</button></div>`)
+    const successAlert = htmlToElement(
+      `<div><button id="torusAlert__btn" class="torusAlert__btn--allow">${this.embedTranslations.continue}</button></div>`
+    )
+    const btnContainer = htmlToElement('<div id="torusAlert__btn-container"></div>')
+    btnContainer.appendChild(cancelAlert)
+    btnContainer.appendChild(successAlert)
+    torusAlert.appendChild(btnContainer)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
           target: '_blank',
           features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
         })
+        torusAlert.remove()
+      })
+      cancelAlert.addEventListener('click', () => {
         torusAlert.remove()
       })
     }
@@ -781,6 +796,18 @@ class Torus {
       if (colors.torusBrand1) element.style.setProperty('--torus-brand-1', colors.torusBrand1)
       if (colors.torusGray2) element.style.setProperty('--torus-gray-2', colors.torusGray2)
     }
+  }
+
+  /** @ignore */
+  _getLogoUrl() {
+    let logoUrl = `${this.torusUrl}/images/torus_icon-blue.svg`
+    if (this.whiteLabel.theme && this.whiteLabel.theme.isDark) {
+      logoUrl = this.whiteLabel.logoLight ? this.whiteLabel.logoLight : logoUrl
+    } else {
+      logoUrl = this.whiteLabel.logoDark ? this.whiteLabel.logoDark : logoUrl
+    }
+
+    return logoUrl
   }
 }
 
