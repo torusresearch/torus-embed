@@ -196,16 +196,16 @@ class Torus {
     if (!thirdPartyCookiesSupported) {
       const logoUrl = this._getLogoUrl()
       const torusAlert = htmlToElement(
-        '<div id="torusAlert" class="torus-alert torus-alert--v2 torus-alert--solo">' +
+        '<div id="torusAlert" class="torus-alert torus-alert--v2">' +
           `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
           `<h1 id="torusAlert__title">${this.embedTranslations.cookiesRequired}</h1>` +
           `<p id="torusAlert__desc">${this.embedTranslations.enableCookies}</p>` +
           '</div>'
       )
       const moreInfo = htmlToElement(
-        '<div id="torusAlert__btn-container" class="torusAlert__btn-container--solo">' +
+        '<div id="torusAlert__btn-container">' +
           '<div><a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
-          `<button id="torusAlert__btn" class="torusAlert__btn--solo">${this.embedTranslations.clickHere}</button>` +
+          `<button id="torusAlert__btn">${this.embedTranslations.clickHere}</button>` +
           '</a></div>' +
           '</div>'
       )
@@ -306,12 +306,10 @@ class Torus {
     // Expect that we don't open more than 1000 alert modals in a session
     this.alertZIndex -= 1
 
-    const cancelAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.cancel}</button></div>`)
     const successAlert = htmlToElement(
       `<div><button id="torusAlert__btn" class="torusAlert__btn--allow">${this.embedTranslations.continue}</button></div>`
     )
     const btnContainer = htmlToElement('<div id="torusAlert__btn-container"></div>')
-    btnContainer.appendChild(cancelAlert)
     btnContainer.appendChild(successAlert)
     torusAlert.appendChild(btnContainer)
     const bindOnLoad = () => {
@@ -320,9 +318,6 @@ class Torus {
           target: '_blank',
           features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
         })
-        torusAlert.remove()
-      })
-      cancelAlert.addEventListener('click', () => {
         torusAlert.remove()
       })
     }
