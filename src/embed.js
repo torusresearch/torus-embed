@@ -626,6 +626,37 @@ class Torus {
     })
   }
 
+  signSolanaMessage(...rest) {
+    return new Promise((resolve, reject) => {
+      const preopenInstanceId = getPreopenInstanceId()
+      const solanaStream = this.communicationMux.getStream('solana')
+      const handler = (chunk) => {
+        const { err, success, id } = chunk.data
+        log.info(chunk)
+        if (id === preopenInstanceId) {
+          if (err) {
+            reject(err)
+          } else if (success) {
+            resolve()
+          } else reject(new Error('some error occured'))
+        }
+      }
+      handleStream(solanaStream, 'data', handler)
+
+      this._handleWindow(preopenInstanceId, {
+        target: '_blank',
+        features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+      })
+      solanaStream.write({
+        name: 'sign_message',
+        data: {
+          preopenInstanceId,
+          ...rest,
+        },
+      })
+    })
+  }
+
   showWallet(path, params = {}) {
     const showWalletStream = this.communicationMux.getStream('show_wallet')
     const finalPath = path ? `/${path}` : ''
