@@ -631,13 +631,13 @@ class Torus {
       const preopenInstanceId = getPreopenInstanceId()
       const solanaStream = this.communicationMux.getStream('solana')
       const handler = (chunk) => {
-        const { err, success, id } = chunk.data
+        const { err, success, id, payload } = chunk.data
         log.info(chunk)
         if (id === preopenInstanceId) {
           if (err) {
             reject(err)
           } else if (success) {
-            resolve()
+            resolve(payload)
           } else reject(new Error('some error occured'))
         }
       }
