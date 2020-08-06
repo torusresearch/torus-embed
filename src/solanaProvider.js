@@ -6,6 +6,7 @@ import { duplex as isDuplex } from 'is-stream'
 import RpcEngine from 'json-rpc-engine'
 import createIdRemapMiddleware from 'json-rpc-engine/src/idRemapMiddleware'
 import createJsonRpcStream from 'json-rpc-middleware-stream'
+import ObjectMultiplex from 'obj-multiplex'
 import ObservableStore from 'obs-store'
 import asStream from 'obs-store/lib/asStream'
 import pump from 'pump'
@@ -13,7 +14,6 @@ import SafeEventEmitter from 'safe-event-emitter'
 
 import log from './loglevel'
 import messages from './messages'
-import { setupMultiplex } from './stream-utils'
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from './utils'
 
 // resolve response.result, reject errors
@@ -71,7 +71,9 @@ class SolanaProvider extends SafeEventEmitter {
     this.selectedAddress = null
 
     // setup connectionStream multiplexing
-    const mux = setupMultiplex(connectionStream)
+    const mux = new ObjectMultiplex()
+    this.mux = mux
+    pump(connectionStream, mux, connectionStream, this._handleDisconnect.bind(this, 'Torus-Solana'))
 
     // subscribe to torus public config (one-way)
     this._publicConfigStore = new ObservableStore({ storageKey: 'Torus-Solana-Config' })
@@ -81,6 +83,8 @@ class SolanaProvider extends SafeEventEmitter {
       const state = JSON.parse(stringifiedState)
       if ('isUnlocked' in state && state.isUnlocked !== this._state.isUnlocked) {
         this._state.isUnlocked = state.isUnlocked
+        this.emit('connect', { chainId: this.chainId })
+        this._state.hasEmittedConnection = true
         if (!this._state.isUnlocked) {
           // accounts are never exposed when the extension is locked
           this._handleAccountsChanged([])
@@ -109,30 +113,10 @@ class SolanaProvider extends SafeEventEmitter {
           // Swallow error
         }
       }
-
-      // Emit chainChanged event on chain change
-      if ('chainId' in state && state.chainId !== this.chainId) {
-        this.chainId = state.chainId
-        this.emit('chainChanged', this.chainId)
-        this.emit('chainIdChanged', this.chainId) // deprecated
-
-        // indicate that we've connected, for EIP-1193 compliance
-        // we do this here so that iframe can initialize
-        if (!this._state.hasEmittedConnection) {
-          this.emit('connect', { chainId: this.chainId })
-          this._state.hasEmittedConnection = true
-        }
-      }
-
-      // Emit networkChanged event on network change
-      if ('networkVersion' in state && state.networkVersion !== this.networkVersion) {
-        this.networkVersion = state.networkVersion
-        this.emit('networkChanged', this.networkVersion)
-      }
     })
 
     pump(
-      mux.getStream('publicConfig'),
+      mux.createStream('publicConfig'),
       asStream(this._publicConfigStore),
       // RPC requests should still work if only this stream fails
       logStreamDisconnectWarning.bind(this, 'MetaMask PublicConfigStore')
@@ -150,7 +134,7 @@ class SolanaProvider extends SafeEventEmitter {
     const jsonRpcConnection = createJsonRpcStream()
     pump(
       jsonRpcConnection.stream,
-      mux.getStream('provider-solana'),
+      mux.createStream('provider-solana'),
       jsonRpcConnection.stream,
       this._handleDisconnect.bind(this, 'Torus Solana RpcProvider')
     )
@@ -381,6 +365,7 @@ class SolanaProvider extends SafeEventEmitter {
         message: bs58.encode(transaction.serializeMessage()),
       },
     })
+    log.info(response, 'signed response')
     const signature = bs58.decode(response.signature)
     const publicKey = new PublicKey(response.publicKey)
     transaction.addSignature(publicKey, signature)
