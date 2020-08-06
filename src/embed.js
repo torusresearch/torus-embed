@@ -13,6 +13,7 @@ import generateIntegrity from './integrity'
 import log from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
+import SolanaProvider from './solanaProvider'
 import { setupMultiplex } from './stream-utils'
 import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
 
@@ -400,6 +401,13 @@ class Torus {
     })
     this.metamaskStream.setMaxListeners(100)
 
+    this.solanaStream = new LocalMessageDuplexStream({
+      name: 'embed_solana',
+      target: 'iframe_solana',
+      targetWindow: this.torusIframe.contentWindow,
+    })
+    this.solanaStream.setMaxListeners(100)
+
     // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
     // because the MetamaskInpageProvider also attempts to do so.
     // We create another LocalMessageDuplexStream for communication between dapp <> iframe
@@ -415,6 +423,8 @@ class Torus {
 
     // compose the inpage provider
     const inpageProvider = new MetamaskInpageProvider(this.metamaskStream)
+
+    const solanaProvider = new SolanaProvider(this.solanaStream)
 
     // detect eth_requestAccounts and pipe to enable for now
     const detectAccountRequestPrototypeModifier = (m) => {
@@ -482,7 +492,14 @@ class Torus {
       deleteProperty: () => true,
     })
 
+    const proxiedSolanaProvider = new Proxy(solanaProvider, {
+      // straight up lie that we deleted the property so that it doesnt
+      // throw an error in strict mode
+      deleteProperty: () => true,
+    })
+
     this.ethereum = proxiedInpageProvider
+    this.solana = proxiedSolanaProvider
     const communicationMux = setupMultiplex(this.communicationStream)
     communicationMux.setMaxListeners(100)
     this.communicationMux = communicationMux
