@@ -116,7 +116,7 @@ class Torus {
 
     this.torusAlertContainer = htmlToElement('<div id="torusAlertContainer"></div>')
     this.torusAlertContainer.style.display = 'none'
-    this.torusAlertContainer.torusAlert.style.setProperty('z-index', this.alertZIndex)
+    this.torusAlertContainer.style.setProperty('z-index', this.alertZIndex)
 
     const link = window.document.createElement('link')
     link.setAttribute('rel', 'stylesheet')
@@ -308,8 +308,7 @@ class Torus {
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert--v2">' +
         `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
-        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
-        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
+        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>`
     )
 
     const successAlert = htmlToElement(

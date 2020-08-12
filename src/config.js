@@ -68,10 +68,8 @@ const paymentProviders = {
 const translations = {
   en: {
     embed: {
-      continue: 'Allow pop-ups',
-      cancel: 'Continue Blocking',
-      actionRequired: 'Unblock pop-ups',
-      pendingAction: 'Please allow pop-ups to continue with the sign in',
+      continue: 'Allow pop up to continue',
+      actionRequired: 'Unblock pop-up',
       cookiesRequired: 'Cookies Required',
       enableCookies: 'Please enable cookies in your browser preferences to access Torus',
       clickHere: 'More Info',
@@ -79,22 +77,17 @@ const translations = {
   },
   de: {
     embed: {
-      continue: 'Popups zulassen',
-      cancel: 'Weiter blockieren',
-      actionRequired: 'Popups entsperren',
-      pendingAction: 'Bitte erlauben Sie Popups, mit der Anmeldung fortzufahren',
+      continue: 'Popup zulassen, um fortzufahren',
+      actionRequired: 'Popup entsperren',
       cookiesRequired: 'Cookies benötigt',
       enableCookies: 'Bitte aktivieren Sie Cookies in Ihren Browsereinstellungen, um auf Torus zuzugreifen',
-      forMoreInfo: 'Für mehr Information, ',
       clickHere: 'Mehr Info',
     },
   },
   ja: {
     embed: {
-      continue: 'ポップアップを許可する',
-      cancel: 'ブロックを続行',
-      actionRequired: 'ポップアップのブロックを解除する',
-      pendingAction: 'ログインを続行するにはポップアップを許可してください',
+      continue: 'ポップアップの続行を許可',
+      actionRequired: 'ポップアップのブロックを解除',
       cookiesRequired: '必要なクッキー',
       enableCookies: 'Torusにアクセスするには、ブラウザの設定でCookieを有効にしてください。',
       clickHere: 'より詳しい情報',
@@ -102,10 +95,8 @@ const translations = {
   },
   ko: {
     embed: {
-      continue: '팝업 허용',
-      cancel: '계속 차단',
+      continue: '계속하려면 팝업 허용',
       actionRequired: '팝업 차단 해제',
-      pendingAction: '로그인이 계속되도록 팝업을 허용하십시오',
       cookiesRequired: '쿠키 필요',
       enableCookies: '브라우저 환경 설정에서 쿠키를 활성화하여 Torus에 액세스하십시오.',
       clickHere: '더 많은 정보',
@@ -113,10 +104,8 @@ const translations = {
   },
   zh: {
     embed: {
-      continue: '允许弹出窗口',
-      cancel: '继续封锁',
+      continue: '允许弹出以继续',
       actionRequired: '取消阻止弹出窗口',
-      pendingAction: '请允许弹出窗口继续登录 ',
       cookiesRequired: '必填Cookie',
       enableCookies: '请在您的浏览器首选项中启用cookie以访问Torus。',
       clickHere: '更多信息',
