@@ -116,7 +116,7 @@ class Torus {
 
     this.torusAlertContainer = htmlToElement('<div id="torusAlertContainer"></div>')
     this.torusAlertContainer.style.display = 'none'
-    this.torusAlertContainer.torusAlert.style.setProperty('z-index', this.alertZIndex)
+    this.torusAlertContainer.style.setProperty('z-index', this.alertZIndex)
 
     const link = window.document.createElement('link')
     link.setAttribute('rel', 'stylesheet')
