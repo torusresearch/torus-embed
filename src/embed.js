@@ -70,6 +70,7 @@ class Torus {
     this.whiteLabel = {}
     this.modalZIndex = modalZIndex
     this.alertZIndex = modalZIndex + 1000
+    this.torusAlertContainer = {}
   }
 
   async init({
@@ -113,6 +114,10 @@ class Torus {
       ></iframe>`
     )
 
+    this.torusAlertContainer = htmlToElement('<div id="torusAlertContainer"></div>')
+    this.torusAlertContainer.style.display = 'none'
+    this.torusAlertContainer.torusAlert.style.setProperty('z-index', this.alertZIndex)
+
     const link = window.document.createElement('link')
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
@@ -127,6 +132,7 @@ class Torus {
     const attachIFrame = () => {
       window.document.head.appendChild(this.styleLink)
       window.document.body.appendChild(this.torusIframe)
+      window.document.body.appendChild(this.torusAlertContainer)
       this.torusIframe.onload = () => {
         this._displayIframe()
       }
@@ -216,6 +222,8 @@ class Torus {
       const bindOnLoad = () => {
         closeAlert.addEventListener('click', () => {
           torusAlert.remove()
+
+          if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = 'none'
         })
       }
 
@@ -224,7 +232,8 @@ class Torus {
       this._setEmbedWhiteLabel(torusAlert)
 
       const attachOnLoad = () => {
-        window.document.body.appendChild(torusAlert)
+        this.torusAlertContainer.style.display = 'block'
+        this.torusAlertContainer.appendChild(torusAlert)
       }
 
       runOnLoad(attachOnLoad)
@@ -286,6 +295,7 @@ class Torus {
       this.torusIframe = {}
     }
     if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
+      this.torusAlertContainer.style.display = 'none'
       this.torusAlert.remove()
       this.torusAlert = {}
     }
@@ -302,10 +312,6 @@ class Torus {
         `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
     )
 
-    torusAlert.style.setProperty('z-index', this.alertZIndex)
-    // Expect that we don't open more than 1000 alert modals in a session
-    this.alertZIndex -= 1
-
     const successAlert = htmlToElement(
       `<div><button id="torusAlert__btn" class="torusAlert__btn--allow">${this.embedTranslations.continue}</button></div>`
     )
@@ -319,13 +325,16 @@ class Torus {
           features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
         })
         torusAlert.remove()
+
+        if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = 'none'
       })
     }
 
     this._setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
-      window.document.body.appendChild(torusAlert)
+      this.torusAlertContainer.style.display = 'block'
+      this.torusAlertContainer.appendChild(torusAlert)
     }
 
     runOnLoad(attachOnLoad)
