@@ -68,8 +68,9 @@ const paymentProviders = {
 const translations = {
   en: {
     embed: {
-      continue: 'Allow pop up to continue',
-      actionRequired: 'Unblock pop-up',
+      continue: 'Continue',
+      actionRequired: 'Authorization required',
+      pendingAction: 'Click continue to proceed with your request in a popup',
       cookiesRequired: 'Cookies Required',
       enableCookies: 'Please enable cookies in your browser preferences to access Torus',
       clickHere: 'More Info',
@@ -77,8 +78,9 @@ const translations = {
   },
   de: {
     embed: {
-      continue: 'Popup zulassen, um fortzufahren',
-      actionRequired: 'Popup entsperren',
+      continue: 'Fortsetzen',
+      actionRequired: 'Autorisierung erforderlich',
+      pendingAction: 'Klicken Sie in einem Popup auf Weiter, um mit Ihrer Anfrage fortzufahren',
       cookiesRequired: 'Cookies benötigt',
       enableCookies: 'Bitte aktivieren Sie Cookies in Ihren Browsereinstellungen, um auf Torus zuzugreifen',
       clickHere: 'Mehr Info',
@@ -86,17 +88,19 @@ const translations = {
   },
   ja: {
     embed: {
-      continue: 'ポップアップの続行を許可',
-      actionRequired: 'ポップアップのブロックを解除',
+      continue: '継続する',
+      actionRequired: '認証が必要です',
+      pendingAction: '続行をクリックして、ポップアップでリクエストを続行します',
       cookiesRequired: '必要なクッキー',
       enableCookies: 'Torusにアクセスするには、ブラウザの設定でCookieを有効にしてください。',
-      clickHere: 'より詳しい情報',
+      clickHere: '詳しくは',
     },
   },
   ko: {
     embed: {
-      continue: '계속하려면 팝업 허용',
-      actionRequired: '팝업 차단 해제',
+      continue: '계속하다',
+      actionRequired: '승인 필요',
+      pendingAction: '팝업에서 요청을 진행하려면 계속을 클릭하십시오.',
       cookiesRequired: '쿠키 필요',
       enableCookies: '브라우저 환경 설정에서 쿠키를 활성화하여 Torus에 액세스하십시오.',
       clickHere: '더 많은 정보',
@@ -104,8 +108,9 @@ const translations = {
   },
   zh: {
     embed: {
-      continue: '允许弹出以继续',
-      actionRequired: '取消阻止弹出窗口',
+      continue: '继续',
+      actionRequired: '需要授权',
+      pendingAction: '单击继续以在弹出窗口中继续您的请求',
       cookiesRequired: '必填Cookie',
       enableCookies: '请在您的浏览器首选项中启用cookie以访问Torus。',
       clickHere: '更多信息',

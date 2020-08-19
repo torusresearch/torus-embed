@@ -204,28 +204,18 @@ class Torus {
       const torusAlert = htmlToElement(
         '<div id="torusAlert" class="torus-alert torus-alert--v2">' +
           `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
+          '<div>' +
           `<h1 id="torusAlert__title">${this.embedTranslations.cookiesRequired}</h1>` +
           `<p id="torusAlert__desc">${this.embedTranslations.enableCookies}</p>` +
+          '</div>' +
           '</div>'
       )
       const moreInfo = htmlToElement(
         '<div id="torusAlert__btn-container">' +
-          '<div><a href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
-          `<button id="torusAlert__btn">${this.embedTranslations.clickHere}</button>` +
-          '</a></div>' +
+          '<div><a id="torusAlert__btn" href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
+          `${this.embedTranslations.clickHere}</a></div>` +
           '</div>'
       )
-
-      const closeAlert = htmlToElement(`<span id="torusAlert__close"><img src="${this.torusUrl}/images/close.svg" /><span>`)
-      torusAlert.appendChild(closeAlert)
-
-      const bindOnLoad = () => {
-        closeAlert.addEventListener('click', () => {
-          torusAlert.remove()
-
-          if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = 'none'
-        })
-      }
 
       torusAlert.appendChild(moreInfo)
 
@@ -237,7 +227,6 @@ class Torus {
       }
 
       runOnLoad(attachOnLoad)
-      runOnLoad(bindOnLoad)
       throw new Error('Third party cookies not supported')
     }
   }
@@ -308,12 +297,14 @@ class Torus {
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert--v2">' +
         `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
-        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>`
+        '<div>' +
+        `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
+        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p>` +
+        '</div>' +
+        '</div>'
     )
 
-    const successAlert = htmlToElement(
-      `<div><button id="torusAlert__btn" class="torusAlert__btn--allow">${this.embedTranslations.continue}</button></div>`
-    )
+    const successAlert = htmlToElement(`<div><a id="torusAlert__btn">${this.embedTranslations.continue}</a></div>`)
     const btnContainer = htmlToElement('<div id="torusAlert__btn-container"></div>')
     btnContainer.appendChild(successAlert)
     torusAlert.appendChild(btnContainer)
