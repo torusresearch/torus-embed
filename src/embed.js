@@ -70,6 +70,7 @@ class Torus {
     this.whiteLabel = {}
     this.modalZIndex = modalZIndex
     this.alertZIndex = modalZIndex + 1000
+    this.torusAlertContainer = {}
   }
 
   async init({
@@ -113,6 +114,10 @@ class Torus {
       ></iframe>`
     )
 
+    this.torusAlertContainer = htmlToElement('<div id="torusAlertContainer"></div>')
+    this.torusAlertContainer.style.display = 'none'
+    this.torusAlertContainer.style.setProperty('z-index', this.alertZIndex)
+
     const link = window.document.createElement('link')
     link.setAttribute('rel', 'stylesheet')
     link.setAttribute('type', 'text/css')
@@ -127,6 +132,7 @@ class Torus {
     const attachIFrame = () => {
       window.document.head.appendChild(this.styleLink)
       window.document.body.appendChild(this.torusIframe)
+      window.document.body.appendChild(this.torusAlertContainer)
       this.torusIframe.onload = () => {
         this._displayIframe()
       }
@@ -194,14 +200,33 @@ class Torus {
   /** @ignore */
   _checkThirdPartyCookies() {
     if (!thirdPartyCookiesSupported) {
-      this._createAlert(
-        '<div id="torusAlert" class="torus-alert">' +
-          `<h1>${this.embedTranslations.cookiesRequired}</h1>` +
-          `<p>${this.embedTranslations.enableCookies}</p>` +
-          `<p>${this.embedTranslations.forMoreInfo}<a href="https://docs.tor.us/faq/users#cookies" target="_blank"` +
-          `rel="noreferrer noopener">${this.embedTranslations.clickHere}</a></p>` +
+      const logoUrl = this._getLogoUrl()
+      const torusAlert = htmlToElement(
+        '<div id="torusAlert" class="torus-alert torus-alert--v2">' +
+          `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
+          '<div>' +
+          `<h1 id="torusAlert__title">${this.embedTranslations.cookiesRequired}</h1>` +
+          `<p id="torusAlert__desc">${this.embedTranslations.enableCookies}</p>` +
+          '</div>' +
           '</div>'
       )
+      const moreInfo = htmlToElement(
+        '<div id="torusAlert__btn-container">' +
+          '<div><a id="torusAlert__btn" href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
+          `${this.embedTranslations.clickHere}</a></div>` +
+          '</div>'
+      )
+
+      torusAlert.appendChild(moreInfo)
+
+      this._setEmbedWhiteLabel(torusAlert)
+
+      const attachOnLoad = () => {
+        this.torusAlertContainer.style.display = 'block'
+        this.torusAlertContainer.appendChild(torusAlert)
+      }
+
+      runOnLoad(attachOnLoad)
       throw new Error('Third party cookies not supported')
     }
   }
@@ -259,6 +284,7 @@ class Torus {
       this.torusIframe = {}
     }
     if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
+      this.torusAlertContainer.style.display = 'none'
       this.torusAlert.remove()
       this.torusAlert = {}
     }
@@ -266,42 +292,22 @@ class Torus {
   }
 
   /** @ignore */
-  _createAlert(alertContent) {
-    this.torusAlert = htmlToElement(alertContent)
-
-    const closeAlert = htmlToElement('<span id="torusAlert__close">x<span>')
-    this.torusAlert.appendChild(closeAlert)
-
-    const bindOnLoad = () => {
-      closeAlert.addEventListener('click', () => {
-        this.torusAlert.remove()
-      })
-    }
-
-    this._setEmbedWhiteLabel(this.torusAlert)
-
-    const attachOnLoad = () => {
-      window.document.body.appendChild(this.torusAlert)
-    }
-
-    runOnLoad(attachOnLoad)
-    runOnLoad(bindOnLoad)
-  }
-
-  /** @ignore */
   _createPopupBlockAlert(preopenInstanceId) {
+    const logoUrl = this._getLogoUrl()
     const torusAlert = htmlToElement(
-      '<div id="torusAlert">' +
+      '<div id="torusAlert" class="torus-alert--v2">' +
+        `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
+        '<div>' +
         `<h1 id="torusAlert__title">${this.embedTranslations.actionRequired}</h1>` +
-        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p></div>`
+        `<p id="torusAlert__desc">${this.embedTranslations.pendingAction}</p>` +
+        '</div>' +
+        '</div>'
     )
 
-    torusAlert.style.setProperty('z-index', this.alertZIndex)
-    // Expect that we don't open more than 1000 alert modals in a session
-    this.alertZIndex -= 1
-
-    const successAlert = htmlToElement(`<div><button id="torusAlert__btn">${this.embedTranslations.continue}</button></div>`)
-    torusAlert.appendChild(successAlert)
+    const successAlert = htmlToElement(`<div><a id="torusAlert__btn">${this.embedTranslations.continue}</a></div>`)
+    const btnContainer = htmlToElement('<div id="torusAlert__btn-container"></div>')
+    btnContainer.appendChild(successAlert)
+    torusAlert.appendChild(btnContainer)
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
@@ -309,13 +315,16 @@ class Torus {
           features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
         })
         torusAlert.remove()
+
+        if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = 'none'
       })
     }
 
     this._setEmbedWhiteLabel(torusAlert)
 
     const attachOnLoad = () => {
-      window.document.body.appendChild(torusAlert)
+      this.torusAlertContainer.style.display = 'block'
+      this.torusAlertContainer.appendChild(torusAlert)
     }
 
     runOnLoad(attachOnLoad)
@@ -781,6 +790,18 @@ class Torus {
       if (colors.torusBrand1) element.style.setProperty('--torus-brand-1', colors.torusBrand1)
       if (colors.torusGray2) element.style.setProperty('--torus-gray-2', colors.torusGray2)
     }
+  }
+
+  /** @ignore */
+  _getLogoUrl() {
+    let logoUrl = `${this.torusUrl}/images/torus_icon-blue.svg`
+    if (this.whiteLabel.theme && this.whiteLabel.theme.isDark) {
+      logoUrl = this.whiteLabel.logoLight ? this.whiteLabel.logoLight : logoUrl
+    } else {
+      logoUrl = this.whiteLabel.logoDark ? this.whiteLabel.logoDark : logoUrl
+    }
+
+    return logoUrl
   }
 }
 
