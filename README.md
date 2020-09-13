@@ -9,13 +9,13 @@ This module generates the javascript to include in a DApp via a script tag.
 It creates an iframe that loads the Torus page and sets up communication streams between
 the iframe and the DApp javascript context.
 
-Please refer to docs for API Reference available [here](https://docs.tor.us/api-reference) or [change log](https://docs.tor.us/features/changelog).
+Please refer to docs for API Reference available [here](https://docs.tor.us/torus-wallet/api-reference) or [change log](https://docs.tor.us/torus-wallet/changelog).
 
 ## Features
 
 - Typescript compatible. Includes Type definitions
 
-Please refer to docs for API Reference available [here](https://docs.tor.us/api-reference) or [change log](https://docs.tor.us/features/changelog).
+Please refer to docs for API Reference available [here](https://docs.tor.us/torus-wallet/api-reference) or [change log](https://docs.tor.us/torus-wallet/changelog).
 
 ## Installation
 
