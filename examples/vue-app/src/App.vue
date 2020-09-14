@@ -142,49 +142,49 @@ export default {
             },
             disclaimerHide: true,
             defaultLanguage: 'en',
-            // customTranslations: {
-            //   en: {
-            //     embed: {
-            //       continue: 'Continue',
-            //       actionRequired: 'Action Required',
-            //       pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
-            //       cookiesRequired: 'Cookies Required',
-            //       enableCookies: 'Please enable cookies in your browser preferences to access Torus.',
-            //       forMoreInfo: 'For more info, ',
-            //       clickHere: 'click here',
-            //     },
-            //     login: {
-            //       acceptTerms: 'By logging in, you accept Examples',
-            //       your: 'Your',
-            //       digitalWallet: 'digital wallet instantly',
-            //       buttonText: 'Login with Startrail',
-            //     },
-            //     dappTransfer: {
-            //       data: 'Data to sign',
-            //     },
-            //     dappPermission: {
-            //       permission: 'Permission',
-            //       requestFrom: 'Request from',
-            //       accessUserInfo: 'To access your Google Email Address, Profile Photo and Name',
-            //     },
-            //   },
-            //   ja: {
-            //     login: {
-            //       acceptTerms: 'ログインすると、Examples を受け入れます',
-            //       your: '君の',
-            //       digitalWallet: 'すぐにデジタルウォレット',
-            //       buttonText: 'Startrailでログイン',
-            //     },
-            //     dappTransfer: {
-            //       data: 'あなたがサインするデータ',
-            //     },
-            //     dappPermission: {
-            //       permission: '下記の内容を許可しますか',
-            //       requestFrom: '許可を求めているアプリケーション',
-            //       accessUserInfo: '受け取る情報: Googleメール、プロフィール写真、名前',
-            //     },
-            //   },
-            // },
+            customTranslations: {
+              en: {
+                // embed: {
+                //   continue: 'Continue',
+                //   actionRequired: 'Action Required',
+                //   pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
+                //   cookiesRequired: 'Cookies Required',
+                //   enableCookies: 'Please enable cookies in your browser preferences to access Torus.',
+                //   forMoreInfo: 'For more info, ',
+                //   clickHere: 'click here',
+                // },
+                login: {
+                  acceptTerms: 'By logging in, you accept Examples',
+                  your: 'Your',
+                  digitalWallet: 'digital wallet instantly',
+                  buttonText: 'Login with Startrail',
+                },
+                dappTransfer: {
+                  data: 'Data to sign',
+                },
+                dappPermission: {
+                  permission: 'Permission',
+                  requestFrom: 'Request from',
+                  accessUserInfo: 'To access your Google Email Address, Profile Photo and Name',
+                },
+              },
+              ja: {
+                login: {
+                  acceptTerms: 'ログインすると、Examples を受け入れます',
+                  your: '君の',
+                  digitalWallet: 'すぐにデジタルウォレット',
+                  buttonText: 'Startrailでログイン',
+                },
+                dappTransfer: {
+                  data: 'あなたがサインするデータ',
+                },
+                dappPermission: {
+                  permission: '下記の内容を許可しますか',
+                  requestFrom: '許可を求めているアプリケーション',
+                  accessUserInfo: '受け取る情報: Googleメール、プロフィール写真、名前',
+                },
+              },
+            },
           },
         })
         await torus.login() // await torus.ethereum.enable()
