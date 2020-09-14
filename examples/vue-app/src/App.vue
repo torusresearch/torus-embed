@@ -101,6 +101,7 @@ export default {
           loginConfig: {
             ...(this.buildEnv === 'lrc' && {
               'startrail-auth0-email-password-qa': {
+                name: 'Startrail email_password',
                 typeOfLogin: 'email_password',
                 description: 'login.buttonText',
                 clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',

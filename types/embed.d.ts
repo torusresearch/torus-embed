@@ -127,7 +127,7 @@ interface LoginConfigItem {
   /**
    * Display Name. If not provided, we use the default for torus app
    */
-  name?: string
+  name: string
   /**
    * The type of login. Refer to enum `LOGIN_TYPE`
    */
