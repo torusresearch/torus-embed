@@ -105,11 +105,11 @@ class Torus {
     this.torusWidgetVisibility = showTorusButton
     // Iframe code
     this.torusIframe = htmlToElement(
-      `<iframe 
+      `<iframe
         id="torusIframe"
         class="torusIframe"
         src="${torusUrl}/popup"
-        style="display: none; position: fixed; top: 0; right: 0; width: 100%; 
+        style="display: none; position: fixed; top: 0; right: 0; width: 100%;
         height: 100%; border: none; border-radius: 0; z-index: ${this.modalZIndex}"
       ></iframe>`
     )
@@ -188,7 +188,7 @@ class Torus {
       if (calculatedIntegrity === integrity.hash) {
         await handleSetup()
       } else {
-        this._cleanUp()
+        this.clearInit()
         throw new Error('Integrity check failed')
       }
     } else {
@@ -267,11 +267,10 @@ class Torus {
     if (this.isLoggedIn) {
       await this.logout()
     }
-    this._cleanUp()
+    this.clearInit()
   }
 
-  /** @ignore */
-  _cleanUp() {
+  clearInit() {
     function isElement(element) {
       return element instanceof Element || element instanceof HTMLDocument
     }

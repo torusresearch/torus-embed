@@ -85,6 +85,10 @@ declare class Torus {
    * Logs the user out first. Cleans up torus iframe and other assets. Removes torus instance completely
    */
   cleanUp(): Promise<void>
+  /**
+   * Clean up initialized torus client.
+   */
+  clearInit(): Promise<void>
 }
 
 export as namespace Torus
@@ -117,8 +121,8 @@ type LOGIN_TYPE =
 
 interface LoginConfig {
   /**
-   * Use the verifier provided by torus as a key or a default verifier used by torus 
-   * {@link https://docs.tor.us/torus-wallet/developing-with-torus-wallet/oauth | Documentation} 
+   * Use the verifier provided by torus as a key or a default verifier used by torus
+   * {@link https://docs.tor.us/torus-wallet/developing-with-torus-wallet/oauth | Documentation}
    */
   [verifier: string]: LoginConfigItem
 }
@@ -284,7 +288,7 @@ interface TorusParams {
    * development uses https://localhost:3000 (expects torus-website to be run locally),
    *
    * staging uses https://staging.tor.us,
-   * 
+   *
    * lrc uses https://lrc.tor.us,
    *
    * testing uses https://testing.tor.us (latest internal build)
@@ -305,7 +309,7 @@ interface TorusParams {
    */
   showTorusButton?: boolean
   /**
-   * setting false, hides those verifiers from login modal   
+   * setting false, hides those verifiers from login modal
    * @deprecated
    * Please use loginConfig instead
    */
