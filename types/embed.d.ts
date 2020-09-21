@@ -290,11 +290,13 @@ interface TorusParams {
    * staging uses https://staging.tor.us,
    *
    * lrc uses https://lrc.tor.us,
+   * 
+   * beta uses https://beta.tor.us, (currently supports tkey)
    *
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
-  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc'
+  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc' | 'beta'
   /**
    * Enables or disables logging.
    *

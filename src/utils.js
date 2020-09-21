@@ -126,6 +126,10 @@ export const getTorusUrl = async (buildEnv, integrity) => {
       torusUrl = 'https://lrc.tor.us'
       logLevel = 'debug'
       break
+    case 'beta':
+      torusUrl = 'https://beta.tor.us'
+      logLevel = 'debug'
+      break
     case 'development':
       torusUrl = 'https://localhost:3000'
       logLevel = 'debug'

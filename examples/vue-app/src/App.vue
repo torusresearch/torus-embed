@@ -8,6 +8,7 @@
         <option value="testing">Testing</option>
         <option value="development">Development</option>
         <option selected value="lrc">LRC</option>
+        <option selected value="beta">Beta</option>
       </select>
       <button v-if="publicAddress === ''">Login</button>
     </form>
