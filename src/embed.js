@@ -29,6 +29,8 @@ const iframeIntegrity = 'sha384-Od908YIRnnnZab8C9thU04vMwpgpTeTpZVjgAus2Kg8KEQsK
 
 const expectedCacheControlHeader = 'max-age=3600'
 
+const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_sign', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
+
 let thirdPartyCookiesSupported = true
 
 const receiveMessage = (evt) => {
@@ -481,6 +483,19 @@ class Torus {
         })
       })
     }
+
+    inpageProvider.on('rpcRequest', (payload, cb) => {
+      const _payload = payload
+      if (UNSAFE_METHODS.includes(payload.method)) {
+        const preopenInstanceId = getPreopenInstanceId()
+        this._handleWindow(preopenInstanceId, {
+          target: '_blank',
+          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+        })
+        _payload.preopenInstanceId = preopenInstanceId
+      }
+      inpageProvider._rpcEngine.handle(_payload, cb)
+    })
 
     // Work around for web3@1.0 deleting the bound `sendAsync` but not the unbound
     // `sendAsync` method on the prototype, causing `this` reference issues with drizzle
