@@ -313,7 +313,7 @@ class Torus {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
           target: '_blank',
-          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
+          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=760,width=500',
         })
         torusAlert.remove()
 
@@ -718,7 +718,7 @@ class Torus {
               const preopenInstanceId = getPreopenInstanceId()
               this._handleWindow(preopenInstanceId, {
                 target: '_blank',
-                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=760,width=500',
               })
               userInfoStream.write({ name: 'user_info_request', data: { message, preopenInstanceId } })
             }
