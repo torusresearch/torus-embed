@@ -546,9 +546,9 @@ class Torus {
     // and try again.`)
     // }
 
-    this.provider = inpageProvider
+    this.provider = proxiedInpageProvider
 
-    this.web3 = new Web3(inpageProvider)
+    this.web3 = new Web3(proxiedInpageProvider)
     this.web3.setProvider = () => {
       log.debug('Torus - overrode web3.setProvider')
     }
