@@ -304,7 +304,14 @@ export default {
         }
         const localWeb3 = window.web3
         const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
+        const balance = await instance.methods.balanceOf(this.publicAddress).call()
+        console.log(balance, 'dai balance')
         const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        if (Number(balance) < Number(value)) {
+          // eslint-disable-next-line no-alert
+          window.alert('You do not have enough dai tokens for transfer')
+          return
+        }
         instance.methods.transfer(this.publicAddress, value).send(
           {
             from: this.publicAddress,
