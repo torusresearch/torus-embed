@@ -83,7 +83,6 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
     // setup connectionStream multiplexing
     const mux = new ObjectMultiplex()
-    this.mux = mux
     pump(connectionStream, mux, connectionStream, this._handleDisconnect.bind(this, 'MetaMask'))
 
     // subscribe to metamask public config (one-way)
