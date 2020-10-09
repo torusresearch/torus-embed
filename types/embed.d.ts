@@ -161,6 +161,10 @@ interface LoginConfigItem {
    */
   showOnModal?: boolean
   /**
+   * Whether to show the login button on mobile
+   */
+  showOnMobile?: boolean
+  /**
    * Custom jwt parameters to configure the login. Useful for Auth0 configuration
    */
   jwtParameters?: JwtParameters
