@@ -1,11 +1,13 @@
 import SafeEventEmitter from 'safe-event-emitter'
 
+import { FEATURES_DEFAULT_POPUP_WINDOW } from './utils'
+
 class PopupHandler extends SafeEventEmitter {
   constructor({ url, target, features }) {
     super()
     this.url = url
     this.target = target || '_blank'
-    this.features = features || 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=1200'
+    this.features = features || FEATURES_DEFAULT_POPUP_WINDOW
     this.window = undefined
     this.windowTimer = {}
     this.iClosedWindow = false
