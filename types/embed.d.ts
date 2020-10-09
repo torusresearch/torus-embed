@@ -164,6 +164,14 @@ interface LoginConfigItem {
    * Custom jwt parameters to configure the login. Useful for Auth0 configuration
    */
   jwtParameters?: JwtParameters
+  /**
+   * Show login button on the main list
+   */
+  mainOption?: boolean
+  /**
+   * Modify the order of buttons. Should be greater than zero, where 1 is top priority.
+   */
+  priority?: number
 }
 
 interface TorusPublicKey extends TorusNodePub {
