@@ -14,7 +14,15 @@ import log from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
-import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
+import {
+  FEATURES_CONFIRM_WINDOW,
+  FEATURES_DEFAULT_WALLET_WINDOW,
+  FEATURES_PROVIDER_CHANGE_WINDOW,
+  getPreopenInstanceId,
+  getTorusUrl,
+  getUserLanguage,
+  validatePaymentProvider,
+} from './utils'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -313,7 +321,7 @@ class Torus {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
           target: '_blank',
-          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=760,width=500',
+          features: FEATURES_CONFIRM_WINDOW,
         })
         torusAlert.remove()
 
@@ -490,7 +498,7 @@ class Torus {
         const preopenInstanceId = getPreopenInstanceId()
         this._handleWindow(preopenInstanceId, {
           target: '_blank',
-          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
+          features: FEATURES_CONFIRM_WINDOW,
         })
         _payload.preopenInstanceId = preopenInstanceId
       }
@@ -600,7 +608,7 @@ class Torus {
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId, {
         target: '_blank',
-        features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+        features: FEATURES_PROVIDER_CHANGE_WINDOW,
       })
       providerChangeStream.write({
         name: 'show_provider_change',
@@ -665,7 +673,7 @@ class Torus {
         Object.keys(params).forEach((x) => {
           finalUrl.searchParams.append(x, params[x])
         })
-        const walletWindow = new PopupHandler({ url: finalUrl })
+        const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW })
         walletWindow.open()
       }
     }
@@ -718,7 +726,7 @@ class Torus {
               const preopenInstanceId = getPreopenInstanceId()
               this._handleWindow(preopenInstanceId, {
                 target: '_blank',
-                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=760,width=500',
+                features: FEATURES_PROVIDER_CHANGE_WINDOW,
               })
               userInfoStream.write({ name: 'user_info_request', data: { message, preopenInstanceId } })
             }
