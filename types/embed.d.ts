@@ -169,6 +169,14 @@ interface LoginConfigItem {
    */
   mainOption?: boolean
   /**
+   * Whether to show the login button on mobile
+   */
+  showOnMobile?: boolean
+  /**
+   * Whether to show the login button on desktop
+   */
+  showOnDesktop?: boolean
+  /**
    * Modify the order of buttons. Should be greater than zero, where 1 is top priority.
    */
   priority?: number
