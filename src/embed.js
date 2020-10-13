@@ -14,7 +14,15 @@ import log from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
-import { getPreopenInstanceId, getTorusUrl, getUserLanguage, validatePaymentProvider } from './utils'
+import {
+  FEATURES_CONFIRM_WINDOW,
+  FEATURES_DEFAULT_WALLET_WINDOW,
+  FEATURES_PROVIDER_CHANGE_WINDOW,
+  getPreopenInstanceId,
+  getTorusUrl,
+  getUserLanguage,
+  validatePaymentProvider,
+} from './utils'
 
 const { GOOGLE, FACEBOOK, REDDIT, TWITCH, DISCORD } = configuration.enums
 const defaultVerifiers = {
@@ -25,9 +33,11 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-El5Onmw8VTS+A5H+DQ6/dxpEj5bf3OyWIXA3WeefF6yREWviqeDIFoUZcHBBiXWS'
+const iframeIntegrity = 'sha384-Od908YIRnnnZab8C9thU04vMwpgpTeTpZVjgAus2Kg8KEQsKf8CGG6UkUT3J9o+U'
 
 const expectedCacheControlHeader = 'max-age=3600'
+
+const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_sign', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
 
 let thirdPartyCookiesSupported = true
 
@@ -311,7 +321,7 @@ class Torus {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
           target: '_blank',
-          features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=660,width=500',
+          features: FEATURES_CONFIRM_WINDOW,
         })
         torusAlert.remove()
 
@@ -482,6 +492,19 @@ class Torus {
       })
     }
 
+    inpageProvider.on('rpcRequest', (payload, cb) => {
+      const _payload = payload
+      if (UNSAFE_METHODS.includes(payload.method)) {
+        const preopenInstanceId = getPreopenInstanceId()
+        this._handleWindow(preopenInstanceId, {
+          target: '_blank',
+          features: FEATURES_CONFIRM_WINDOW,
+        })
+        _payload.preopenInstanceId = preopenInstanceId
+      }
+      inpageProvider._rpcEngine.handle(_payload, cb)
+    })
+
     // Work around for web3@1.0 deleting the bound `sendAsync` but not the unbound
     // `sendAsync` method on the prototype, causing `this` reference issues with drizzle
     const proxiedInpageProvider = new Proxy(inpageProvider, {
@@ -531,9 +554,9 @@ class Torus {
     // and try again.`)
     // }
 
-    this.provider = inpageProvider
+    this.provider = proxiedInpageProvider
 
-    this.web3 = new Web3(inpageProvider)
+    this.web3 = new Web3(proxiedInpageProvider)
     this.web3.setProvider = () => {
       log.debug('Torus - overrode web3.setProvider')
     }
@@ -585,7 +608,7 @@ class Torus {
       const preopenInstanceId = getPreopenInstanceId()
       this._handleWindow(preopenInstanceId, {
         target: '_blank',
-        features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+        features: FEATURES_PROVIDER_CHANGE_WINDOW,
       })
       providerChangeStream.write({
         name: 'show_provider_change',
@@ -650,7 +673,7 @@ class Torus {
         Object.keys(params).forEach((x) => {
           finalUrl.searchParams.append(x, params[x])
         })
-        const walletWindow = new PopupHandler({ url: finalUrl })
+        const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW })
         walletWindow.open()
       }
     }
@@ -703,7 +726,7 @@ class Torus {
               const preopenInstanceId = getPreopenInstanceId()
               this._handleWindow(preopenInstanceId, {
                 target: '_blank',
-                features: 'directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=600,width=500',
+                features: FEATURES_PROVIDER_CHANGE_WINDOW,
               })
               userInfoStream.write({ name: 'user_info_request', data: { message, preopenInstanceId } })
             }
