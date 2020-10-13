@@ -138,8 +138,11 @@ export default {
           // }
           loginConfig: {
             ...(this.buildEnv === 'lrc' && {
+              'torus-auth0-email-passwordless': {
+                showOnModal: false,
+              },
               'startrail-auth0-email-password-qa': {
-                name: 'Startrail email_password',
+                name: 'Startrail Email Password',
                 typeOfLogin: 'email_password',
                 description: 'login.buttonText',
                 clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
@@ -147,6 +150,10 @@ export default {
                 logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
                 logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
                 showOnModal: true,
+                priority: 1,
+                mainOption: true,
+                showOnMobile: true,
+                showOnDesktop: true,
                 jwtParameters: {
                   domain: 'https://torusstartrail.au.auth0.com',
                   ui_locales: 'ja',
