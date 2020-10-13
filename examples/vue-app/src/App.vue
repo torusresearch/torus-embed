@@ -1,40 +1,69 @@
 <template>
   <div id="app">
-    <form @submit.prevent="login">
-      <p>Build Environment</p>
-      <select name="buildEnv" v-model="buildEnv">
-        <option value="production">Production</option>
-        <option selected value="staging">Staging</option>
-        <option value="testing">Testing</option>
-        <option value="development">Development</option>
-        <option selected value="lrc">LRC</option>
-      </select>
-      <button v-if="publicAddress === ''">Login</button>
-    </form>
-    <br />
-    <div v-if="publicAddress !== ''">
-      <button @click="getUserInfo">Get User Info</button>
-      <button @click="createPaymentTx">Create Payment Tx</button>
-      <button @click="sendEth">Send Eth</button>
-      <button @click="logout">Logout</button>
-      <br />
-      <button @click="signMessage">sign_eth</button>
-      <button @click="signTypedData_v1">sign typed data v1</button>
-      <button @click="signTypedData_v3">sign typed data v3</button>
-      <button @click="signTypedData_v4">sign typed data v4</button>
-      <button @click="changeProvider">Change Provider</button>
-      <button @click="sendDai">Send DAI</button>
-      <button @click="approveKnc">Approve Knc</button>
-      <div :style="{ marginTop: '20px' }">
-        <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
-          <option selected value="google">Google</option>
-          <option value="reddit">Reddit</option>
-          <option value="discord">Discord</option>
+    <h3>Login With Torus</h3>
+    <section>
+      <p>
+        Build Environment :
+        <i>{{ this.buildEnv }}</i>
+      </p>
+      <div v-if="publicAddress === ''">
+        <select name="buildEnv" v-model="buildEnv">
+          <option value="production">Production</option>
+          <option value="staging">Staging</option>
+          <option selected value="testing">Testing</option>
+          <option value="development">Development</option>
+          <option value="lrc">LRC</option>
+          <option value="beta">Beta</option>
         </select>
-        <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
+        <button @click="login">Login</button>
       </div>
-      <button :disabled="!verifierId" :style="{ marginTop: '20px' }" v-if="publicAddress !== ''" @click="getPublicAddress">Get Public Address</button>
-    </div>
+      <button v-else @click="logout">Logout</button>
+    </section>
+    <section v-if="publicAddress !== ''">
+      <section>
+        <div>
+          Public Address:
+          <i>{{ this.publicAddress }}</i>
+        </div>
+        <div>
+          Network:
+          <i>{{ this.chainIdNetworkMap[this.chainId] }}</i>
+        </div>
+      </section>
+      <section :style="{ marginTop: '20px' }">
+        <h4>Torus Specific Info</h4>
+        <button @click="getUserInfo">Get User Info</button>
+        <button @click="createPaymentTx">Create Payment Tx</button>
+        <button @click="changeProvider">Change Provider</button>
+        <div :style="{ marginTop: '20px' }">
+          <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
+            <option selected value="google">Google</option>
+            <option value="reddit">Reddit</option>
+            <option value="discord">Discord</option>
+          </select>
+          <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
+        </div>
+        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">
+          Get Public Address
+        </button>
+      </section>
+      <section :style="{ marginTop: '20px' }">
+        <h4>Blockchain Apis</h4>
+        <section>
+          <h5>Signing</h5>
+          <button @click="signMessage">sign_eth</button>
+          <button @click="signTypedData_v1">sign typed data v1</button>
+          <button @click="signTypedData_v3">sign typed data v3</button>
+          <button @click="signTypedData_v4">sign typed data v4</button>
+        </section>
+        <section>
+          <h5>Transactions</h5>
+          <button @click="sendEth">Send Eth</button>
+          <button @click="sendDai">Send DAI</button>
+          <button @click="approveKnc">Approve Knc</button>
+        </section>
+      </section>
+    </section>
     <div id="console">
       <p></p>
     </div>
@@ -43,19 +72,28 @@
 
 <script>
 import Torus from '@toruslabs/torus-embed'
+import tokenAbi from 'human-standard-token-abi'
 import Web3 from 'web3'
 
-const tokenAbi = require('human-standard-token-abi')
+import { getV3TypedData, getV4TypedData, whiteLabelData } from './data'
 
 export default {
   name: 'app',
   data() {
     return {
       publicAddress: '',
+      chainId: 4,
       verifierId: '',
       selectedVerifier: 'google',
       placeholder: 'Enter google email',
       buildEnv: 'testing',
+      chainIdNetworkMap: {
+        1: 'mainnet',
+        3: 'ropsten',
+        4: 'rinkeby',
+        5: 'goerli',
+        42: 'kovan',
+      },
     }
   },
   methods: {
@@ -89,19 +127,22 @@ export default {
           },
           enableLogging: true,
           network: {
-            host: 'rinkeby', // mandatory
-            chainId: 4,
+            host: this.chainIdNetworkMap[this.chainId], // mandatory
+            chainId: this.chainId,
           },
           showTorusButton: true,
           // integrity: {
           //   check: true,
           //   version: '1.4.2',
-          //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMH2r5m027ua2tkQ+83FPdp9'
+          //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
           // }
           loginConfig: {
             ...(this.buildEnv === 'lrc' && {
+              'torus-auth0-email-passwordless': {
+                showOnModal: false,
+              },
               'startrail-auth0-email-password-qa': {
-                name: 'Startrail email_password',
+                name: 'Startrail Email Password',
                 typeOfLogin: 'email_password',
                 description: 'login.buttonText',
                 clientId: 'F1NCHy8cV6UfZPTHUwELJZWU2zPsI7Gt',
@@ -109,6 +150,10 @@ export default {
                 logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg',
                 logoDark: 'https://startrail.io/images/front/startrail-top__main.svg',
                 showOnModal: true,
+                priority: 1,
+                mainOption: true,
+                showOnMobile: true,
+                showOnDesktop: true,
                 jwtParameters: {
                   domain: 'https://torusstartrail.au.auth0.com',
                   ui_locales: 'ja',
@@ -116,80 +161,19 @@ export default {
               },
             }),
           },
-          whiteLabel: {
-            theme: {
-              isDark: false,
-              colors: {
-                torusBrand1: '#000000',
-                torusGray2: '#FBF7F3',
-              },
-            },
-            logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', // dark logo for light background
-            logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', // light logo for dark background
-            topupHide: false,
-            featuredBillboardHide: true,
-            tncLink: {
-              en: 'http://example.com/tnc/en',
-              ja: 'http://example.com/tnc/ja',
-            },
-            privacyPolicy: {
-              en: 'http://example.com/tnc/en',
-              ja: 'http://example.com/tnc/ja',
-            },
-            contactLink: {
-              en: 'http://example.com/tnc/en',
-              ja: 'http://example.com/tnc/ja',
-            },
-            disclaimerHide: true,
-            defaultLanguage: 'en',
-            customTranslations: {
-              en: {
-                // embed: {
-                //   continue: 'Continue',
-                //   actionRequired: 'Action Required',
-                //   pendingAction: 'You have a pending action that needs to be completed in a pop-up window ',
-                //   cookiesRequired: 'Cookies Required',
-                //   enableCookies: 'Please enable cookies in your browser preferences to access Torus.',
-                //   forMoreInfo: 'For more info, ',
-                //   clickHere: 'click here',
-                // },
-                login: {
-                  acceptTerms: 'By logging in, you accept Examples',
-                  your: 'Your',
-                  digitalWallet: 'digital wallet instantly',
-                  buttonText: 'Login with Startrail',
-                },
-                dappTransfer: {
-                  data: 'Data to sign',
-                },
-                dappPermission: {
-                  permission: 'Permission',
-                  requestFrom: 'Request from',
-                  accessUserInfo: 'To access your Google Email Address, Profile Photo and Name',
-                },
-              },
-              ja: {
-                login: {
-                  acceptTerms: 'ログインすると、Examples を受け入れます',
-                  your: '君の',
-                  digitalWallet: 'すぐにデジタルウォレット',
-                  buttonText: 'Startrailでログイン',
-                },
-                dappTransfer: {
-                  data: 'あなたがサインするデータ',
-                },
-                dappPermission: {
-                  permission: '下記の内容を許可しますか',
-                  requestFrom: '許可を求めているアプリケーション',
-                  accessUserInfo: '受け取る情報: Googleメール、プロフィール写真、名前',
-                },
-              },
-            },
-          },
+          whiteLabel: whiteLabelData,
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
-        torus.provider.on('chainChanged', (resp) => console.log(resp, 'chainchanged'))
+        torus.provider.on('chainChanged', (resp) => {
+          console.log(resp, 'chainchanged')
+          this.chainId = resp
+        })
+        torus.provider.on('accountsChanged', (accounts) => {
+          console.log(accounts, 'accountsChanged')
+          // eslint-disable-next-line no-extra-semi
+          ;[this.publicAddress] = accounts
+        })
         window.web3 = web3
         const accounts = await web3.eth.getAccounts()
         ;[this.publicAddress] = accounts
@@ -275,43 +259,7 @@ export default {
     },
 
     signTypedData_v3() {
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-          ],
-          Person: [
-            { name: 'name', type: 'string' },
-            { name: 'wallet', type: 'address' },
-          ],
-          Mail: [
-            { name: 'from', type: 'Person' },
-            { name: 'to', type: 'Person' },
-            { name: 'contents', type: 'string' },
-          ],
-        },
-        primaryType: 'Mail',
-        domain: {
-          name: 'Ether Mail',
-          version: '1',
-          chainId: 4,
-          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-        },
-        message: {
-          from: {
-            name: 'Cow',
-            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826',
-          },
-          to: {
-            name: 'Bob',
-            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-          },
-          contents: 'Hello, Bob!',
-        },
-      }
+      const typedData = getV3TypedData(this.chainId)
       const self = this
       window.torus.web3.currentProvider.send(
         {
@@ -328,53 +276,7 @@ export default {
       )
     },
     signTypedData_v4() {
-      const typedData = {
-        types: {
-          EIP712Domain: [
-            { name: 'name', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'verifyingContract', type: 'address' },
-          ],
-          Person: [
-            { name: 'name', type: 'string' },
-            { name: 'wallets', type: 'address[]' },
-          ],
-          Mail: [
-            { name: 'from', type: 'Person' },
-            { name: 'to', type: 'Person[]' },
-            { name: 'contents', type: 'string' },
-          ],
-          Group: [
-            { name: 'name', type: 'string' },
-            { name: 'members', type: 'Person[]' },
-          ],
-        },
-        domain: {
-          name: 'Ether Mail',
-          version: '1',
-          chainId: 4,
-          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-        },
-        primaryType: 'Mail',
-        message: {
-          from: {
-            name: 'Cow',
-            wallets: ['0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826', '0xDeaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF'],
-          },
-          to: [
-            {
-              name: 'Bob',
-              wallets: [
-                '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB',
-                '0xB0BdaBea57B0BDABeA57b0bdABEA57b0BDabEa57',
-                '0xB0B0b0b0b0b0B000000000000000000000000000',
-              ],
-            },
-          ],
-          contents: 'Hello, Bob!',
-        },
-      }
+      const typedData = getV4TypedData(this.chainId)
       const self = this
       window.torus.web3.currentProvider.send(
         {
@@ -392,7 +294,7 @@ export default {
     },
     logout() {
       window.torus
-        .logout()
+        .cleanUp()
         .then(() => {
           this.publicAddress = ''
           return undefined
@@ -402,43 +304,58 @@ export default {
     changeProvider() {
       window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
     },
-    sendDai() {
-      window.torus
-        .setProvider({ host: 'mainnet' })
-        .then(() => {
-          const localWeb3 = window.web3
-          const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
-          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-          return instance.methods.transfer(this.publicAddress, value).send(
-            {
-              from: this.publicAddress,
-            },
-            (err, hash) => {
-              if (err) this.console(err)
-              else this.console(hash)
-            }
-          )
-        })
-        .catch(console.error)
+    async sendDai() {
+      try {
+        if (this.chainId !== '1') {
+          await window.torus.setProvider({ host: 'mainnet' })
+        }
+        const localWeb3 = window.web3
+        const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
+        const balance = await instance.methods.balanceOf(this.publicAddress).call()
+        console.log(balance, 'dai balance')
+        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        if (Number(balance) < Number(value)) {
+          // eslint-disable-next-line no-alert
+          window.alert('You do not have enough dai tokens for transfer')
+          return
+        }
+        instance.methods.transfer(this.publicAddress, value).send(
+          {
+            from: this.publicAddress,
+          },
+          (err, hash) => {
+            if (err) this.console(err)
+            else this.console(hash)
+          }
+        )
+      } catch (error) {
+        console.error(error)
+      }
     },
-    approveKnc() {
-      window.torus
-        .setProvider({ host: 'mainnet' })
-        .then(() => {
-          const localWeb3 = window.web3
-          const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
-          const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
-          return instance.methods.approve(this.publicAddress, value).send(
-            {
-              from: this.publicAddress,
-            },
-            (err, hash) => {
-              if (err) this.console(err)
-              else this.console(hash)
-            }
-          )
-        })
-        .catch(console.error)
+    async approveKnc() {
+      try {
+        console.log(this.chainId, 'current chain id')
+        if (this.chainId !== '1') {
+          await window.torus.setProvider({ host: 'mainnet' })
+        }
+        const localWeb3 = window.web3
+        const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
+        let value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        const allowance = await instance.methods.allowance(this.publicAddress, '0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3').call()
+        console.log(allowance, 'current allowance')
+        if (Number(allowance) > 0) value = '0'
+        instance.methods.approve('0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3', value).send(
+          {
+            from: this.publicAddress,
+          },
+          (err, hash) => {
+            if (err) this.console(err)
+            else this.console(hash)
+          }
+        )
+      } catch (error) {
+        console.error(error)
+      }
     },
     async getUserInfo() {
       window.torus.getUserInfo().then(this.console).catch(this.console)

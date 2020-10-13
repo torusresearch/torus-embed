@@ -161,9 +161,29 @@ interface LoginConfigItem {
    */
   showOnModal?: boolean
   /**
+   * Whether to show the login button on mobile
+   */
+  showOnMobile?: boolean
+  /**
    * Custom jwt parameters to configure the login. Useful for Auth0 configuration
    */
   jwtParameters?: JwtParameters
+  /**
+   * Show login button on the main list
+   */
+  mainOption?: boolean
+  /**
+   * Whether to show the login button on mobile
+   */
+  showOnMobile?: boolean
+  /**
+   * Whether to show the login button on desktop
+   */
+  showOnDesktop?: boolean
+  /**
+   * Modify the order of buttons. Should be greater than zero, where 1 is top priority.
+   */
+  priority?: number
 }
 
 interface TorusPublicKey extends TorusNodePub {
@@ -290,11 +310,13 @@ interface TorusParams {
    * staging uses https://staging.tor.us,
    *
    * lrc uses https://lrc.tor.us,
+   * 
+   * beta uses https://beta.tor.us, (currently supports tkey)
    *
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
-  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc'
+  buildEnv?: 'production' | 'development' | 'staging' | 'testing' | 'lrc' | 'beta'
   /**
    * Enables or disables logging.
    *
