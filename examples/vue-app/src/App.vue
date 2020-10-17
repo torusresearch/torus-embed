@@ -19,7 +19,12 @@
       </div>
       <button v-else @click="logout">Logout</button>
     </section>
-    <section v-if="publicAddress !== ''">
+    <section
+      :style="{
+        fontSize: '12px',
+      }"
+      v-if="publicAddress !== ''"
+    >
       <section>
         <div>
           Public Address:
@@ -381,16 +386,16 @@ export default {
   border: 1px solid black;
   height: 40px;
   padding: 2px;
-  bottom: 10px;
-  position: absolute;
+  bottom: 80px;
+  position: fixed;
   text-align: left;
   width: calc(100% - 20px);
   border-radius: 5px;
 }
 #console::before {
   content: 'Console :';
-  position: absolute;
-  top: -20px;
+  position: fixed;
+  bottom: 130px;
   font-size: 12px;
 }
 #console > p {
