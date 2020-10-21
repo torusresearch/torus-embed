@@ -1,5 +1,3 @@
-import Web3 from 'web3'
-
 /**
  * Torus class
  */
@@ -9,10 +7,6 @@ declare class Torus {
    * @param args Constructor arguments used to initialize torus constructor
    */
   constructor(args: TorusCtorArgs)
-  /**
-   * web3 0.20.7 instance. {@link https://github.com/ethereum/wiki/wiki/JavaScript-API | Documentation}
-   */
-  web3: Web3
   /**
    * Ethereum provider instance
    */

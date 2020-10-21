@@ -43,8 +43,7 @@
     "obs-store": "^4.0.3",
     "post-message-stream": "^3.0.0",
     "pump": "^3.0.0",
-    "safe-event-emitter": "^1.0.1",
-    "web3": "^0.20.7"
+    "safe-event-emitter": "^1.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.1",
