@@ -218,7 +218,7 @@ export default {
       const self = this
       // hex message
       const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_sign',
           params: [this.publicAddress, message],
@@ -246,7 +246,7 @@ export default {
         },
       ]
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData',
           params: [typedData, this.publicAddress],
@@ -264,7 +264,7 @@ export default {
     signTypedData_v3() {
       const typedData = getV3TypedData(this.chainId)
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
           params: [this.publicAddress, JSON.stringify(typedData)],
@@ -281,7 +281,7 @@ export default {
     signTypedData_v4() {
       const typedData = getV4TypedData(this.chainId)
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v4',
           params: [this.publicAddress, JSON.stringify(typedData)],
@@ -384,17 +384,11 @@ export default {
   border: 1px solid black;
   height: 40px;
   padding: 2px;
-  bottom: 80px;
-  position: fixed;
   text-align: left;
   width: calc(100% - 20px);
   border-radius: 5px;
-}
-#console::before {
-  content: 'Console :';
-  position: fixed;
-  bottom: 130px;
-  font-size: 12px;
+  margin-top: 20px;
+  margin-bottom: 80px;
 }
 #console > p {
   margin: 0.5em;
