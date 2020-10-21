@@ -48,9 +48,7 @@
           </select>
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
-        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">
-          Get Public Address
-        </button>
+        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Blockchain Apis</h4>
