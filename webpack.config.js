@@ -23,9 +23,24 @@ const baseConfig = {
       lodash: path.resolve(__dirname, 'node_modules/lodash'),
       'js-sha3': path.resolve(__dirname, 'node_modules/js-sha3'),
     },
+    fallback: {
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      vm: require.resolve('vm-browserify'),
+      https: require.resolve('https-browserify'),
+      http: require.resolve('stream-http'),
+      url: require.resolve('url/'),
+      os: require.resolve('os-browserify/browser'),
+    },
   },
   module: {
     rules: [],
+  },
+  node: {
+    global: true,
+  },
+  experiments: {
+    outputModule: true,
   },
 }
 
@@ -84,18 +99,7 @@ const cjsConfig = {
   externals: [...externals, /^(@babel\/runtime)/i],
 }
 
-module.exports = [umdPolyfilledConfig, umdConfig, cjsConfig]
-// module.exports = [cjsConfig]
+// module.exports = [umdPolyfilledConfig, umdConfig, cjsConfig]
+module.exports = cjsConfig
 
 // V5
-// experiments: {
-//   outputModule: true
-// }
-
-// node: {
-//   global: true,
-// },
-// resolve: {
-//   alias: { crypto: 'crypto-browserify', stream: 'stream-browserify', vm: 'vm-browserify' },
-//   aliasFields: ['browser'],
-// },
