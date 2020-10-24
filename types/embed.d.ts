@@ -95,7 +95,7 @@ declare class Provider {
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
 type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai'
-type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | ''
+type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | 'mercuryo' | ''
 
 type LOGIN_TYPE =
   | 'google'
