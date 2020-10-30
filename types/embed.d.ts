@@ -173,10 +173,6 @@ interface LoginConfigItem {
    */
   mainOption?: boolean
   /**
-   * Whether to show the login button on mobile
-   */
-  showOnMobile?: boolean
-  /**
    * Whether to show the login button on desktop
    */
   showOnDesktop?: boolean
