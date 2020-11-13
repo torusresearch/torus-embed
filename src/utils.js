@@ -1,6 +1,6 @@
 import randomId from '@chaitanyapotti/random-id'
 import { get } from '@toruslabs/http-helpers'
-import { ethErrors, serializeError } from 'eth-json-rpc-errors'
+import { ethErrors, serializeError } from 'eth-rpc-errors'
 
 import { name, version } from '../package.json'
 import config from './config'

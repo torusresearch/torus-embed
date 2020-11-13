@@ -1,5 +1,3 @@
-import Web3 from 'web3'
-
 /**
  * Torus class
  */
@@ -9,10 +7,6 @@ declare class Torus {
    * @param args Constructor arguments used to initialize torus constructor
    */
   constructor(args: TorusCtorArgs)
-  /**
-   * web3 0.20.7 instance. {@link https://github.com/ethereum/wiki/wiki/JavaScript-API | Documentation}
-   */
-  web3: Web3
   /**
    * Ethereum provider instance
    */
@@ -101,7 +95,7 @@ declare class Provider {
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
 type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai'
-type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | ''
+type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | 'mercuryo' | ''
 
 type LOGIN_TYPE =
   | 'google'
@@ -172,10 +166,6 @@ interface LoginConfigItem {
    * Show login button on the main list
    */
   mainOption?: boolean
-  /**
-   * Whether to show the login button on mobile
-   */
-  showOnMobile?: boolean
   /**
    * Whether to show the login button on desktop
    */
