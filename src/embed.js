@@ -4,7 +4,6 @@ import { setAPIKey } from '@toruslabs/http-helpers'
 import TorusJs from '@toruslabs/torus.js'
 import deepmerge from 'deepmerge'
 import LocalMessageDuplexStream from 'post-message-stream'
-import Web3 from 'web3'
 
 import configuration from './config'
 import { handleStream, htmlToElement, runOnLoad } from './embedUtils'
@@ -67,7 +66,6 @@ class Torus {
     this.currentVerifier = ''
     this.enabledVerifiers = {}
     this.loginConfig = {}
-    this.Web3 = Web3
     this.torusAlert = {}
     this.nodeDetailManager = new NodeDetailManager()
     this.torusJs = new TorusJs({
@@ -546,23 +544,11 @@ class Torus {
         delete this.isLoginCallback
       }
     })
-    // if (typeof window.web3 !== 'undefined') {
-    //   console.log(`Torus detected another web3.
-    // Torus will not work reliably with another web3 extension.
-    // This usually happens if you have two Torus' installed,
-    // or Torus and another web3 extension. Please remove one
-    // and try again.`)
-    // }
 
     this.provider = proxiedInpageProvider
 
-    this.web3 = new Web3(proxiedInpageProvider)
-    this.web3.setProvider = () => {
-      log.debug('Torus - overrode web3.setProvider')
-    }
     if (this.provider.shouldSendMetadata) sendSiteMetadata(this.provider._rpcEngine)
-    // window.web3 = window.torus.web3
-    log.debug('Torus - injected web3')
+    log.debug('Torus - injected provider')
   }
 
   /** @ignore */

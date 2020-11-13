@@ -19,7 +19,12 @@
       </div>
       <button v-else @click="logout">Logout</button>
     </section>
-    <section v-if="publicAddress !== ''">
+    <section
+      :style="{
+        fontSize: '12px',
+      }"
+      v-if="publicAddress !== ''"
+    >
       <section>
         <div>
           Public Address:
@@ -43,9 +48,7 @@
           </select>
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
-        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">
-          Get Public Address
-        </button>
+        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Blockchain Apis</h4>
@@ -187,7 +190,7 @@ export default {
     },
     createPaymentTx() {
       window.torus
-        .initiateTopup('moonpay', {
+        .initiateTopup('mercuryo', {
           selectedCurrency: 'USD',
         })
         .then(console.log)
@@ -215,7 +218,7 @@ export default {
       const self = this
       // hex message
       const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_sign',
           params: [this.publicAddress, message],
@@ -243,7 +246,7 @@ export default {
         },
       ]
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData',
           params: [typedData, this.publicAddress],
@@ -261,7 +264,7 @@ export default {
     signTypedData_v3() {
       const typedData = getV3TypedData(this.chainId)
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v3',
           params: [this.publicAddress, JSON.stringify(typedData)],
@@ -278,7 +281,7 @@ export default {
     signTypedData_v4() {
       const typedData = getV4TypedData(this.chainId)
       const self = this
-      window.torus.web3.currentProvider.send(
+      window.web3.currentProvider.send(
         {
           method: 'eth_signTypedData_v4',
           params: [this.publicAddress, JSON.stringify(typedData)],
@@ -381,17 +384,11 @@ export default {
   border: 1px solid black;
   height: 40px;
   padding: 2px;
-  bottom: 10px;
-  position: absolute;
   text-align: left;
   width: calc(100% - 20px);
   border-radius: 5px;
-}
-#console::before {
-  content: 'Console :';
-  position: absolute;
-  top: -20px;
-  font-size: 12px;
+  margin-top: 20px;
+  margin-bottom: 80px;
 }
 #console > p {
   margin: 0.5em;
