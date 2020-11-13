@@ -190,7 +190,7 @@ export default {
     },
     createPaymentTx() {
       window.torus
-        .initiateTopup('moonpay', {
+        .initiateTopup('mercuryo', {
           selectedCurrency: 'USD',
         })
         .then(console.log)
