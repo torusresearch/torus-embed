@@ -290,10 +290,10 @@ class Torus {
       this.torusIframe.remove()
       this.torusIframe = {}
     }
-    if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
-      this.torusAlertContainer.style.display = 'none'
-      this.torusAlert.remove()
+    if (isElement(this.torusAlertContainer) && window.document.body.contains(this.torusAlertContainer)) {
       this.torusAlert = {}
+      this.torusAlertContainer.remove()
+      this.torusAlertContainer = {}
     }
     this.isInitalized = false
   }
