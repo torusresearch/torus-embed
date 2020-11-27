@@ -32,7 +32,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-s9QKcaqkZE+WPTbFVDGFhYurOOXdt0PKRnWgmUgy7UakbPw8btS49VDgF6ee7Yna'
+const iframeIntegrity = 'sha384-oWug5wEqpriD2EOlb26t2eqR830VnOtI8U7J9F7V9v9Q5j9EwfD6sr0OjuxWZ+dI'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -290,10 +290,10 @@ class Torus {
       this.torusIframe.remove()
       this.torusIframe = {}
     }
-    if (isElement(this.torusAlert) && window.document.body.contains(this.torusAlert)) {
-      this.torusAlertContainer.style.display = 'none'
-      this.torusAlert.remove()
+    if (isElement(this.torusAlertContainer) && window.document.body.contains(this.torusAlertContainer)) {
       this.torusAlert = {}
+      this.torusAlertContainer.remove()
+      this.torusAlertContainer = {}
     }
     this.isInitalized = false
   }
