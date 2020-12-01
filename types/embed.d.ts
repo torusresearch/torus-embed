@@ -89,8 +89,14 @@ export as namespace Torus
 
 export = Torus
 
+import {
+  JsonRpcPayload,
+  JsonRpcResponse
+} from 'web3-core-helpers'
+
 declare class Provider {
-  send(payload: JsonRPCRequest, callback: Callback<JsonRPCResponse>): any
+  sendAsync(payload: JsonRpcPayload, callback: (error: Error | null, result?: JsonRpcResponse) => void): void;
+  send(payload: JsonRpcPayload, callback: Callback<JsonRpcResponse>): any
 }
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
@@ -300,7 +306,7 @@ interface TorusParams {
    * staging uses https://staging.tor.us,
    *
    * lrc uses https://lrc.tor.us,
-   * 
+   *
    * beta uses https://beta.tor.us, (currently supports tkey)
    *
    * testing uses https://testing.tor.us (latest internal build)
