@@ -65,6 +65,15 @@
           <button @click="sendDai">Send DAI</button>
           <button @click="approveKnc">Approve Knc</button>
         </section>
+        <section>
+          <h5>Encrypt / Decrypt</h5>
+          <button @click="getEncryptionKey">Get Encryption Key</button>
+          <div>
+            <input :style="{ marginReft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
+            <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
+          </div>
+          <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
+        </section>
       </section>
     </section>
     <div id="console">
@@ -75,6 +84,8 @@
 
 <script>
 import Torus from '@toruslabs/torus-embed'
+import { encrypt } from 'eth-sig-util'
+import { ethers } from 'ethers'
 import tokenAbi from 'human-standard-token-abi'
 import Web3 from 'web3'
 
@@ -97,6 +108,10 @@ export default {
         5: 'goerli',
         42: 'kovan',
       },
+      messageToEncrypt: '',
+      encryptionKey: '',
+      messageEncrypted: '',
+      messageDecrypted: '',
     }
   },
   methods: {
@@ -366,6 +381,48 @@ export default {
     getPublicAddress() {
       console.log(this.selectedVerifier, this.verifierId)
       window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console).catch(console.error)
+    },
+    getEncryptionKey() {
+      const self = this
+      window.web3.currentProvider.send(
+        {
+          method: 'eth_getEncryptionPublicKey',
+          params: [this.publicAddress],
+        },
+        (err, result) => {
+          if (err) {
+            return console.error(err)
+          }
+          self.encryptionKey = result.result
+          return self.console(`encryption public key => ${result.result}`)
+        }
+      )
+    },
+    encryptMessage() {
+      try {
+        this.messageEncrypted = encrypt(this.encryptionKey, { data: this.messageToEncrypt }, 'x25519-xsalsa20-poly1305')
+        const hexMessage = this.stringifiableToHex(this.messageEncrypted)
+        this.console(`encrypted message => ${hexMessage}`)
+      } catch (error) {}
+    },
+    decryptMessage() {
+      const self = this
+      window.web3.currentProvider.send(
+        {
+          method: 'eth_decrypt',
+          params: [self.messageEncrypted, this.publicAddress],
+        },
+        (err, result) => {
+          if (err) {
+            return console.error(err)
+          }
+          self.messageDecrypted = result.result
+          return self.console(`decrypted message => ${result.result}`)
+        }
+      )
+    },
+    stringifiableToHex(value) {
+      return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)))
     },
   },
 }
