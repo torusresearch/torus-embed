@@ -400,9 +400,9 @@ export default {
     },
     encryptMessage() {
       try {
-        this.messageEncrypted = encrypt(this.encryptionKey, { data: this.messageToEncrypt }, 'x25519-xsalsa20-poly1305')
-        const hexMessage = this.stringifiableToHex(this.messageEncrypted)
-        this.console(`encrypted message => ${hexMessage}`)
+        const messageEncrypted = encrypt(this.encryptionKey, { data: this.messageToEncrypt }, 'x25519-xsalsa20-poly1305')
+        this.messageEncrypted = this.stringifiableToHex(messageEncrypted)
+        this.console(`encrypted message => ${this.messageEncrypted}`)
       } catch (error) {}
     },
     decryptMessage() {
@@ -410,7 +410,7 @@ export default {
       window.web3.currentProvider.send(
         {
           method: 'eth_decrypt',
-          params: [self.messageEncrypted, this.publicAddress],
+          params: [this.messageEncrypted, this.publicAddress],
         },
         (err, result) => {
           if (err) {
