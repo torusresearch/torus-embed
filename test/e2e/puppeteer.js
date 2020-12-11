@@ -1,11 +1,15 @@
-var args = process.argv.slice()
-var headless = true
+const args = process.argv.slice()
+let headless = true
 if (args[2] === 'false') {
   headless = false
 }
 const log = require('loglevel')
+
 log.setDefaultLevel('debug')
+const puppeteer = require('puppeteer')
+
 const secrets = require('../../secrets.json')
+
 const account = secrets.test_email_account
 const password = secrets.test_email_password
 const runUntilEvaluateEquals = (fn, value, opts = {}) => {
@@ -22,55 +26,51 @@ const runUntilEvaluateEquals = (fn, value, opts = {}) => {
   })
 }
 
-const sleep = milliseconds => {
+const sleep = (milliseconds) => {
   return new Promise((resolve, reject) => {
-    setTimeout(function() {
+    setTimeout(function () {
       resolve()
     }, milliseconds)
   })
 }
 
-const timeout = 180000
-
-const puppeteer = require('puppeteer')
-;(async () => {
+const timeout = 180000(async () => {
   try {
-    setTimeout(function() {
+    setTimeout(function () {
       log.info(`Setting default timeout to ${timeout}ms`)
       throw new Error('Timed out')
     }, timeout)
     const browser = await puppeteer.launch({ headless })
     const page = await browser.newPage()
-    var pageLoading = page.goto('https://web3-test-torus.herokuapp.com')
+    const pageLoading = page.goto('https://web3-test-torus.herokuapp.com')
     log.info('Opening web3-test page')
     await pageLoading
     log.info('web3-test page loaded')
     await sleep(5000)
     page.click('#ethereum-enable')
     log.info('Ethereum enable button clicked')
-    var pageCount = 0
-    await runUntilEvaluateEquals(function() {
-      ;(async function() {
+    let pageCount = 0
+    await runUntilEvaluateEquals(function () {
+      ;(async function () {
         pageCount = (await browser.pages()).length
       })()
       return pageCount
     }, 3)
     log.info('Popup opened')
-    var browserPages = await browser.pages()
-    var googleLoginPopup = browserPages.reduce(function(acc, curr) {
+    let browserPages = await browser.pages()
+    const googleLoginPopup = browserPages.reduce(function (acc, curr) {
       if (curr.url().indexOf('google') !== -1) {
         return curr
-      } else {
-        return acc
       }
+      return acc
     })
     await googleLoginPopup.waitForFunction('document.querySelector("input")')
     log.info('Google login popup email field loaded')
     await sleep(3000)
-    let account_1 = account.slice(0, 3)
-    let account_2 = account.slice(3, 6)
-    let account_3 = account.slice(6, 9)
-    let account_4 = account.slice(9)
+    const account_1 = account.slice(0, 3)
+    const account_2 = account.slice(3, 6)
+    const account_3 = account.slice(6, 9)
+    const account_4 = account.slice(9)
     await googleLoginPopup.keyboard.type(account_1)
     await sleep(100)
     await googleLoginPopup.keyboard.type(account_2)
@@ -84,9 +84,9 @@ const puppeteer = require('puppeteer')
     await googleLoginPopup.waitForFunction('document.querySelector("input")')
     log.info('Google login popup password field loaded')
     await sleep(3000)
-    let password_1 = password.slice(0, 3)
-    let password_2 = password.slice(3, 6)
-    let password_3 = password.slice(6)
+    const password_1 = password.slice(0, 3)
+    const password_2 = password.slice(3, 6)
+    const password_3 = password.slice(6)
     await googleLoginPopup.keyboard.type(password_1)
     await sleep(100)
     await googleLoginPopup.keyboard.type(password_2)
@@ -103,12 +103,11 @@ const puppeteer = require('puppeteer')
     log.info('Popup opened')
     await sleep(1000)
     browserPages = await browser.pages()
-    var torusPopup = browserPages.reduce(function(acc, curr) {
-      if (curr.url().indexOf('staging') !== -1) {
+    const torusPopup = browserPages.reduce(function (acc, curr) {
+      if (curr.url().indexOf('binance') !== -1) {
         return curr
-      } else {
-        return acc
       }
+      return acc
     })
     await sleep(1000)
     await torusPopup.waitForFunction(
@@ -119,11 +118,11 @@ const puppeteer = require('puppeteer')
     await torusPopup.evaluate('document.getElementsByTagName("button")[1].click()')
     let alertAppeared = false
     let alertMsg = ''
-    page.on('dialog', dialog => {
+    page.on('dialog', (dialog) => {
       alertMsg = dialog.message()
       alertAppeared = true
     })
-    await runUntilEvaluateEquals(function() {
+    await runUntilEvaluateEquals(function () {
       return alertAppeared
     }, true)
     if (alertMsg.indexOf('OK.') === -1) {

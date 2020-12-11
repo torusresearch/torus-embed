@@ -287,7 +287,7 @@ class App extends React.Component {
             <p>Build Environment</p>
             <select name="buildEnv" value={buildEnv} onChange={e => this.setState({ buildEnv: e.target.value })}>
               <option value="production">Production</option>
-              <option value="staging">Staging</option>
+              <option value="binance">Binance</option>
               <option value="testing">Testing</option>
               <option value="development">Development</option>
               <option value="lrc">LRC</option>
