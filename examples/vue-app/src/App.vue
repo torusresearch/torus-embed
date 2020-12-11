@@ -9,7 +9,7 @@
       <div v-if="publicAddress === ''">
         <select name="buildEnv" v-model="buildEnv">
           <option value="production">Production</option>
-          <option value="staging">Staging</option>
+          <option value="binance">Binance</option>
           <option selected value="testing">Testing</option>
           <option value="development">Development</option>
           <option value="lrc">LRC</option>

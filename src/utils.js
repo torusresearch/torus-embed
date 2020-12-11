@@ -105,7 +105,7 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   let logLevel
   let versionUsed = integrity.version || version
   try {
-    if ((buildEnv === 'staging' || buildEnv === 'production') && !integrity.version) {
+    if ((buildEnv === 'binance' || buildEnv === 'production') && !integrity.version) {
       const response = await get(`${config.api}/latestversion?name=${name}&version=${version}`, {}, { useAPIKey: true })
       versionUsed = response.data
     }
@@ -114,8 +114,8 @@ export const getTorusUrl = async (buildEnv, integrity) => {
   }
   log.info('version used: ', versionUsed)
   switch (buildEnv) {
-    case 'staging':
-      torusUrl = `https://staging.tor.us/v${versionUsed}`
+    case 'binance':
+      torusUrl = `https://binance.tor.us/v${versionUsed}`
       logLevel = 'info'
       break
     case 'testing':
