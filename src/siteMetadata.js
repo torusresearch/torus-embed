@@ -69,12 +69,10 @@ async function getSiteIcon(window) {
  * Gets site metadata and returns it
  *
  */
-const getSiteMetadata = async () => {
-  return {
-    name: getSiteName(window),
-    icon: await getSiteIcon(window),
-  }
-}
+const getSiteMetadata = async () => ({
+  name: getSiteName(window),
+  icon: await getSiteIcon(window),
+})
 
 /**
  * Sends site metadata over an RPC request.

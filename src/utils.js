@@ -56,26 +56,24 @@ export const validatePaymentProvider = (provider, params) => {
  *
  * @returns {Function} json-rpc-engine middleware function
  */
-export const createErrorMiddleware = () => {
-  return (req, res, next) => {
-    // json-rpc-engine will terminate the request when it notices this error
-    if (!req.method || typeof req.method !== 'string') {
-      res.error = ethErrors.rpc.invalidRequest({
-        message: 'The request `method` must be a non-empty string.',
-        data: req,
-      })
-    }
-
-    next((done) => {
-      const { error } = res
-      if (!error) {
-        return done()
-      }
-      serializeError(error)
-      log.error(`MetaMask - RPC Error: ${error.message}`, error)
-      return done()
+export const createErrorMiddleware = () => (req, res, next) => {
+  // json-rpc-engine will terminate the request when it notices this error
+  if (!req.method || typeof req.method !== 'string') {
+    res.error = ethErrors.rpc.invalidRequest({
+      message: 'The request `method` must be a non-empty string.',
+      data: req,
     })
   }
+
+  next((done) => {
+    const { error } = res
+    if (!error) {
+      return done()
+    }
+    serializeError(error)
+    log.error(`MetaMask - RPC Error: ${error.message}`, error)
+    return done()
+  })
 }
 
 /**
@@ -96,9 +94,7 @@ export function logStreamDisconnectWarning(remoteLabel, err) {
   }
 }
 
-export const getPreopenInstanceId = () => {
-  return randomId()
-}
+export const getPreopenInstanceId = () => randomId()
 
 export const getTorusUrl = async (buildEnv, integrity) => {
   let torusUrl
