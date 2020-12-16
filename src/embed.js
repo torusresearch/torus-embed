@@ -299,7 +299,7 @@ class Torus {
   }
 
   /** @ignore */
-  _createPopupBlockAlert(preopenInstanceId) {
+  _createPopupBlockAlert(preopenInstanceId, url) {
     const logoUrl = this._getLogoUrl()
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert--v2">' +
@@ -318,6 +318,7 @@ class Torus {
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
+          url,
           target: '_blank',
           features: FEATURES_CONFIRM_WINDOW,
         })
@@ -519,7 +520,7 @@ class Torus {
     const windowStream = communicationMux.getStream('window')
     windowStream.on('data', (chunk) => {
       if (chunk.name === 'create_window') {
-        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId, chunk.data.url)
       }
     })
 
@@ -724,10 +725,10 @@ class Torus {
   }
 
   /** @ignore */
-  _handleWindow(preopenInstanceId, { target, features } = {}) {
+  _handleWindow(preopenInstanceId, { url, target, features } = {}) {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream('window')
-      const finalUrl = `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`
+      const finalUrl = url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`
       const handledWindow = new PopupHandler({ url: finalUrl, target, features })
       handledWindow.open()
       if (!handledWindow.window) {
