@@ -520,6 +520,8 @@ class Torus {
     const windowStream = communicationMux.getStream('window')
     windowStream.on('data', (chunk) => {
       if (chunk.name === 'create_window') {
+        // url is the url we need to open
+        // we can pass the final url upfront so that it removes the step of redirecting to /redirect and waiting for finalUrl
         this._createPopupBlockAlert(chunk.data.preopenInstanceId, chunk.data.url)
       }
     })
