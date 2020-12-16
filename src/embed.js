@@ -732,7 +732,7 @@ class Torus {
       const handledWindow = new PopupHandler({ url: finalUrl, target, features })
       handledWindow.open()
       if (!handledWindow.window) {
-        this._createPopupBlockAlert(preopenInstanceId)
+        this._createPopupBlockAlert(preopenInstanceId, finalUrl)
         return
       }
       windowStream.write({
