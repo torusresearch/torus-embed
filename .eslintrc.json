@@ -19,7 +19,8 @@
   },
   "rules": {
     "no-restricted-syntax": 0,
-    "simple-import-sort/sort": "error",
+    "simple-import-sort/imports": "error",
+    "simple-import-sort/exports": "error",
     "operator-linebreak": 0,
     "object-curly-newline": 0,
     "semi": [2, "never"],

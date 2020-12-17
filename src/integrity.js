@@ -1,17 +1,13 @@
 import createHash from 'create-hash/browser'
 
-const defaults = (options) => {
-  return {
-    algorithms: options.algorithms || ['sha256'],
-    delimiter: options.delimiter || ' ',
-    full: options.full || false,
-  }
-}
+const defaults = (options) => ({
+  algorithms: options.algorithms || ['sha256'],
+  delimiter: options.delimiter || ' ',
+  full: options.full || false,
+})
 
 // Generate hash
-const digest = (algorithm, data) => {
-  return createHash(algorithm).update(data, 'utf8').digest('base64')
-}
+const digest = (algorithm, data) => createHash(algorithm).update(data, 'utf8').digest('base64')
 // Generate list of hashes
 const hashes = (options, data) => {
   const internalHashes = {}

@@ -1,5 +1,5 @@
-export const runOnLoad = (fn) => {
-  return new Promise((resolve, reject) => {
+export const runOnLoad = (fn) =>
+  new Promise((resolve, reject) => {
     if (window.document.body != null) {
       Promise.resolve(fn()).then(resolve).catch(reject)
     } else {
@@ -8,7 +8,6 @@ export const runOnLoad = (fn) => {
       })
     }
   })
-}
 
 export const runOnComplete = (fn) => {
   const retry = window.setInterval(() => {
