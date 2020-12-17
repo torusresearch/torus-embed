@@ -32,7 +32,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-AWNT3vNZDN9pNim/t1h8zS5JzY4kFbkJRe5cS2Df91/c7jo9ycsUR0T/4Rzc2rLS'
+const iframeIntegrity = 'sha384-MvX9MS6hvpe3GUOSU9AfVDm5m7iZL9v6nJ3YpWgUOHiBL2aKrMr0R3IzbC+ats/c'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -299,7 +299,7 @@ class Torus {
   }
 
   /** @ignore */
-  _createPopupBlockAlert(preopenInstanceId) {
+  _createPopupBlockAlert(preopenInstanceId, url) {
     const logoUrl = this._getLogoUrl()
     const torusAlert = htmlToElement(
       '<div id="torusAlert" class="torus-alert--v2">' +
@@ -318,6 +318,7 @@ class Torus {
     const bindOnLoad = () => {
       successAlert.addEventListener('click', () => {
         this._handleWindow(preopenInstanceId, {
+          url,
           target: '_blank',
           features: FEATURES_CONFIRM_WINDOW,
         })
@@ -519,7 +520,9 @@ class Torus {
     const windowStream = communicationMux.getStream('window')
     windowStream.on('data', (chunk) => {
       if (chunk.name === 'create_window') {
-        this._createPopupBlockAlert(chunk.data.preopenInstanceId)
+        // url is the url we need to open
+        // we can pass the final url upfront so that it removes the step of redirecting to /redirect and waiting for finalUrl
+        this._createPopupBlockAlert(chunk.data.preopenInstanceId, chunk.data.url)
       }
     })
 
@@ -724,14 +727,14 @@ class Torus {
   }
 
   /** @ignore */
-  _handleWindow(preopenInstanceId, { target, features } = {}) {
+  _handleWindow(preopenInstanceId, { url, target, features } = {}) {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream('window')
-      const finalUrl = `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`
+      const finalUrl = url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`
       const handledWindow = new PopupHandler({ url: finalUrl, target, features })
       handledWindow.open()
       if (!handledWindow.window) {
-        this._createPopupBlockAlert(preopenInstanceId)
+        this._createPopupBlockAlert(preopenInstanceId, finalUrl)
         return
       }
       windowStream.write({

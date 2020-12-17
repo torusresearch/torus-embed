@@ -1,9 +1,8 @@
 import { ethErrors } from 'eth-rpc-errors'
 import dequal from 'fast-deep-equal'
 import { duplex as isDuplex } from 'is-stream'
-import RpcEngine from 'json-rpc-engine'
-import createIdRemapMiddleware from 'json-rpc-engine/src/idRemapMiddleware'
-import createJsonRpcStream from 'json-rpc-middleware-stream'
+import { createIdRemapMiddleware, JsonRpcEngine as RpcEngine } from 'json-rpc-engine'
+import { createStreamMiddleware } from 'json-rpc-middleware-stream'
 import ObjectMultiplex from 'obj-multiplex'
 import ObservableStore from 'obs-store'
 import asStream from 'obs-store/lib/asStream'
@@ -162,7 +161,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
 
     // connect to async provider
 
-    const jsonRpcConnection = createJsonRpcStream()
+    const jsonRpcConnection = createStreamMiddleware()
     pump(jsonRpcConnection.stream, mux.createStream('provider'), jsonRpcConnection.stream, this._handleDisconnect.bind(this, 'MetaMask RpcProvider'))
 
     // handle RPC requests via dapp-side rpc engine
