@@ -100,7 +100,7 @@ declare class Provider {
 }
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
-type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai'
+type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai' | 'xdai' | 'bsc_mainnet' | 'bsc_testnet'
 type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | 'mercuryo' | ''
 
 type LOGIN_TYPE =
@@ -422,6 +422,10 @@ interface LocaleLinks<T> {
    * Item corresponding to chinese (simplified)
    */
   zh?: T;
+  /**
+   * Item corresponding to spanish
+   */
+  es?: T;
 }
 
 interface ThemeParams {
