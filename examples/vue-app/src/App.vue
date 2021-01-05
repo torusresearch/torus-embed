@@ -54,6 +54,7 @@
         <h4>Blockchain Apis</h4>
         <section>
           <h5>Signing</h5>
+          <button @click="signPersonalMsg">personal_sign</button>
           <button @click="signMessage">sign_eth</button>
           <button @click="signTypedData_v1">sign typed data v1</button>
           <button @click="signTypedData_v3">sign typed data v3</button>
@@ -309,6 +310,19 @@ export default {
           return self.console('sign typed message v4 => true \n', result)
         }
       )
+    },
+    async signPersonalMsg() {
+      try {
+        const message = 'Some string'
+        const hash = window.web3.utils.sha3(message)
+        const sig = await window.web3.eth.personal.sign(hash, this.publicAddress)
+        const originalAddress = await window.web3.eth.personal.ecRecover(hash, sig)
+        if (this.publicAddress.toLowerCase() === originalAddress.toLowerCase()) this.console('Success')
+        else this.console('Failed')
+      } catch (error) {
+        console.error(error)
+        this.console('failed')
+      }
     },
     logout() {
       window.torus
