@@ -54,6 +54,7 @@
         <h4>Blockchain Apis</h4>
         <section>
           <h5>Signing</h5>
+          <button @click="signMessageWithoutPopup">sign_eth_no_popup</button>
           <button @click="signPersonalMsg">personal_sign</button>
           <button @click="signMessage">sign_eth</button>
           <button @click="signTypedData_v1">sign typed data v1</button>
@@ -87,6 +88,7 @@
 import Torus from '@toruslabs/torus-embed'
 import { encrypt } from 'eth-sig-util'
 import { ethers } from 'ethers'
+import { keccak256 } from 'ethers/lib/utils'
 import tokenAbi from 'human-standard-token-abi'
 import Web3 from 'web3'
 
@@ -230,6 +232,27 @@ export default {
       //   .then((resp) => this.console(resp))
       //   .catch(console.error)
     },
+    signMessageWithoutPopup() {
+      const self = this
+      // hex message
+      const message = 'Hello world'
+      const customPrefix = `\u0019${window.location.hostname} Signed Message:\n`
+      const prefixWithLength = Buffer.from(`${customPrefix}${message.length.toString()}`, 'utf-8')
+      const hashedMsg = keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]))
+      window.web3.currentProvider.send(
+        {
+          method: 'eth_sign',
+          params: [this.publicAddress, hashedMsg, { customPrefix, customMessage: message }],
+          from: this.publicAddress,
+        },
+        (err, result) => {
+          if (err) {
+            return console.error(err)
+          }
+          return self.console('sign message => true \n', result)
+        }
+      )
+    },
     signMessage() {
       const self = this
       // hex message
@@ -316,8 +339,8 @@ export default {
         const message = 'Some string'
         const hash = window.web3.utils.sha3(message)
         const sig = await window.web3.eth.personal.sign(hash, this.publicAddress)
-        const originalAddress = await window.web3.eth.personal.ecRecover(hash, sig)
-        if (this.publicAddress.toLowerCase() === originalAddress.toLowerCase()) this.console('Success')
+        const hostnamealAddress = await window.web3.eth.personal.ecRecover(hash, sig)
+        if (this.publicAddress.toLowerCase() === hostnamealAddress.toLowerCase()) this.console('Success')
         else this.console('Failed')
       } catch (error) {
         console.error(error)

@@ -36,7 +36,7 @@ const iframeIntegrity = 'sha384-rx0hFSJK8hLFFoJBW2kqApqrtQhWoYS6pH95ie1JrX7oLOsT
 
 const expectedCacheControlHeader = 'max-age=3600'
 
-const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_sign', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
+const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
 
 let thirdPartyCookiesSupported = true
 
