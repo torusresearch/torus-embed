@@ -32,11 +32,11 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-Lz+sUoAfwhvEU9N9cWGilk1wz5F37xhASjvJfIhtDUvPpbUgu41ZTXN2RCZeHHC5'
+const iframeIntegrity = 'sha384-rx0hFSJK8hLFFoJBW2kqApqrtQhWoYS6pH95ie1JrX7oLOsTB4iMzv1NwAEypaLB'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
-const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_sign', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
+const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
 
 let thirdPartyCookiesSupported = true
 
