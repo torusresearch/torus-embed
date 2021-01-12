@@ -249,7 +249,10 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign message => true \n', result)
+          const signerAddress = ethers.utils.recoverAddress(hashedMsg, result.result)
+          return self.console(
+            `sign message => true, message: ${prefixWithLength + message}, msgHash: ${hashedMsg}, sig: ${result.result}, signer: ${signerAddress}`
+          )
         }
       )
     },
