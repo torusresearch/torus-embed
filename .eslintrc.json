@@ -11,7 +11,7 @@
     "airbnb-base",
     "prettier"
   ],
-  "plugins": ["prettier", "babel", "standard", "promise", "import", "flowtype", "standard", "simple-import-sort"],
+  "plugins": ["prettier", "babel", "promise", "import", "flowtype", "simple-import-sort"],
   "parser": "babel-eslint",
   "parserOptions": {
     "sourceType": "module",
