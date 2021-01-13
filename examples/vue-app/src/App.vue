@@ -37,6 +37,7 @@
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Torus Specific Info</h4>
+        <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
         <button @click="changeProvider">Change Provider</button>
@@ -78,8 +79,8 @@
         </section>
       </section>
     </section>
-    <div id="console">
-      <p></p>
+    <div id="console" style="white-space: pre-line">
+      <p style="white-space: pre-line"></p>
     </div>
   </div>
 </template>
@@ -203,8 +204,15 @@ export default {
         console.error(error)
       }
     },
-    console(text) {
-      document.querySelector('#console>p').innerHTML = typeof text === 'object' ? JSON.stringify(text) : text
+    toggleTorusWidget() {
+      if (window.torus.torusWidgetVisibility) {
+        window.torus.hideTorusButton()
+      } else {
+        window.torus.showTorusButton()
+      }
+    },
+    console(...args) {
+      document.querySelector('#console>p').innerHTML = JSON.stringify(args || {}, null, 2)
     },
     createPaymentTx() {
       window.torus
@@ -249,7 +257,14 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign message => true \n', result)
+          const signerAddress = ethers.utils.recoverAddress(hashedMsg, result.result)
+          return self.console(
+            'sign message => true',
+            `message: ${prefixWithLength + message}`,
+            `msgHash: ${hashedMsg}`,
+            `sig: ${result.result}`,
+            `signer: ${signerAddress}`
+          )
         }
       )
     },
@@ -267,7 +282,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign message => true \n', result)
+          return self.console('sign message => true', result)
         }
       )
     },
@@ -295,7 +310,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v1 => true \n', result)
+          return self.console('sign typed message v1 => true', result)
         }
       )
     },
@@ -313,7 +328,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v3 => true \n', result)
+          return self.console('sign typed message v3 => true', result)
         }
       )
     },
@@ -330,7 +345,7 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v4 => true \n', result)
+          return self.console('sign typed message v4 => true', result)
         }
       )
     },
@@ -475,7 +490,7 @@ export default {
   margin-top: 60px;
 }
 #console {
-  border: 1px solid black;
+  border: 0px solid black;
   height: 40px;
   padding: 2px;
   text-align: left;
