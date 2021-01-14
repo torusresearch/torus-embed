@@ -325,7 +325,7 @@ class MetamaskInpageProvider extends SafeEventEmitter {
         }
       }
     }
-    this.emit('rpcRequest', _payload, cb)
+    this.tryPreopenHandle(_payload, cb)
   }
 
   /**
