@@ -9,7 +9,7 @@ import configuration from './config'
 import { handleStream, htmlToElement, runOnLoad } from './embedUtils'
 import MetamaskInpageProvider from './inpage-provider'
 import generateIntegrity from './integrity'
-import log from './loglevel'
+import log, { sentry } from './loglevel'
 import PopupHandler from './PopupHandler'
 import { sendSiteMetadata } from './siteMetadata'
 import { setupMultiplex } from './stream-utils'
@@ -84,6 +84,7 @@ class Torus {
   async init({
     buildEnv = 'production',
     enableLogging = false,
+    enableErrorTracking = false,
     // deprecated: use loginConfig instead
     enabledVerifiers = defaultVerifiers,
     network = {
@@ -110,6 +111,7 @@ class Torus {
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
     else log.disableAll()
+    sentry.setEnabled(enableErrorTracking)
     this.torusWidgetVisibility = showTorusButton
     // Iframe code
     this.torusIframe = htmlToElement(
