@@ -1,9 +1,12 @@
 const path = require('path')
+const webpack = require('webpack')
+
+const pkg = require('./package.json')
 
 const pkgName = 'torus'
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1)
 
-const externals = ['@chaitanyapotti/random-id', 'fast-deep-equal', 'loglevel', 'deepmerge']
+const externals = ['@chaitanyapotti/random-id', '@toruslabs/loglevel-sentry', 'fast-deep-equal', 'loglevel', 'deepmerge']
 
 const { NODE_ENV = 'production' } = process.env
 
@@ -27,6 +30,11 @@ const baseConfig = {
   module: {
     rules: [],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.SENTRY_RELEASE': JSON.stringify(`torus-embed@v${pkg.version}`),
+    }),
+  ],
 }
 
 const eslintLoader = {
