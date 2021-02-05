@@ -53,6 +53,21 @@ const receiveMessage = (evt) => {
 }
 window.addEventListener('message', receiveMessage, false)
 
+// preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
+;(async function preLoadIframe() {
+  const torusIframeHtml = document.createElement('link')
+  const { torusUrl } = await getTorusUrl('production', { check: false, hash: iframeIntegrity, version: '' })
+  torusIframeHtml.href = `${torusUrl}/popup`
+  torusIframeHtml.crossOrigin = 'anonymous'
+  torusIframeHtml.type = 'text/html'
+  torusIframeHtml.rel = 'prefetch'
+  if (torusIframeHtml.relList && torusIframeHtml.relList.supports) {
+    if (torusIframeHtml.relList.supports('prefetch')) {
+      document.head.appendChild(torusIframeHtml)
+    }
+  }
+})()
+
 class Torus {
   constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999, apiKey = 'torus-default' } = {}) {
     this.buttonPosition = buttonPosition
