@@ -32,7 +32,7 @@ const defaultVerifiers = {
   [DISCORD]: true,
 }
 
-const iframeIntegrity = 'sha384-wCkOidRl6v4dUboJkCUH0vqA/r6gLv4LvXpvl9yci2CwqfPj0AaslGgpizRDWSgD'
+const iframeIntegrity = 'sha384-B0Z/dG9ASDdYUny7VD3AFEXT/X3LAJ9DcvsF5pUYlonaxN/5UhK4jPujYTY04ted'
 
 const expectedCacheControlHeader = 'max-age=3600'
 
@@ -52,6 +52,25 @@ const receiveMessage = (evt) => {
   }
 }
 window.addEventListener('message', receiveMessage, false)
+
+// preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
+;(async function preLoadIframe() {
+  try {
+    const torusIframeHtml = document.createElement('link')
+    const { torusUrl } = await getTorusUrl('production', { check: false, hash: iframeIntegrity, version: '' })
+    torusIframeHtml.href = `${torusUrl}/popup`
+    torusIframeHtml.crossOrigin = 'anonymous'
+    torusIframeHtml.type = 'text/html'
+    torusIframeHtml.rel = 'prefetch'
+    if (torusIframeHtml.relList && torusIframeHtml.relList.supports) {
+      if (torusIframeHtml.relList.supports('prefetch')) {
+        document.head.appendChild(torusIframeHtml)
+      }
+    }
+  } catch (error) {
+    log.warn(error)
+  }
+})()
 
 class Torus {
   constructor({ buttonPosition = 'bottom-left', modalZIndex = 99999, apiKey = 'torus-default' } = {}) {
