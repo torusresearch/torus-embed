@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "1.9.10",
+  "version": "1.9.11",
   "description": "Embed script for Torus",
   "main": "dist/torus.cjs.js",
   "unpkg": "dist/torus.umd.min.js",
