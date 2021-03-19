@@ -502,6 +502,18 @@ interface NetworkInterface {
    * Name of the network
    */
   networkName?: string
+  /**
+   * Url of the block explorer
+   */
+  blockExplorer?: string,
+  /**
+   * Default currency ticker of the network (e.g: BNB)
+   */
+  ticker?: string,
+  /**
+   * Name for currency ticker (e.g: `Binance Coin`)
+   */
+  tickerName?: string,
 }
 
 interface JsonRPCResponse {

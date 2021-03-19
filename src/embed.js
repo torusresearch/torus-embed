@@ -109,6 +109,9 @@ class Torus {
       host: 'mainnet',
       chainId: null,
       networkName: '',
+      blockExplorer: '',
+      ticker: '',
+      tickerName: '',
     },
     loginConfig = {},
     showTorusButton = true,
@@ -600,7 +603,7 @@ class Torus {
     }
   }
 
-  setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
+  setProvider({ host = 'mainnet', chainId = null, networkName = '', ...rest } = {}) {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream('provider_change')
       const handler = (chunk) => {
@@ -625,6 +628,7 @@ class Torus {
             host,
             chainId,
             networkName,
+            ...rest,
           },
           type: configuration.networkList.includes(host) ? undefined : 'rpc',
           preopenInstanceId,
@@ -635,7 +639,7 @@ class Torus {
   }
 
   /** @ignore */
-  _setProvider({ host = 'mainnet', chainId = null, networkName = '' } = {}) {
+  _setProvider({ host = 'mainnet', chainId = null, networkName = '', ...rest } = {}) {
     return new Promise((resolve, reject) => {
       if (!this.isInitalized) {
         const providerChangeStream = this.communicationMux.getStream('provider_change')
@@ -656,6 +660,7 @@ class Torus {
               host,
               chainId,
               networkName,
+              ...rest,
             },
             type: configuration.networkList.includes(host) ? undefined : 'rpc',
             override: true,
