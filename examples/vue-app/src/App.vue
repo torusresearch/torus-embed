@@ -151,6 +151,11 @@ export default {
           network: {
             host: this.chainIdNetworkMap[this.chainId], // mandatory
             chainId: this.chainId,
+            // chainId: 336,
+            // networkName: 'DES Network',
+            // host: 'https://quorum.block360.io/https',
+            // ticker: 'DES',
+            // tickerName: 'DES Coin',
           },
           showTorusButton: true,
           // integrity: {
