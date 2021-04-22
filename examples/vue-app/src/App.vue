@@ -159,7 +159,7 @@ export default {
           },
           showTorusButton: true,
           integrity: {
-            version: '1.9.16'
+            version: '1.9.16',
             // check: true,
             // version: '1.4.2',
             // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
