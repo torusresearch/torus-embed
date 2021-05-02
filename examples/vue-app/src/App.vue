@@ -172,6 +172,7 @@ export default {
             }),
           },
           whiteLabel: whiteLabelData,
+          skipTKey: true,
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
