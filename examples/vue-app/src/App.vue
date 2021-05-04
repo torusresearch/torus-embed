@@ -87,7 +87,7 @@
 
 <script>
 import Torus from '@toruslabs/torus-embed'
-import { encrypt } from 'eth-sig-util'
+import { encrypt, recoverTypedMessage } from 'eth-sig-util'
 import { ethers } from 'ethers'
 import { keccak256 } from 'ethers/lib/utils'
 import tokenAbi from 'human-standard-token-abi'
@@ -299,7 +299,19 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v1 => true', result)
+
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V1'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v1 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
@@ -317,7 +329,18 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v3 => true', result)
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V3'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v3 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
@@ -334,7 +357,18 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v4 => true', result)
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V4'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v4 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
