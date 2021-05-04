@@ -89,18 +89,26 @@ export as namespace Torus
 
 export = Torus
 
-import {
-  JsonRpcPayload,
-  JsonRpcResponse
-} from 'web3-core-helpers'
+import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers'
 
 declare class Provider {
-  sendAsync(payload: JsonRpcPayload, callback: (error: Error | null, result?: JsonRpcResponse) => void): void;
+  sendAsync(payload: JsonRpcPayload, callback: (error: Error | null, result?: JsonRpcResponse) => void): void
   send(payload: JsonRpcPayload, callback: Callback<JsonRpcResponse>): any
 }
 
 type WALLET_PATH = 'transfer' | 'topup' | 'home' | 'settings' | 'history'
-type ETHEREUM_NETWORK_TYPE = 'ropsten' | 'rinkeby' | 'kovan' | 'mainnet' | 'goerli' | 'localhost' | 'matic' | 'mumbai' | 'xdai' | 'bsc_mainnet' | 'bsc_testnet'
+type ETHEREUM_NETWORK_TYPE =
+  | 'ropsten'
+  | 'rinkeby'
+  | 'kovan'
+  | 'mainnet'
+  | 'goerli'
+  | 'localhost'
+  | 'matic'
+  | 'mumbai'
+  | 'xdai'
+  | 'bsc_mainnet'
+  | 'bsc_testnet'
 type PAYMENT_PROVIDER = 'moonpay' | 'wyre' | 'rampnetwork' | 'xanpool' | 'mercuryo' | ''
 
 type LOGIN_TYPE =
@@ -301,7 +309,7 @@ interface TorusParams {
    *
    * production uses https://app.tor.us,
    *
-   * development uses https://localhost:3000 (expects torus-website to be run locally),
+   * development uses http://localhost:4050 (expects torus-website to be run locally),
    *
    * binance uses https://binance.tor.us,
    *
@@ -344,6 +352,13 @@ interface TorusParams {
    * Params to enable whitelabelling of torus website and widget
    */
   whiteLabel?: WhiteLabelParams
+  /**
+   * Skips TKey onboarding for new users
+   *
+   * Defaults to false
+   * @default false
+   */
+  skipTKey?: boolean
 }
 
 interface WhiteLabelParams {
@@ -405,27 +420,27 @@ interface LocaleLinks<T> {
   /**
    * Item corresponding to english
    */
-  en?: T;
+  en?: T
   /**
    * Item corresponding to japanese
    */
-  ja?: T;
+  ja?: T
   /**
    * Item corresponding to korean
    */
-  ko?: T;
+  ko?: T
   /**
    * Item corresponding to german
    */
-  de?: T;
+  de?: T
   /**
    * Item corresponding to chinese (simplified)
    */
-  zh?: T;
+  zh?: T
   /**
    * Item corresponding to spanish
    */
-  es?: T;
+  es?: T
 }
 
 interface ThemeParams {
@@ -505,15 +520,15 @@ interface NetworkInterface {
   /**
    * Url of the block explorer
    */
-  blockExplorer?: string,
+  blockExplorer?: string
   /**
    * Default currency ticker of the network (e.g: BNB)
    */
-  ticker?: string,
+  ticker?: string
   /**
    * Name for currency ticker (e.g: `Binance Coin`)
    */
-  tickerName?: string,
+  tickerName?: string
 }
 
 interface JsonRPCResponse {
@@ -542,29 +557,29 @@ interface BaseLoginOptions {
    * - `'touch'`: displays the UI in a way that leverages a touch interface
    * - `'wap'`: displays the UI with a "feature phone" type interface
    */
-  display?: "page" | "popup" | "touch" | "wap";
+  display?: 'page' | 'popup' | 'touch' | 'wap'
   /**
    * - `'none'`: do not prompt user for login or consent on reauthentication
    * - `'login'`: prompt user for reauthentication
    * - `'consent'`: prompt user for consent before processing request
    * - `'select_account'`: prompt user to select an account
    */
-  prompt?: "none" | "login" | "consent" | "select_account";
+  prompt?: 'none' | 'login' | 'consent' | 'select_account'
   /**
    * Maximum allowable elasped time (in seconds) since authentication.
    * If the last time the user authenticated is greater than this value,
    * the user must be reauthenticated.
    */
-  max_age?: string | number;
+  max_age?: string | number
   /**
    * The space-separated list of language tags, ordered by preference.
    * For example: `'fr-CA fr en'`.
    */
-  ui_locales?: string;
+  ui_locales?: string
   /**
    * Previously issued ID Token.
    */
-  id_token_hint?: string;
+  id_token_hint?: string
   /**
    * The user's email address or other identifier. When your app knows
    * which user is trying to authenticate, you can provide this parameter
@@ -572,30 +587,30 @@ interface BaseLoginOptions {
    *
    * This currently only affects the classic Lock experience.
    */
-  login_hint?: string;
-  acr_values?: string;
+  login_hint?: string
+  acr_values?: string
   /**
    * The default scope to be used on authentication requests.
    * The defaultScope defined in the Auth0Client is included
    * along with this scope
    */
-  scope?: string;
+  scope?: string
   /**
    * The default audience to be used for requesting API access.
    */
-  audience?: string;
+  audience?: string
   /**
    * The name of the connection configured for your application.
    * If null, it will redirect to the Auth0 Login Page and show
    * the Login Widget.
    */
-  connection?: string;
+  connection?: string
 
   /**
    * If you need to send custom parameters to the Authorization Server,
    * make sure to use the original parameter name.
    */
-  [key: string]: unknown;
+  [key: string]: unknown
 }
 
 interface JwtParameters extends BaseLoginOptions {
@@ -604,11 +619,11 @@ interface JwtParameters extends BaseLoginOptions {
    * `'example.eu.auth0.com'` or , `'example.mycompany.com'`
    * (when using [custom domains](https://auth0.com/docs/custom-domains))
    */
-  domain: string;
+  domain: string
   /**
    * The Client ID found on your Application settings page
    */
-  client_id?: string;
+  client_id?: string
   /**
    * The default URL where Auth0 will redirect your browser to with
    * the authentication result. It must be whitelisted in
@@ -616,22 +631,22 @@ interface JwtParameters extends BaseLoginOptions {
    * settings. If not provided here, it should be provided in the other
    * methods that provide authentication.
    */
-  redirect_uri?: string;
+  redirect_uri?: string
   /**
    * The value in seconds used to account for clock skew in JWT expirations.
    * Typically, this value is no more than a minute or two at maximum.
    * Defaults to 60s.
    */
-  leeway?: number;
+  leeway?: number
 
   /**
    * The field in jwt token which maps to verifier id
    */
-  verifierIdField?: string;
+  verifierIdField?: string
 
   /**
    * Whether the verifier id field is case sensitive
    * @default true
    */
-  isVerifierIdCaseSensitive?: boolean;
+  isVerifierIdCaseSensitive?: boolean
 }

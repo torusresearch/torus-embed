@@ -98,6 +98,7 @@ class Torus {
     this.modalZIndex = modalZIndex
     this.alertZIndex = modalZIndex + 1000
     this.torusAlertContainer = {}
+    this.skipTKey = false
   }
 
   async init({
@@ -121,6 +122,7 @@ class Torus {
       version: '',
     },
     whiteLabel = {},
+    skipTKey = false,
   } = {}) {
     if (this.isInitalized) throw new Error('Already initialized')
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity)
@@ -129,6 +131,7 @@ class Torus {
     this.enabledVerifiers = enabledVerifiers
     this.loginConfig = loginConfig
     this.whiteLabel = whiteLabel
+    this.skipTKey = skipTKey
     log.setDefaultLevel(logLevel)
     if (enableLogging) log.enableAll()
     else log.disableAll()
@@ -192,6 +195,7 @@ class Torus {
             buttonPosition: this.buttonPosition,
             torusWidgetVisibility: this.torusWidgetVisibility,
             apiKey: this.apiKey,
+            skipTKey: this.skipTKey,
           },
         })
         await this._setProvider(network)

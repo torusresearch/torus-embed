@@ -87,7 +87,7 @@
 
 <script>
 import Torus from '@toruslabs/torus-embed'
-import { encrypt } from 'eth-sig-util'
+import { encrypt, recoverTypedMessage } from 'eth-sig-util'
 import { ethers } from 'ethers'
 import { keccak256 } from 'ethers/lib/utils'
 import tokenAbi from 'human-standard-token-abi'
@@ -158,11 +158,12 @@ export default {
             // tickerName: 'DES Coin',
           },
           showTorusButton: true,
-          // integrity: {
-          //   check: true,
-          //   version: '1.4.2',
-          //   hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
-          // }
+          integrity: {
+            version: '1.9.17',
+            // check: true,
+            // version: '1.4.2',
+            // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
+          },
           loginConfig: {
             ...(this.buildEnv === 'lrc' && {
               'torus-auth0-email-passwordless': {
@@ -171,6 +172,7 @@ export default {
             }),
           },
           whiteLabel: whiteLabelData,
+          skipTKey: true,
         })
         await torus.login() // await torus.ethereum.enable()
         const web3 = new Web3(torus.provider)
@@ -297,7 +299,19 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v1 => true', result)
+
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V1'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v1 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
@@ -315,7 +329,18 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v3 => true', result)
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V3'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v3 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
@@ -332,7 +357,18 @@ export default {
           if (err) {
             return console.error(err)
           }
-          return self.console('sign typed message v4 => true', result)
+          const recovered = recoverTypedMessage(
+            {
+              data: typedData,
+              sig: result.result,
+            },
+            'V4'
+          )
+
+          if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
+            return self.console(`sign typed message v4 => true`, result, `Recovered signer: ${this.publicAddress}`)
+          }
+          return self.console(`Failed to verify signer, got: ${recovered}`)
         }
       )
     },
