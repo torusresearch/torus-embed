@@ -9,11 +9,14 @@
     "airbnb-base",
     "prettier"
   ],
-  "plugins": ["prettier", "babel", "promise", "import", "simple-import-sort"],
-  "parser": "babel-eslint",
+  "plugins": ["prettier", "@babel", "promise", "import", "simple-import-sort"],
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 9
+    "ecmaVersion": 11,
+    "babelOptions": {
+      "configFile": "./babel.config.json"
+    }
   },
   "rules": {
     "no-restricted-syntax": 0,
