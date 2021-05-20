@@ -14,12 +14,14 @@ import messages from './messages'
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from './utils'
 
 // resolve response.result, reject errors
-const getRpcPromiseCallback = (resolve, reject, unwrapResult = true) => (error, response) => {
-  if (error || response.error) {
-    return reject(error || response.error)
+const getRpcPromiseCallback =
+  (resolve, reject, unwrapResult = true) =>
+  (error, response) => {
+    if (error || response.error) {
+      return reject(error || response.error)
+    }
+    return !unwrapResult || Array.isArray(response) ? resolve(response) : resolve(response.result)
   }
-  return !unwrapResult || Array.isArray(response) ? resolve(response) : resolve(response.result)
-}
 
 /**
  * @param {Object} connectionStream - A Node.js duplex stream
