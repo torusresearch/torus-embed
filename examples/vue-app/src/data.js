@@ -7,7 +7,7 @@ export const whiteLabelData = {
     },
   },
   logoDark: 'https://startrail.io/images/front/startrail-top__main.svg', // dark logo for light background
-  logoLight: 'https://s3.amazonaws.com/app.tor.us/startrail-logo-light.svg', // light logo for dark background
+  logoLight: 'https://images.toruswallet.io/startrail-logo-light.svg', // light logo for dark background
   topupHide: false,
   featuredBillboardHide: true,
   tncLink: {

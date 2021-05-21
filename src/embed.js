@@ -265,12 +265,8 @@ class Torus {
     }
   }
 
-  login({ verifier } = {}) {
+  login({ verifier = '' } = {}) {
     if (!this.isInitalized) throw new Error('Call init() first')
-    if (!verifier) {
-      this.requestedVerifier = ''
-      return this.ethereum.enable()
-    }
     this.requestedVerifier = verifier
     return this.ethereum.enable()
   }
@@ -596,7 +592,7 @@ class Torus {
       }
     }
     const oauthStream = this.communicationMux.getStream('oauth')
-    if (this.requestedVerifier === undefined || this.requestedVerifier === '') {
+    if (!this.requestedVerifier) {
       handleStream(oauthStream, 'data', loginHandler)
       oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
