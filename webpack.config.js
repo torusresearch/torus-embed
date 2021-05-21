@@ -1,4 +1,5 @@
 const path = require('path')
+const ESLintPlugin = require('eslint-webpack-plugin')
 
 const pkgName = 'torus'
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1)
@@ -29,13 +30,6 @@ const baseConfig = {
   },
 }
 
-const eslintLoader = {
-  enforce: 'pre',
-  test: /\.js$/,
-  exclude: /node_modules/,
-  loader: 'eslint-loader',
-}
-
 const babelLoaderWithPolyfills = {
   test: /\.m?js$/,
   exclude: /(node_modules|bower_components)/,
@@ -54,7 +48,7 @@ const umdPolyfilledConfig = {
     libraryTarget: 'umd',
   },
   module: {
-    rules: [eslintLoader, babelLoaderWithPolyfills],
+    rules: [babelLoaderWithPolyfills],
   },
 }
 
@@ -66,7 +60,7 @@ const umdConfig = {
     libraryTarget: 'umd',
   },
   module: {
-    rules: [eslintLoader, babelLoader],
+    rules: [babelLoader],
   },
 }
 
@@ -79,9 +73,14 @@ const cjsConfig = {
     libraryTarget: 'commonjs2',
   },
   module: {
-    rules: [eslintLoader, babelLoader],
+    rules: [babelLoader],
   },
   externals: [...externals, /^(@babel\/runtime)/i],
+  plugins: [
+    new ESLintPlugin({
+      extensions: '.js',
+    }),
+  ],
 }
 
 module.exports = [umdPolyfilledConfig, umdConfig, cjsConfig]
