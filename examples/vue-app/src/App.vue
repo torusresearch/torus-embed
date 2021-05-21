@@ -190,7 +190,7 @@ export default {
         ;[this.publicAddress] = accounts
         web3.eth.getBalance(accounts[0]).then(console.log).catch(console.error)
       } catch (error) {
-        console.error(error)
+        console.error(error, 'caught in vue-app')
       }
     },
     toggleTorusWidget() {
