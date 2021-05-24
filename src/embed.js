@@ -38,21 +38,6 @@ const expectedCacheControlHeader = 'max-age=3600'
 
 const UNSAFE_METHODS = ['eth_sendTransaction', 'eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4', 'personal_sign']
 
-let thirdPartyCookiesSupported = true
-
-const receiveMessage = (evt) => {
-  if (evt.data === 'torus:3PCunsupported') {
-    log.info('unsupported 3rd party cookies')
-    thirdPartyCookiesSupported = false
-    window.removeEventListener('message', receiveMessage)
-  } else if (evt.data === 'torus:3PCsupported') {
-    log.info('supported 3rd party cookies')
-    thirdPartyCookiesSupported = true
-    window.removeEventListener('message', receiveMessage)
-  }
-}
-window.addEventListener('message', receiveMessage, false)
-
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
 ;(async function preLoadIframe() {
   try {
@@ -229,40 +214,6 @@ class Torus {
       await handleSetup()
     }
     return undefined
-  }
-
-  /** @ignore */
-  _checkThirdPartyCookies() {
-    if (!thirdPartyCookiesSupported) {
-      const logoUrl = this._getLogoUrl()
-      const torusAlert = htmlToElement(
-        '<div id="torusAlert" class="torus-alert torus-alert--v2">' +
-          `<div id="torusAlert__logo"><img src="${logoUrl}" /></div>` +
-          '<div>' +
-          `<h1 id="torusAlert__title">${this.embedTranslations.cookiesRequired}</h1>` +
-          `<p id="torusAlert__desc">${this.embedTranslations.enableCookies}</p>` +
-          '</div>' +
-          '</div>'
-      )
-      const moreInfo = htmlToElement(
-        '<div id="torusAlert__btn-container">' +
-          '<div><a id="torusAlert__btn" href="https://docs.tor.us/faq/users#cookies" target="_blank" rel="noreferrer noopener">' +
-          `${this.embedTranslations.clickHere}</a></div>` +
-          '</div>'
-      )
-
-      torusAlert.appendChild(moreInfo)
-
-      this._setEmbedWhiteLabel(torusAlert)
-
-      const attachOnLoad = () => {
-        this.torusAlertContainer.style.display = 'block'
-        this.torusAlertContainer.appendChild(torusAlert)
-      }
-
-      runOnLoad(attachOnLoad)
-      throw new Error('Third party cookies not supported')
-    }
   }
 
   login({ verifier = '' } = {}) {
@@ -470,9 +421,7 @@ class Torus {
     detectAccountRequestPrototypeModifier('sendAsync')
 
     inpageProvider.enable = () => {
-      this._checkThirdPartyCookies()
       this._displayIframe(true)
-      if (!thirdPartyCookiesSupported) return Promise.reject(new Error('Third party cookies not supported'))
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
