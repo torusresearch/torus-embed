@@ -442,7 +442,6 @@ class Torus {
                   // eslint-disable-next-line promise/always-return
                   .then((_) => {
                     this.requestedVerifier = requestedVerifier
-                    this._displayIframe(true)
                     this._showLoginPopup(true, resolve, reject)
                   })
                   .catch((error) => reject(error))
@@ -457,7 +456,6 @@ class Torus {
             }
           } else {
             // set up listener for login
-            this._displayIframe(true)
             this._showLoginPopup(true, resolve, reject)
           }
         })
