@@ -84,6 +84,7 @@ class Torus {
     this.alertZIndex = modalZIndex + 1000
     this.torusAlertContainer = {}
     this.skipTKey = false
+    this.isIframeFullScreen = false
   }
 
   async init({
@@ -152,7 +153,8 @@ class Torus {
       window.document.body.appendChild(this.torusIframe)
       window.document.body.appendChild(this.torusAlertContainer)
       this.torusIframe.onload = () => {
-        this._displayIframe()
+        // only do this if iframe is not full screen
+        if (!this.isIframeFullScreen) this._displayIframe()
       }
     }
     const handleSetup = async () => {
@@ -377,6 +379,7 @@ class Torus {
       style.bottom = '0px'
     }
     Object.assign(this.torusIframe.style, style)
+    this.isIframeFullScreen = isFull
   }
 
   /** @ignore */
@@ -420,14 +423,12 @@ class Torus {
     detectAccountRequestPrototypeModifier('send')
     detectAccountRequestPrototypeModifier('sendAsync')
 
-    inpageProvider.enable = () => {
-      this._displayIframe(true)
-      return new Promise((resolve, reject) => {
+    inpageProvider.enable = () =>
+      new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
           if (err) {
             setTimeout(() => {
-              this._displayIframe()
               reject(err)
             }, 50)
           } else if (Array.isArray(res) && res.length > 0) {
@@ -445,7 +446,6 @@ class Torus {
                   })
                   .catch((error) => reject(error))
               } else {
-                this._displayIframe()
                 resolve(res)
               }
             }
@@ -460,7 +460,6 @@ class Torus {
           }
         })
       })
-    }
 
     inpageProvider.tryPreopenHandle = (payload, cb) => {
       const _payload = payload
@@ -527,21 +526,19 @@ class Torus {
 
   /** @ignore */
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    this._displayIframe(true)
     const loginHandler = (data) => {
       const { err, selectedAddress } = data
       if (err) {
         log.error(err)
-        this._displayIframe()
         if (reject) reject(err)
-      } else {
-        // returns an array (cause accounts expects it)
-        if (resolve) resolve([selectedAddress])
-        this._displayIframe()
       }
+      // returns an array (cause accounts expects it)
+      else if (resolve) resolve([selectedAddress])
+      if (this.isIframeFullScreen) this._displayIframe()
     }
     const oauthStream = this.communicationMux.getStream('oauth')
     if (!this.requestedVerifier) {
+      this._displayIframe(true)
       handleStream(oauthStream, 'data', loginHandler)
       oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
