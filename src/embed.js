@@ -526,21 +526,19 @@ class Torus {
 
   /** @ignore */
   _showLoginPopup(calledFromEmbed, resolve, reject) {
-    this._displayIframe(true)
     const loginHandler = (data) => {
       const { err, selectedAddress } = data
       if (err) {
         log.error(err)
-        this._displayIframe()
         if (reject) reject(err)
-      } else {
-        // returns an array (cause accounts expects it)
-        if (resolve) resolve([selectedAddress])
-        this._displayIframe()
       }
+      // returns an array (cause accounts expects it)
+      else if (resolve) resolve([selectedAddress])
+      if (this.isIframeFullScreen) this._displayIframe()
     }
     const oauthStream = this.communicationMux.getStream('oauth')
     if (!this.requestedVerifier) {
+      this._displayIframe(true)
       handleStream(oauthStream, 'data', loginHandler)
       oauthStream.write({ name: 'oauth_modal', data: { calledFromEmbed } })
     } else {
