@@ -84,6 +84,7 @@ class Torus {
     this.alertZIndex = modalZIndex + 1000
     this.torusAlertContainer = {}
     this.skipTKey = false
+    this.isIframeFullScreen = false
   }
 
   async init({
@@ -152,7 +153,8 @@ class Torus {
       window.document.body.appendChild(this.torusIframe)
       window.document.body.appendChild(this.torusAlertContainer)
       this.torusIframe.onload = () => {
-        this._displayIframe()
+        // only do this if iframe is not full screen
+        if (!this.isIframeFullScreen) this._displayIframe()
       }
     }
     const handleSetup = async () => {
@@ -377,6 +379,7 @@ class Torus {
       style.bottom = '0px'
     }
     Object.assign(this.torusIframe.style, style)
+    this.isIframeFullScreen = isFull
   }
 
   /** @ignore */
@@ -420,14 +423,12 @@ class Torus {
     detectAccountRequestPrototypeModifier('send')
     detectAccountRequestPrototypeModifier('sendAsync')
 
-    inpageProvider.enable = () => {
-      this._displayIframe(true)
-      return new Promise((resolve, reject) => {
+    inpageProvider.enable = () =>
+      new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ method: 'eth_requestAccounts', params: [] }, (err, { result: res } = {}) => {
           if (err) {
             setTimeout(() => {
-              this._displayIframe()
               reject(err)
             }, 50)
           } else if (Array.isArray(res) && res.length > 0) {
@@ -441,11 +442,11 @@ class Torus {
                   // eslint-disable-next-line promise/always-return
                   .then((_) => {
                     this.requestedVerifier = requestedVerifier
+                    this._displayIframe(true)
                     this._showLoginPopup(true, resolve, reject)
                   })
                   .catch((error) => reject(error))
               } else {
-                this._displayIframe()
                 resolve(res)
               }
             }
@@ -456,11 +457,11 @@ class Torus {
             }
           } else {
             // set up listener for login
+            this._displayIframe(true)
             this._showLoginPopup(true, resolve, reject)
           }
         })
       })
-    }
 
     inpageProvider.tryPreopenHandle = (payload, cb) => {
       const _payload = payload
