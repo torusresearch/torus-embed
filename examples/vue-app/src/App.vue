@@ -111,6 +111,8 @@ export default {
         4: 'rinkeby',
         5: 'goerli',
         42: 'kovan',
+        97: 'bsc_testnet',
+        56: 'bsc_mainnet',
       },
       messageToEncrypt: '',
       encryptionKey: '',
@@ -395,7 +397,7 @@ export default {
         .catch(console.error)
     },
     changeProvider() {
-      window.torus.setProvider({ host: 'ropsten' }).then(this.console).catch(this.console)
+      window.torus.setProvider({ host: 'bsc_testnet' }).then(this.console).catch(this.console)
     },
     async sendDai() {
       try {
