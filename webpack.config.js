@@ -5,7 +5,15 @@ const ESLintPlugin = require("eslint-webpack-plugin");
 const pkgName = "torus";
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1);
 
-const externals = ["@chaitanyapotti/random-id", "fast-deep-equal", "loglevel", "deepmerge"];
+const externals = [
+  "@chaitanyapotti/random-id",
+  "fast-deep-equal",
+  "loglevel",
+  "deepmerge",
+  "@toruslabs/fetch-node-details",
+  "@toruslabs/torus.js",
+  "@toruslabs/http-helpers",
+];
 
 const { NODE_ENV = "production" } = process.env;
 
@@ -68,7 +76,9 @@ const umdConfig = {
 
 const cjsConfig = {
   ...baseConfig,
-  // ...optimization,
+  optimization: {
+    minimize: false,
+  },
   output: {
     ...baseConfig.output,
     filename: `${pkgName}.cjs.js`,

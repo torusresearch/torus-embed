@@ -61,7 +61,7 @@ const UNSAFE_METHODS = ["eth_sendTransaction", "eth_signTypedData", "eth_signTyp
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
 (async function preLoadIframe() {
   try {
-    if (!document) return;
+    if (typeof document === "undefined") return;
     const torusIframeHtml = document.createElement("link");
     const { torusUrl } = await getTorusUrl("production", { check: false, hash: iframeIntegrity, version: "" });
     torusIframeHtml.href = `${torusUrl}/popup`;
@@ -439,7 +439,7 @@ class Torus {
   }
 
   /** @ignore */
-  _setupWeb3() {
+  _setupWeb3(): void {
     log.info("setupWeb3 running");
     // setup background connection
     const metamaskStream = new WindowPostMessageStream({
