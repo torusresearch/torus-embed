@@ -1,67 +1,91 @@
 {
   "extends": [
+    "airbnb-typescript/base",
+    "problems",
+    "plugin:@typescript-eslint/recommended",
     "standard",
     "eslint:recommended",
     "plugin:prettier/recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
+    "plugin:import/typescript",
     "plugin:promise/recommended",
-    "airbnb-base",
+    "plugin:mocha/recommended",
     "prettier"
   ],
-  "plugins": ["prettier", "@babel", "promise", "import", "simple-import-sort"],
-  "parser": "@babel/eslint-parser",
+  "plugins": ["prettier", "promise", "import", "simple-import-sort", "mocha", "@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 11,
-    "babelOptions": {
-      "configFile": "./babel.config.json"
-    }
+    "project": "./tsconfig.json"
   },
   "rules": {
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "typeLike",
+        "format": ["camelCase", "UPPER_CASE", "PascalCase"]
+      }
+    ],
+    "no-console": 2,
+    "no-bitwise": [2, { "allow": ["~"] }],
+    "camelcase": 0,
+    "no-useless-constructor": 0,
+    "@typescript-eslint/no-useless-constructor": 2,
+    "no-dupe-class-members": 0,
+    "@typescript-eslint/no-dupe-class-members": 2,
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
+      }
+    ],
     "no-restricted-syntax": 0,
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "operator-linebreak": 0,
     "object-curly-newline": 0,
-    "semi": [2, "never"],
     "no-underscore-dangle": 0,
-    "quotes": [2, "single"],
     "max-len": [
       2,
       {
         "code": 150
       }
     ],
-    "no-console": 0,
     "import/prefer-default-export": 0,
     "no-nested-ternary": 0,
     "no-confusing-arrow": 0,
     "linebreak-style": 0,
-    "no-extra-semi": 0,
-    "no-unused-vars": [2, { "args": "after-used", "argsIgnorePattern": "_" }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "args": "after-used", "argsIgnorePattern": "_" }],
+    "no-param-reassign": [
+      "error",
+      {
+        "props": false
+      }
+    ],
     "prettier/prettier": [
       "error",
       {
-        "singleQuote": true,
+        "singleQuote": false,
         "printWidth": 150,
-        "semi": false
+        "semi": true
       }
     ]
   },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".json", ".vue"]
+      }
+    }
+  },
   "env": {
-    "es6": true,
+    "es2020": true,
     "browser": true,
     "node": true
-  },
-  "globals": {
-    "document": true,
-    "fetch": true,
-    "jest": true,
-    "it": true,
-    "beforeEach": true,
-    "afterEach": true,
-    "describe": true,
-    "expect": true
   }
 }
