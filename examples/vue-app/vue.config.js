@@ -1,10 +1,11 @@
 /* eslint-disable no-param-reassign */
 
 module.exports = {
+  lintOnSave: false,
   devServer: {
     port: 8080, // CHANGE YOUR PORT HERE!
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      "Access-Control-Allow-Origin": "*",
     },
   },
   css: {
@@ -12,15 +13,15 @@ module.exports = {
   },
 
   configureWebpack: (config) => {
-    if (process.env.NODE_ENV !== 'production') {
-      config.devtool = 'source-map'
+    if (process.env.NODE_ENV !== "production") {
+      config.devtool = "source-map";
     }
   },
   chainWebpack: (config) => {
-    if (process.env.NODE_ENV !== 'production') {
-      config.module.rule('sourcemap').test(/\.js$/).enforce('pre').use('source-map-loader').loader('source-map-loader').end()
+    if (process.env.NODE_ENV !== "production") {
+      config.module.rule("sourcemap").test(/\.js$/).enforce("pre").use("source-map-loader").loader("source-map-loader").end();
     }
   },
-  crossorigin: 'anonymous',
+  crossorigin: "anonymous",
   productionSourceMap: true,
-}
+};

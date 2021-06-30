@@ -2,7 +2,7 @@ import { JsonRpcEngine } from "json-rpc-engine";
 
 import log from "./loglevel";
 import messages from "./messages";
-import { NOOP } from "./utils";
+import { getPreopenInstanceId, NOOP } from "./utils";
 
 /**
  * Returns whether the given image URL exists
@@ -85,8 +85,8 @@ export default async function sendSiteMetadata(engine: JsonRpcEngine): Promise<v
     engine.handle(
       {
         jsonrpc: "2.0",
-        id: 1,
-        method: "metamask_sendDomainMetadata",
+        id: getPreopenInstanceId(),
+        method: "wallet_sendDomainMetadata",
         params: domainMetadata,
       },
       NOOP

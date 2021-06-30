@@ -133,7 +133,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     this.request = this.request.bind(this);
     this.send = this.send.bind(this);
     this.sendAsync = this.sendAsync.bind(this);
-    this.enable = this.enable.bind(this);
+    // this.enable = this.enable.bind(this);
 
     // setup connectionStream multiplexing
     const mux = new ObjectMultiplex();
