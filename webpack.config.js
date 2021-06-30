@@ -10,9 +10,9 @@ const externals = [
   "fast-deep-equal",
   "loglevel",
   "deepmerge",
-  "@toruslabs/fetch-node-details",
-  "@toruslabs/torus.js",
-  "@toruslabs/http-helpers",
+  // "@toruslabs/fetch-node-details",
+  // "@toruslabs/torus.js",
+  // "@toruslabs/http-helpers",
 ];
 
 const { NODE_ENV = "production" } = process.env;
@@ -76,9 +76,9 @@ const umdConfig = {
 
 const cjsConfig = {
   ...baseConfig,
-  optimization: {
-    minimize: false,
-  },
+  // optimization: {
+  //   minimize: false,
+  // },
   output: {
     ...baseConfig.output,
     filename: `${pkgName}.cjs.js`,

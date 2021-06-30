@@ -19,6 +19,7 @@ import {
   LOGIN_PROVIDER,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
+  TORUS_BUILD_ENV,
   TorusParams,
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
@@ -147,7 +148,7 @@ class Torus {
   }
 
   async init({
-    buildEnv = "production",
+    buildEnv = TORUS_BUILD_ENV.PRODUCTION,
     enableLogging = false,
     // deprecated: use loginConfig instead
     enabledVerifiers = defaultVerifiers,

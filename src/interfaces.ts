@@ -19,7 +19,18 @@ export const PAYMENT_PROVIDER = {
   MERCURYO: "mercuryo",
 } as const;
 
+export const TORUS_BUILD_ENV = {
+  PRODUCTION: "production",
+  DEVELOPMENT: "development",
+  BINANCE: "binance",
+  TESTING: "testing",
+  LRC: "lrc",
+  BETA: "beta",
+} as const;
+
 export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
+
+export type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
 
 export interface IPaymentProvider {
   line1: string;
@@ -558,7 +569,7 @@ export interface TorusParams {
    * testing uses https://testing.tor.us (latest internal build)
    * @default production
    */
-  buildEnv?: "production" | "development" | "binance" | "testing" | "lrc" | "beta";
+  buildEnv?: TORUS_BUILD_ENV_TYPE;
   /**
    * Enables or disables logging.
    *

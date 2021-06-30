@@ -17,7 +17,16 @@ export declare const PAYMENT_PROVIDER: {
     readonly XANPOOL: "xanpool";
     readonly MERCURYO: "mercuryo";
 };
+export declare const TORUS_BUILD_ENV: {
+    readonly PRODUCTION: "production";
+    readonly DEVELOPMENT: "development";
+    readonly BINANCE: "binance";
+    readonly TESTING: "testing";
+    readonly LRC: "lrc";
+    readonly BETA: "beta";
+};
 export declare type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
+export declare type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
 export interface IPaymentProvider {
     line1: string;
     line2: string;
@@ -500,7 +509,7 @@ export interface TorusParams {
      * testing uses https://testing.tor.us (latest internal build)
      * @default production
      */
-    buildEnv?: "production" | "development" | "binance" | "testing" | "lrc" | "beta";
+    buildEnv?: TORUS_BUILD_ENV_TYPE;
     /**
      * Enables or disables logging.
      *
