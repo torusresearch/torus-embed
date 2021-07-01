@@ -13,5 +13,6 @@ declare const _default: {
         embed: EMBED_TRANSLATION_ITEM;
     }>;
     prodTorusUrl: string;
+    localStorageKey: string;
 };
 export default _default;

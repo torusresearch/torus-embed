@@ -123,4 +123,5 @@ export default {
   api: "https://api.tor.us",
   translations,
   prodTorusUrl: "",
+  localStorageKey: `torus-${window.location.hostname}`,
 };

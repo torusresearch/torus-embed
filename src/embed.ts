@@ -39,7 +39,7 @@ import {
   getPreopenInstanceId,
   getTorusUrl,
   getUserLanguage,
-  // storageAvailable,
+  storageAvailable,
   validatePaymentProvider,
 } from "./utils";
 
@@ -57,7 +57,7 @@ const expectedCacheControlHeader = "max-age=3600";
 
 const UNSAFE_METHODS = ["eth_sendTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign"];
 
-// const isLocalStorageAvailable = storageAvailable("localStorage");
+const isLocalStorageAvailable = storageAvailable("localStorage");
 
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
 (async function preLoadIframe() {
@@ -126,6 +126,8 @@ class Torus {
 
   isLoginCallback: () => void;
 
+  dappStorageKey: string;
+
   constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" } = {}) {
     this.buttonPosition = buttonPosition;
     this.torusUrl = "";
@@ -145,6 +147,7 @@ class Torus {
     this.modalZIndex = modalZIndex;
     this.alertZIndex = modalZIndex + 1000;
     this.isIframeFullScreen = false;
+    this.dappStorageKey = "";
   }
 
   async init({
@@ -169,6 +172,7 @@ class Torus {
     },
     whiteLabel,
     skipTKey = false,
+    useLocalStorage = false,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -179,12 +183,29 @@ class Torus {
     if (enableLogging) log.enableAll();
     else log.disableAll();
     this.torusWidgetVisibility = showTorusButton;
+    let dappStorageKey = "";
+    if (isLocalStorageAvailable && useLocalStorage) {
+      const storedKey = window.localStorage.getItem(configuration.localStorageKey);
+      if (storedKey) dappStorageKey = storedKey;
+      else {
+        const generatedKey = `torus-app-${getPreopenInstanceId()}`;
+        window.localStorage.setItem(configuration.localStorageKey, generatedKey);
+        dappStorageKey = generatedKey;
+      }
+    }
+    this.dappStorageKey = dappStorageKey;
+    const torusIframeUrl = new URL(torusUrl);
+    if (torusIframeUrl.pathname.endsWith("/")) torusIframeUrl.pathname += "popup";
+    else torusIframeUrl.pathname += "/popup";
+    if (dappStorageKey) {
+      torusIframeUrl.hash = `#dappStorageKey=${dappStorageKey}`;
+    }
     // Iframe code
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
       `<iframe
         id="torusIframe"
         class="torusIframe"
-        src="${torusUrl}/popup"
+        src="${torusIframeUrl.href}"
         style="display: none; position: fixed; top: 0; right: 0; width: 100%;
         height: 100%; border: none; border-radius: 0; z-index: ${this.modalZIndex}"
       ></iframe>`
@@ -372,7 +393,7 @@ class Torus {
   }
 
   /** @ignore */
-  _sendWidgetVisibilityStatus(status): void {
+  _sendWidgetVisibilityStatus(status: boolean): void {
     const torusWidgetVisibilityStream = this.communicationMux.getStream("torus-widget-visibility");
     torusWidgetVisibilityStream.write({
       data: status,
@@ -686,6 +707,9 @@ class Torus {
         Object.keys(params).forEach((x) => {
           finalUrl.searchParams.append(x, params[x]);
         });
+        if (this.dappStorageKey) {
+          finalUrl.hash = `#dappStorageKey=${this.dappStorageKey}`;
+        }
         const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW });
         walletWindow.open();
       }
@@ -754,11 +778,16 @@ class Torus {
   _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window");
-      const finalUrl = url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`;
-      const handledWindow = new PopupHandler({ url: new URL(finalUrl), target, features });
+      const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
+      if (this.dappStorageKey) {
+        // If multiple instances, it returns the first one
+        if (finalUrl.hash) finalUrl.hash += `&dappStorageKey=${this.dappStorageKey}`;
+        else finalUrl.hash = `#dappStorageKey=${this.dappStorageKey}`;
+      }
+      const handledWindow = new PopupHandler({ url: finalUrl, target, features });
       handledWindow.open();
       if (!handledWindow.window) {
-        this._createPopupBlockAlert(preopenInstanceId, finalUrl);
+        this._createPopupBlockAlert(preopenInstanceId, finalUrl.href);
         return;
       }
       windowStream.write({

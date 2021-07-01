@@ -608,6 +608,13 @@ export interface TorusParams {
    * @default false
    */
   skipTKey?: boolean;
+  /**
+   * Prefers to use localStorage instead of sessionStorage for torus iframe. Allows longer lived sessions
+   *
+   * Defaults to false
+   * @default false
+   */
+  useLocalStorage?: boolean;
 }
 
 export interface UnvalidatedJsonRpcRequest {

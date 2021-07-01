@@ -27,12 +27,13 @@ declare class Torus {
     provider: TorusInpageProvider;
     communicationMux: ExtendedObjectMultiplex;
     isLoginCallback: () => void;
+    dappStorageKey: string;
     constructor({ buttonPosition, modalZIndex, apiKey }?: {
         buttonPosition?: "bottom-left";
         modalZIndex?: number;
         apiKey?: string;
     });
-    init({ buildEnv, enableLogging, enabledVerifiers, network, loginConfig, showTorusButton, integrity, whiteLabel, skipTKey, }?: TorusParams): Promise<void>;
+    init({ buildEnv, enableLogging, enabledVerifiers, network, loginConfig, showTorusButton, integrity, whiteLabel, skipTKey, useLocalStorage, }?: TorusParams): Promise<void>;
     login({ verifier }?: {
         verifier?: string;
     }): Promise<string[]>;
@@ -42,7 +43,7 @@ declare class Torus {
     /** @ignore */
     _createPopupBlockAlert(preopenInstanceId: string, url: string): void;
     /** @ignore */
-    _sendWidgetVisibilityStatus(status: any): void;
+    _sendWidgetVisibilityStatus(status: boolean): void;
     hideTorusButton(): void;
     showTorusButton(): void;
     /** @ignore */
