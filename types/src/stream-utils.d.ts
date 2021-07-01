@@ -1,4 +1,4 @@
-import ExtendedObjectMultiplex from "./ExtendedObjectMultiplex";
+import ExtendedObjectMultiplex from "./ObjectMultiplex";
 /**
  * Sets up stream multiplexing for the given stream
  * @param {any} connectionStream - the stream to mux

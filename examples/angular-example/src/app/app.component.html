@@ -26,9 +26,7 @@
       </select>
       <input type="email" [(ngModel)]="selectedVerifierId" class="mt-20" placeholder="{{ placeholder }}" />
     </div>
-    <button [disabled]="!selectedVerifierId" class="mt-20" (click)="getPublicAddress($event)">
-      Get Public Address
-    </button>
+    <button [disabled]="!selectedVerifierId" class="mt-20" (click)="getPublicAddress($event)">Get Public Address</button>
   </div>
   <div id="console">
     <p></p>

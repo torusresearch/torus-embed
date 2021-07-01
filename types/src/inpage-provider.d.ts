@@ -1,8 +1,7 @@
-/// <reference types="node" />
 import { ObservableStore } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, PublicConfigState, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
 /**
  * @param {Object} connectionStream - A Node.js duplex stream

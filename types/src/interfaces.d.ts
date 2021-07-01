@@ -1,8 +1,7 @@
-/// <reference types="node" />
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import createHash from "create-hash";
 import { JsonRpcId, JsonRpcMiddleware, JsonRpcRequest, JsonRpcVersion } from "json-rpc-engine";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 export declare const LOGIN_PROVIDER: {
     readonly GOOGLE: "google";
     readonly FACEBOOK: "facebook";
@@ -619,3 +618,5 @@ export interface PublicConfigState {
     storageKey: string;
 }
 export declare type Maybe<T> = Partial<T> | null | undefined;
+export declare type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex";
+export declare type IObjectMultiplex = Duplex;

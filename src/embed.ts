@@ -5,11 +5,10 @@ import { setAPIKey } from "@toruslabs/http-helpers";
 import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "deepmerge";
 import { JsonRpcRequest } from "json-rpc-engine";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 
 import configuration from "./config";
 import { handleStream, htmlToElement, runOnLoad } from "./embedUtils";
-import ExtendedObjectMultiplex from "./ExtendedObjectMultiplex";
 import TorusInpageProvider from "./inpage-provider";
 import generateIntegrity from "./integrity";
 import {
@@ -29,6 +28,7 @@ import {
   WhiteLabelParams,
 } from "./interfaces";
 import log from "./loglevel";
+import ExtendedObjectMultiplex from "./ObjectMultiplex";
 import PopupHandler from "./PopupHandler";
 import sendSiteMetadata from "./siteMetadata";
 import { setupMultiplex } from "./stream-utils";
@@ -221,7 +221,7 @@ class Torus {
     link.setAttribute("href", `${torusUrl}/css/widget.css`);
     this.styleLink = link;
 
-    const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel;
+    const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel || {};
     const mergedTranslations = deepmerge(configuration.translations, customTranslations);
     const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()];
     this.embedTranslations = languageTranslations.embed;
@@ -846,7 +846,7 @@ class Torus {
   /** @ignore */
   _setEmbedWhiteLabel(element: HTMLElement): void {
     // Set whitelabel
-    const { theme } = this.whiteLabel;
+    const { theme } = this.whiteLabel || {};
     if (theme) {
       const { isDark = false, colors = {} } = theme;
       if (isDark) element.classList.add("torus-dark");
@@ -859,10 +859,10 @@ class Torus {
   /** @ignore */
   _getLogoUrl(): string {
     let logoUrl = `${this.torusUrl}/images/torus_icon-blue.svg`;
-    if (this.whiteLabel.theme && this.whiteLabel.theme.isDark) {
-      logoUrl = this.whiteLabel.logoLight ? this.whiteLabel.logoLight : logoUrl;
+    if (this.whiteLabel?.theme?.isDark) {
+      logoUrl = this.whiteLabel?.logoLight || logoUrl;
     } else {
-      logoUrl = this.whiteLabel.logoDark ? this.whiteLabel.logoDark : logoUrl;
+      logoUrl = this.whiteLabel?.logoDark || logoUrl;
     }
 
     return logoUrl;

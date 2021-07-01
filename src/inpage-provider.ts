@@ -1,4 +1,3 @@
-import ObjectMultiplex from "@metamask/object-multiplex";
 import { ObservableStore, storeAsStream } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
@@ -7,7 +6,7 @@ import { duplex as isDuplex } from "is-stream";
 import { createIdRemapMiddleware, JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
 import { createStreamMiddleware } from "json-rpc-middleware-stream";
 import pump from "pump";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 
 import {
   BaseProviderState,
@@ -22,6 +21,7 @@ import {
 } from "./interfaces";
 import log from "./loglevel";
 import messages from "./messages";
+import ObjectMultiplex from "./ObjectMultiplex";
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from "./utils";
 
 // resolve response.result, reject errors

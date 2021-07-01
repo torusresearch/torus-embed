@@ -1,8 +1,8 @@
 import log from "loglevel";
 import pump, { Stream } from "pump";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 
-import ExtendedObjectMultiplex from "./ExtendedObjectMultiplex";
+import ExtendedObjectMultiplex from "./ObjectMultiplex";
 
 /**
  * Sets up stream multiplexing for the given stream

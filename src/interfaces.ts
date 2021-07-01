@@ -1,7 +1,7 @@
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import createHash from "create-hash";
 import { JsonRpcId, JsonRpcMiddleware, JsonRpcRequest, JsonRpcVersion } from "json-rpc-engine";
-import { Duplex } from "stream";
+import { Duplex } from "readable-stream";
 
 export const LOGIN_PROVIDER = {
   GOOGLE: "google",
@@ -692,3 +692,7 @@ export interface PublicConfigState {
 }
 
 export type Maybe<T> = Partial<T> | null | undefined;
+
+export type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex";
+
+export type IObjectMultiplex = Duplex;

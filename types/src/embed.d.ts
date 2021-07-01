@@ -1,8 +1,8 @@
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import TorusJs from "@toruslabs/torus.js";
-import ExtendedObjectMultiplex from "./ExtendedObjectMultiplex";
 import TorusInpageProvider from "./inpage-provider";
 import { BUTTON_POSITION_TYPE, EMBED_TRANSLATION_ITEM, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusParams, TorusPublicKey, UserInfo, VerifierArgs, WALLET_PATH, WhiteLabelParams } from "./interfaces";
+import ExtendedObjectMultiplex from "./ObjectMultiplex";
 declare class Torus {
     buttonPosition: BUTTON_POSITION_TYPE;
     torusUrl: string;
