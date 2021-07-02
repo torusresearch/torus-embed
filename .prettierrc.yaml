@@ -1,4 +1,4 @@
 # .prettierrc or .prettierrc.yaml
 printWidth: 150
-singleQuote: true
-semi: false
+singleQuote: false
+semi: true
