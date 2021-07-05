@@ -120,6 +120,13 @@ export default {
       messageDecrypted: '',
     }
   },
+  mounted() {
+    const torus = new Torus({
+      apiKey: 'torus-default',
+      buttonPosition: 'bottom-left',
+    })
+    window.torus = torus
+  },
   methods: {
     onSelectedVerifierChanged(e) {
       this.selectedVerifier = e.target.value
@@ -139,11 +146,7 @@ export default {
     },
     async login() {
       try {
-        const torus = new Torus({
-          apiKey: 'torus-default',
-          buttonPosition: 'bottom-left',
-        })
-        window.torus = torus
+        const { torus } = window
         await torus.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
@@ -161,7 +164,7 @@ export default {
           },
           showTorusButton: true,
           integrity: {
-            version: '1.9.17',
+            // version: '1.9.17',
             // check: true,
             // version: '1.4.2',
             // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'

@@ -5,7 +5,7 @@
   "main": "dist/torus.cjs.js",
   "unpkg": "dist/torus.umd.min.js",
   "jsdelivr": "dist/torus.umd.min.js",
-  "types": "types/embed.d.ts",
+  "types": "types/index.d.ts",
   "files": [
     "dist",
     "types"
@@ -16,9 +16,10 @@
   },
   "scripts": {
     "dev": "rimraf dist/ && cross-env NODE_ENV=development parallel-webpack --no-stats",
-    "build": "rimraf ./dist && cross-env NODE_ENV=production parallel-webpack --no-stats",
-    "lint:js": "eslint --fix 'src/**/*.js'",
-    "prepack": "npm run build",
+    "build": "rimraf dist/ && cross-env NODE_ENV=production parallel-webpack --no-stats",
+    "build:types": "rimraf types/ && tsc --project tsconfig.types.json",
+    "prepack": "npm run build && npm run build:types",
+    "lint:ts": "eslint --fix 'src/**/*.ts' 'index.ts'",
     "test:e2e": "node ./test/e2e/puppeteer.js",
     "test:e2e:headful": "node ./test/e2e/puppeteer.js false",
     "test:build-embed": "mocha --exit ./test/compile/Web3Test.js",
@@ -29,44 +30,52 @@
   },
   "dependencies": {
     "@chaitanyapotti/random-id": "^1.0.3",
+    "@metamask/obs-store": "^6.0.2",
+    "@metamask/post-message-stream": "^4.0.0",
+    "@metamask/safe-event-emitter": "^2.0.0",
     "@toruslabs/fetch-node-details": "^2.6.1",
     "@toruslabs/http-helpers": "^1.3.7",
     "@toruslabs/torus.js": "^2.3.1",
     "create-hash": "^1.2.0",
     "deepmerge": "^4.2.2",
+    "end-of-stream": "^1.4.4",
     "eth-rpc-errors": "^4.0.3",
     "fast-deep-equal": "^3.1.3",
     "is-stream": "^2.0.0",
     "json-rpc-engine": "^6.1.0",
     "json-rpc-middleware-stream": "^3.0.0",
     "loglevel": "^1.7.1",
-    "obj-multiplex": "^1.0.0",
-    "obs-store": "^4.0.3",
-    "post-message-stream": "^3.0.0",
+    "once": "^1.4.0",
     "pump": "^3.0.0",
-    "safe-event-emitter": "^1.0.1"
+    "readable-stream": "^3.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.3",
     "@babel/core": "^7.14.3",
-    "@babel/eslint-parser": "^7.14.3",
-    "@babel/eslint-plugin": "^7.13.16",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.14.2",
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.14.2",
+    "@babel/preset-typescript": "^7.14.5",
+    "@babel/register": "^7.14.5",
     "@babel/runtime-corejs3": "^7.14.0",
-    "assert": "^2.0.0",
+    "@types/create-hash": "^1.2.2",
+    "@types/node": "^15.12.5",
+    "@types/once": "^1.4.0",
+    "@types/readable-stream": "^2.3.10",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "eslint": "^7.26.0",
     "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^12.3.1",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-mocha": "^8.1.0",
+    "eslint-config-problems": "^5.0.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "~2.23.4",
+    "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
@@ -80,7 +89,8 @@
     "prettier": "^2.3.0",
     "puppeteer": "^9.1.1",
     "rimraf": "^3.0.2",
-    "uglifyify": "^5.0.2",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
   },
@@ -104,11 +114,11 @@
   },
   "homepage": "https://github.com/torusresearch/torus-embed#readme",
   "lint-staged": {
-    "*.js": [
+    "!(*d).{js,ts}": [
       "eslint --cache --fix",
       "prettier --write"
     ],
-    "*.{json}": [
+    "*.{json, md}": [
       "prettier --write"
     ]
   }
