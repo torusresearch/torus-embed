@@ -1,42 +1,50 @@
 {
-  "name": "react-basic-app",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@toruslabs/torus-embed": "^1.2.5",
-    "human-standard-token-abi": "^2.0.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
-    "web3": "^1.2.6"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb": "^18.1.0",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-react-hooks": "^3.0.0"
-  }
+    "name": "react-basic-app",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@toruslabs/torus-embed": "^1.11.0",
+        "eth-sig-util": "^3.0.1",
+        "ethers": "^5.4.1",
+        "human-standard-token-abi": "^2.0.0",
+        "prettier": "^2.3.2",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-scripts": "4.0.3",
+        "typescript": "^4.3.5",
+        "web3": "^1.4.0"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@types/react": "^17.0.13",
+        "@types/react-dom": "^17.0.8",
+        "@typescript-eslint/eslint-plugin": "^4.28.2",
+        "@typescript-eslint/parser": "^4.28.2",
+        "eslint": "^7.30.0",
+        "eslint-config-airbnb": "^18.2.1",
+        "eslint-config-airbnb-typescript": "^12.3.1",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-import": "^2.23.4",
+        "eslint-plugin-jsx-a11y": "^6.4.1",
+        "eslint-plugin-prettier": "^3.4.0",
+        "eslint-plugin-react": "^7.24.0",
+        "eslint-plugin-react-hooks": "^4.2.0"
+    }
 }
