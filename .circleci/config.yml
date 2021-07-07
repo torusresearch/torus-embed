@@ -1,7 +1,7 @@
 version: 2
 job_common_node: &job_common_node
   docker:
-    - image: circleci/node
+    - image: cimg/node:14.17
   working_directory: ~/torus-embed
 job_common: &job_common
   docker:
