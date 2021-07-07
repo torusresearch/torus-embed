@@ -18,18 +18,19 @@ code {
   color: #2c3e50;
   margin-top: 60px;
 }
+
 #console {
   border: 1px solid black;
-  height: 40px;
+  height: 300px;
   padding: 2px;
   bottom: 10px;
-  position: absolute;
   text-align: left;
   width: calc(100% - 20px);
   border-radius: 5px;
+  margin-top: 100;
 }
 #console::before {
-  content: "Console :";
+  content: 'Console :';
   position: absolute;
   top: -20px;
   font-size: 12px;
@@ -42,4 +43,5 @@ button {
   margin: 5px;
   background: none;
   border-radius: 5px;
+  cursor: pointer;
 }

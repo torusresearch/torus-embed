@@ -1,4 +1,4 @@
-import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from '@toruslabs/torus-embed';
+import { TORUS_BUILD_ENV_TYPE, VerifierArgs } from '@toruslabs/torus-embed';
 import React from 'react';
 import { encrypt, recoverTypedMessage } from 'eth-sig-util';
 import { ethers } from 'ethers';
@@ -31,18 +31,17 @@ class App extends React.Component {
   }
 
   componentDidMount(): void {
-    const torus = new Torus({
-      apiKey: 'torus-default',
-      buttonPosition: 'bottom-left',
-    });
-    web3Obj.torus = torus;
+    const torusEnv = sessionStorage.getItem('pageUsingTorus');
+    if (torusEnv) {
+      this.login();
+    }
   }
 
   login = async (): Promise<void> => {
     try {
       const { torus, web3 } = web3Obj;
       const { buildEnv, chainIdNetworkMap, chainId } = this.state;
-      await torus?.init({
+      await torus.init({
         buildEnv,
         enabledVerifiers: {
           reddit: false,
@@ -60,7 +59,7 @@ class App extends React.Component {
         showTorusButton: true,
         integrity: {
           version: '1.11.0',
-          check: true,
+          check: false,
           // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
         },
         loginConfig: buildEnv === 'lrc' ? {
@@ -73,15 +72,16 @@ class App extends React.Component {
         whiteLabel: whiteLabelData,
         skipTKey: true,
       });
-      await torus?.login(); // await torus.ethereum.enable()
-      web3Obj.setweb3(torus?.provider);
-      torus?.provider.on('chainChanged', (resp) => {
+      await torus.login(); // await torus.ethereum.enable()
+      sessionStorage.setItem('pageUsingTorus', buildEnv);
+      web3Obj.setweb3(torus.provider);
+      torus.provider.on('chainChanged', (resp) => {
         console.log(resp, 'chainchanged');
         this.setState({
           chainId: resp,
         });
       });
-      torus?.provider.on('accountsChanged', (accounts) => {
+      torus.provider.on('accountsChanged', (accounts) => {
         console.log(accounts, 'accountsChanged');
         this.setState({
           publicAddress: (Array.isArray(accounts) && accounts[0]) || '',
@@ -91,7 +91,7 @@ class App extends React.Component {
       console.log('accounts[0]', accounts[0]);
       // const ac = [...accounts][0];
       this.setState({
-        publicAddress: '0xdd6CDf4C2D93752daF64c69aeB9D70A932869B60',
+        publicAddress: (Array.isArray(accounts) && accounts[0]) || '',
       });
       web3.eth.getBalance(accounts[0]).then(console.log).catch(console.error);
     } catch (error) {
@@ -101,10 +101,10 @@ class App extends React.Component {
 
   toggleTorusWidget = (): void => {
     const { torus } = web3Obj;
-    if (torus?.torusWidgetVisibility) {
+    if (torus.torusWidgetVisibility) {
       torus.hideTorusButton();
     } else {
-      torus?.showTorusButton();
+      torus.showTorusButton();
     }
   }
 
@@ -132,14 +132,14 @@ class App extends React.Component {
   }
 
   changeProvider = async () => {
-    await web3Obj.torus?.setProvider({ host: 'ropsten' });
+    await web3Obj.torus.setProvider({ host: 'ropsten' });
     this.console('finished changing provider');
   }
 
   createPaymentTx = async (): Promise<void> => {
     try {
       const { torus } = web3Obj;
-      const res = await torus?.initiateTopup('mercuryo', {
+      const res = await torus.initiateTopup('mercuryo', {
         selectedCurrency: 'USD',
       });
       console.log(res);
@@ -170,7 +170,7 @@ class App extends React.Component {
       {
         method: 'eth_sign',
         params: [publicAddress, hashedMsg, { customPrefix, customMessage: message }],
-        from: publicAddress,
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -197,7 +197,7 @@ class App extends React.Component {
       {
         method: 'eth_sign',
         params: [publicAddress, message],
-        from: publicAddress,
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -227,7 +227,7 @@ class App extends React.Component {
       {
         method: 'eth_signTypedData',
         params: [typedData, publicAddress],
-        from: publicAddress,
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -243,7 +243,7 @@ class App extends React.Component {
         );
 
         if (publicAddress && recovered.toLowerCase() === publicAddress?.toLowerCase()) {
-          return this.console(`sign typed message v1 => true${result}Recovered signer: ${publicAddress}`);
+          return this.console(`sign typed message v1 => true, Singature: ${result.result} Recovered signer: ${publicAddress}`, result);
         }
         return this.console(`Failed to verify signer, got: ${recovered}`);
       },
@@ -258,7 +258,7 @@ class App extends React.Component {
       {
         method: 'eth_signTypedData_v3',
         params: [publicAddress, JSON.stringify(typedData)],
-        from: publicAddress,
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -273,7 +273,7 @@ class App extends React.Component {
         );
 
         if (recovered.toLowerCase() === publicAddress?.toLowerCase()) {
-          return this.console(`sign typed message v3 => true${result}Recovered signer: ${publicAddress}`);
+          return this.console(`sign typed message v3 => true, Singature: ${result.result} Recovered signer: ${publicAddress}`, result);
         }
         return this.console(`Failed to verify signer, got: ${recovered}`);
       },
@@ -288,7 +288,7 @@ class App extends React.Component {
       {
         method: 'eth_signTypedData_v4',
         params: [publicAddress, JSON.stringify(typedData)],
-        from: publicAddress,
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -303,7 +303,7 @@ class App extends React.Component {
         );
 
         if (recovered.toLowerCase() === publicAddress.toLowerCase()) {
-          return this.console('sign typed message v4 => true', result, `Recovered signer: ${publicAddress}`);
+          return this.console('sign typed message v4 => true', result.result, `Recovered signer: ${publicAddress}`, result);
         }
         return this.console(`Failed to verify signer, got: ${recovered}`);
       },
@@ -322,7 +322,7 @@ class App extends React.Component {
       const { chainId, publicAddress } = this.state;
       const { torus, web3 } = web3Obj;
       if (chainId !== 1) {
-        await torus?.setProvider({ host: 'mainnet' });
+        await torus.setProvider({ host: 'mainnet' });
       }
       const instance = new web3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f');
       const balance = await instance.methods.balanceOf(publicAddress).call();
@@ -353,7 +353,7 @@ class App extends React.Component {
       const { torus, web3 } = web3Obj;
       console.log(chainId, 'current chain id');
       if (chainId !== 1) {
-        await torus?.setProvider({ host: 'mainnet' });
+        await torus.setProvider({ host: 'mainnet' });
       }
       const instance = new web3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200');
       let value = Math.floor(parseFloat('0.01') * 10 ** parseFloat('18')).toString();
@@ -392,14 +392,14 @@ class App extends React.Component {
 
   getUserInfo = (): void => {
     const { torus } = web3Obj;
-    torus?.getUserInfo('').then(this.console).catch(this.console);
+    torus.getUserInfo('').then(this.console).catch(this.console);
   }
 
   getPublicAddress = (): void => {
     const { torus } = web3Obj;
     const { selectedVerifier, verifierId } = this.state;
     console.log(selectedVerifier, verifierId);
-    torus?.getPublicAddress({ verifier: selectedVerifier, verifierId } as VerifierArgs).then(this.console).catch(console.error);
+    torus.getPublicAddress({ verifier: selectedVerifier, verifierId } as VerifierArgs).then(this.console).catch(console.error);
   }
 
   getEncryptionKey = (): void => {
@@ -409,6 +409,7 @@ class App extends React.Component {
       {
         method: 'eth_getEncryptionPublicKey',
         params: [publicAddress],
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -443,6 +444,7 @@ class App extends React.Component {
       {
         method: 'eth_decrypt',
         params: [messageEncrypted, publicAddress],
+        jsonrpc: '2.0',
       },
       (err: Error, result: any) => {
         if (err) {
@@ -457,7 +459,7 @@ class App extends React.Component {
   stringifiableToHex = (value: any): string => ethers.utils.hexlify(Buffer.from(JSON.stringify(value)))
 
   logout = (): void => {
-    web3Obj.torus?.cleanUp()
+    web3Obj.torus.cleanUp()
       .then(() => {
         this.setState({
           publicAddress: '',
@@ -470,7 +472,7 @@ class App extends React.Component {
   render() {
     const {
       messageEncrypted, encryptionKey, messageToEncrypt, buildEnv, selectedVerifier,
-      verifierId, placeholder, publicAddress,
+      verifierId, placeholder, publicAddress, chainIdNetworkMap, chainId,
     } = this.state;
     return (
       <div className="App">
@@ -518,7 +520,7 @@ class App extends React.Component {
               </div>
               <div>
                 Network:
-                {/* <i>{chainIdNetworkMap[chainId.toString()]}</i> */}
+                <i>{chainIdNetworkMap[chainId.toString()]}</i>
               </div>
             </section>
             <section style={{ marginTop: '20px' }}>
@@ -546,6 +548,7 @@ class App extends React.Component {
               </div>
               <button disabled={!verifierId} style={{ marginTop: '20px' }} onClick={this.getPublicAddress}>Get Public Address</button>
             </section>
+
             <section style={{ marginTop: '20px' }}>
               <h4>Blockchain Apis</h4>
               <section>
