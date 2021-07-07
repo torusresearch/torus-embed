@@ -2,7 +2,8 @@ export const whiteLabelData = {
   theme: {
     isDark: false,
     colors: {
-      torusBrand1: '#000000',
+      torusBrand1: '#000000 ',
+      
       torusGray2: '#FBF7F3',
     },
   },
@@ -69,7 +70,7 @@ export const whiteLabelData = {
   },
 }
 
-export const getV3TypedData = (chainId) => ({
+export const getV3TypedData = (chainId: string) => ({
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -107,7 +108,7 @@ export const getV3TypedData = (chainId) => ({
   },
 })
 
-export const getV4TypedData = (chainId) => ({
+export const getV4TypedData = (chainId: string) => ({
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
