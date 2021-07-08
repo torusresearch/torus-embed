@@ -85,17 +85,20 @@
   </div>
 </template>
 
-<script>
-import Torus from '@toruslabs/torus-embed'
+<script lang="ts">
+
+import Vue from 'vue';
+import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from '@toruslabs/torus-embed'
+import { getV3TypedData, getV4TypedData, whiteLabelData } from './data'
 import { encrypt, recoverTypedMessage } from 'eth-sig-util'
 import { ethers } from 'ethers'
 import { keccak256 } from 'ethers/lib/utils'
-import tokenAbi from 'human-standard-token-abi'
 import Web3 from 'web3'
+import web3Obj from './helpers';
+const tokenAbi = require('human-standard-token-abi')
 
-import { getV3TypedData, getV4TypedData, whiteLabelData } from './data'
 
-export default {
+export default Vue.extend({
   name: 'app',
   data() {
     return {
@@ -104,7 +107,6 @@ export default {
       verifierId: '',
       selectedVerifier: 'google',
       placeholder: 'Enter google email',
-      buildEnv: 'testing',
       chainIdNetworkMap: {
         1: 'mainnet',
         3: 'ropsten',
@@ -113,23 +115,23 @@ export default {
         42: 'kovan',
         97: 'bsc_testnet',
         56: 'bsc_mainnet',
-      },
+      } as Record<string, string>,
       messageToEncrypt: '',
       encryptionKey: '',
       messageEncrypted: '',
-      messageDecrypted: '',
+      buildEnv: 'testing' as TORUS_BUILD_ENV_TYPE,
     }
   },
   mounted() {
     const torus = new Torus({
       apiKey: 'torus-default',
-      buttonPosition: 'bottom-left',
+      buttonPosition: "bottom-left",
     })
-    window.torus = torus
+    web3Obj.torus = torus
   },
   methods: {
-    onSelectedVerifierChanged(e) {
-      this.selectedVerifier = e.target.value
+    onSelectedVerifierChanged(e: Event) {
+      this.selectedVerifier = (<HTMLSelectElement>e.target).value
       switch (this.selectedVerifier) {
         case 'google':
           this.placeholder = 'Enter google email'
@@ -146,8 +148,8 @@ export default {
     },
     async login() {
       try {
-        const { torus } = window
-        await torus.init({
+        const { torus, web3 } = web3Obj
+        await torus?.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
@@ -164,33 +166,31 @@ export default {
           },
           showTorusButton: true,
           integrity: {
-            // version: '1.9.17',
-            // check: true,
+            version: '1.11.0',
+            check: true,
             // version: '1.4.2',
             // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
           },
-          loginConfig: {
-            ...(this.buildEnv === 'lrc' && {
-              'torus-auth0-email-passwordless': {
-                showOnModal: false,
-              },
-            }),
-          },
+          loginConfig: this.buildEnv === 'lrc' ? {
+            'torus-auth0-email-passwordless': {
+              name: 'torus-auth0-email-passwordless',
+              typeOfLogin: 'passwordless',
+              showOnModal: false,
+            },
+          } : undefined,
           whiteLabel: whiteLabelData,
           skipTKey: true,
         })
-        await torus.login() // await torus.ethereum.enable()
-        const web3 = new Web3(torus.provider)
-        torus.provider.on('chainChanged', (resp) => {
+        await torus?.login() // await torus.ethereum.enable()
+        web3Obj.setweb3(torus?.provider)
+        torus?.provider.on('chainChanged', (resp) => {
           console.log(resp, 'chainchanged')
-          this.chainId = resp
+          this.chainId = parseInt(resp as string)
         })
-        torus.provider.on('accountsChanged', (accounts) => {
-          console.log(accounts, 'accountsChanged')
-          // eslint-disable-next-line no-extra-semi
-          ;[this.publicAddress] = accounts
+        torus?.provider.on('accountsChanged', (accounts) => {
+          console.log(accounts, 'accountsChanged');
+          this.publicAddress =  (Array.isArray(accounts) && accounts[0]) || '';
         })
-        window.web3 = web3
         const accounts = await web3.eth.getAccounts()
         ;[this.publicAddress] = accounts
         web3.eth.getBalance(accounts[0]).then(console.log).catch(console.error)
@@ -199,26 +199,31 @@ export default {
       }
     },
     toggleTorusWidget() {
-      if (window.torus.torusWidgetVisibility) {
-        window.torus.hideTorusButton()
+      const { torus } = web3Obj
+      if (torus?.torusWidgetVisibility) {
+        torus.hideTorusButton()
       } else {
-        window.torus.showTorusButton()
+        torus?.showTorusButton()
       }
     },
-    console(...args) {
-      document.querySelector('#console>p').innerHTML = JSON.stringify(args || {}, null, 2)
+    console(...args: any[]): void {
+      const el = document.querySelector('#console>p');
+      if (el) {
+        el.innerHTML = JSON.stringify(args || {}, null, 2);
+      }
     },
     createPaymentTx() {
-      window.torus
-        .initiateTopup('mercuryo', {
+      const { torus } = web3Obj
+      torus?.initiateTopup('mercuryo', {
           selectedCurrency: 'USD',
         })
         .then(console.log)
         .catch(console.error)
     },
     sendEth() {
-      window.web3.eth
-        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.01') })
+      const { web3 } = web3Obj
+      web3.eth
+        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei('0.01') })
         .then((resp) => this.console(resp))
         .catch(console.error)
       // window.web3.eth
@@ -235,19 +240,20 @@ export default {
       //   .catch(console.error)
     },
     signMessageWithoutPopup() {
+      const { web3 } = web3Obj
       const self = this
       // hex message
       const message = 'Hello world'
       const customPrefix = `\u0019${window.location.hostname} Signed Message:\n`
-      const prefixWithLength = Buffer.from(`${customPrefix}${message.length.toString()}`, 'utf-8')
-      const hashedMsg = keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]))
-      window.web3.currentProvider.send(
+      const prefixWithLength = Buffer.from(`${customPrefix}${message.length.toString()}`, 'utf-8');
+      const hashedMsg = keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]));
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_sign',
           params: [this.publicAddress, hashedMsg, { customPrefix, customMessage: message }],
           from: this.publicAddress,
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
@@ -263,16 +269,17 @@ export default {
       )
     },
     signMessage() {
+      const { web3 } = web3Obj;
       const self = this
       // hex message
-      const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad'
-      window.web3.currentProvider.send(
+      const message = '0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad';
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_sign',
           params: [this.publicAddress, message],
           from: this.publicAddress,
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
@@ -281,6 +288,7 @@ export default {
       )
     },
     signTypedData_v1() {
+      const { web3 } = web3Obj;
       const typedData = [
         {
           type: 'string',
@@ -292,15 +300,15 @@ export default {
           name: 'value',
           value: 10,
         },
-      ]
-      const self = this
-      window.web3.currentProvider.send(
+      ];
+      const self = this;
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_signTypedData',
           params: [typedData, this.publicAddress],
           from: this.publicAddress,
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
@@ -322,21 +330,22 @@ export default {
     },
 
     signTypedData_v3() {
-      const typedData = getV3TypedData(this.chainId)
-      const self = this
-      window.web3.currentProvider.send(
+      const { web3 } = web3Obj;
+      const typedData = getV3TypedData(this.chainId.toString())
+      const self = this;
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_signTypedData_v3',
           params: [this.publicAddress, JSON.stringify(typedData)],
           from: this.publicAddress,
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
           const recovered = recoverTypedMessage(
             {
-              data: typedData,
+              data: typedData as any,
               sig: result.result,
             },
             'V3'
@@ -350,21 +359,22 @@ export default {
       )
     },
     signTypedData_v4() {
-      const typedData = getV4TypedData(this.chainId)
-      const self = this
-      window.web3.currentProvider.send(
+      const { web3 } = web3Obj;
+      const typedData = getV4TypedData(this.chainId.toString())
+      const self = this;
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_signTypedData_v4',
           params: [this.publicAddress, JSON.stringify(typedData)],
           from: this.publicAddress,
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
           const recovered = recoverTypedMessage(
             {
-              data: typedData,
+              data: typedData as any,
               sig: result.result,
             },
             'V4'
@@ -379,10 +389,11 @@ export default {
     },
     async signPersonalMsg() {
       try {
+        const { web3 } = web3Obj;
         const message = 'Some string'
-        const hash = window.web3.utils.sha3(message)
-        const sig = await window.web3.eth.personal.sign(hash, this.publicAddress)
-        const hostnamealAddress = await window.web3.eth.personal.ecRecover(hash, sig)
+        const hash = web3.utils.sha3(message) as string;
+        const sig = await web3.eth.personal.sign(hash, this.publicAddress,"");
+        const hostnamealAddress = await web3.eth.personal.ecRecover(hash, sig)
         if (this.publicAddress.toLowerCase() === hostnamealAddress.toLowerCase()) this.console('Success')
         else this.console('Failed')
       } catch (error) {
@@ -391,8 +402,8 @@ export default {
       }
     },
     logout() {
-      window.torus
-        .cleanUp()
+      const { torus } = web3Obj;
+      torus?.cleanUp()
         .then(() => {
           this.publicAddress = ''
           return undefined
@@ -400,18 +411,19 @@ export default {
         .catch(console.error)
     },
     changeProvider() {
-      window.torus.setProvider({ host: 'bsc_testnet' }).then(this.console).catch(this.console)
+      const { torus } = web3Obj;
+      torus?.setProvider({ host: 'bsc_testnet' }).then(this.console).catch(this.console)
     },
     async sendDai() {
       try {
-        if (this.chainId !== '1') {
-          await window.torus.setProvider({ host: 'mainnet' })
+        const { torus, web3 } = web3Obj;
+        if (this.chainId !== 1) {
+          await torus?.setProvider({ host: 'mainnet' })
         }
-        const localWeb3 = window.web3
-        const instance = new localWeb3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
+        const instance = new web3.eth.Contract(tokenAbi, '0x6b175474e89094c44da98b954eedeac495271d0f')
         const balance = await instance.methods.balanceOf(this.publicAddress).call()
         console.log(balance, 'dai balance')
-        const value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        const value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString()
         if (Number(balance) < Number(value)) {
           // eslint-disable-next-line no-alert
           window.alert('You do not have enough dai tokens for transfer')
@@ -421,7 +433,7 @@ export default {
           {
             from: this.publicAddress,
           },
-          (err, hash) => {
+          (err: Error, hash: string) => {
             if (err) this.console(err)
             else this.console(hash)
           }
@@ -432,13 +444,13 @@ export default {
     },
     async approveKnc() {
       try {
+        const { torus, web3 } = web3Obj;
         console.log(this.chainId, 'current chain id')
-        if (this.chainId !== '1') {
-          await window.torus.setProvider({ host: 'mainnet' })
+        if (this.chainId !== 1) {
+          await torus?.setProvider({ host: 'mainnet' })
         }
-        const localWeb3 = window.web3
-        const instance = new localWeb3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
-        let value = Math.floor(parseFloat(0.01) * 10 ** parseFloat(18)).toString()
+        const instance = new web3.eth.Contract(tokenAbi, '0xdd974D5C2e2928deA5F71b9825b8b646686BD200')
+        let value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString()
         const allowance = await instance.methods.allowance(this.publicAddress, '0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3').call()
         console.log(allowance, 'current allowance')
         if (Number(allowance) > 0) value = '0'
@@ -446,7 +458,7 @@ export default {
           {
             from: this.publicAddress,
           },
-          (err, hash) => {
+          (err: Error, hash: string) => {
             if (err) this.console(err)
             else this.console(hash)
           }
@@ -456,20 +468,23 @@ export default {
       }
     },
     async getUserInfo() {
-      window.torus.getUserInfo().then(this.console).catch(this.console)
+      const { torus } = web3Obj;
+      torus?.getUserInfo("").then(this.console).catch(this.console)
     },
     getPublicAddress() {
+      const { torus } = web3Obj;
       console.log(this.selectedVerifier, this.verifierId)
-      window.torus.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId }).then(this.console).catch(console.error)
+      torus?.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId } as VerifierArgs).then(this.console).catch(console.error)
     },
     getEncryptionKey() {
-      const self = this
-      window.web3.currentProvider.send(
+      const { web3 } = web3Obj;
+      const self = this;
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_getEncryptionPublicKey',
           params: [this.publicAddress],
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
@@ -486,26 +501,26 @@ export default {
       } catch (error) {}
     },
     decryptMessage() {
-      const self = this
-      window.web3.currentProvider.send(
+      const { web3 } = web3Obj;
+      const self = this;
+      (web3.currentProvider as any)?.send(
         {
           method: 'eth_decrypt',
           params: [this.messageEncrypted, this.publicAddress],
         },
-        (err, result) => {
+        (err: Error, result: any) => {
           if (err) {
             return console.error(err)
           }
-          self.messageDecrypted = result.result
           return self.console(`decrypted message => ${result.result}`)
         }
       )
     },
-    stringifiableToHex(value) {
+    stringifiableToHex(value: any): string {
       return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)))
     },
   },
-}
+})
 </script>
 
 <style>
