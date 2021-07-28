@@ -67,9 +67,9 @@ export const whiteLabelData = {
       },
     },
   },
-}
+};
 
-export const getV3TypedData = (chainId) => ({
+export const getV3TypedData = (chainId: string | number) => ({
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -105,9 +105,9 @@ export const getV3TypedData = (chainId) => ({
     },
     contents: 'Hello, Bob!',
   },
-})
+});
 
-export const getV4TypedData = (chainId) => ({
+export const getV4TypedData = (chainId: string | number) => ({
   types: {
     EIP712Domain: [
       { name: 'name', type: 'string' },
@@ -153,4 +153,4 @@ export const getV4TypedData = (chainId) => ({
     ],
     contents: 'Hello, Bob!',
   },
-})
+});

@@ -136,7 +136,7 @@ class Torus {
     this.torusWidgetVisibility = true;
     this.requestedVerifier = "";
     this.currentVerifier = "";
-    this.nodeDetailManager = new NodeDetailManager({});
+    this.nodeDetailManager = new NodeDetailManager();
     this.torusJs = new TorusJs({
       metadataHost: "https://metadata.tor.us",
       allowHost: "https://signer.tor.us/api/allow",
