@@ -128,7 +128,7 @@ class Torus {
 
   dappStorageKey: string;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" } = {}) {
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT as BUTTON_POSITION_TYPE, modalZIndex = 99999, apiKey = "torus-default" } = {}) {
     this.buttonPosition = buttonPosition;
     this.torusUrl = "";
     this.isLoggedIn = false; // ethereum.enable working
