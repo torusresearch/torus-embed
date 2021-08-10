@@ -29,7 +29,7 @@ declare class Torus {
     isLoginCallback: () => void;
     dappStorageKey: string;
     constructor({ buttonPosition, modalZIndex, apiKey }?: {
-        buttonPosition?: "bottom-left";
+        buttonPosition?: BUTTON_POSITION_TYPE;
         modalZIndex?: number;
         apiKey?: string;
     });
