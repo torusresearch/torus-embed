@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@chaitanyapotti/random-id": "^1.0.3",
-    "@metamask/obs-store": "^6.0.2",
     "@metamask/post-message-stream": "^4.0.0",
     "@metamask/safe-event-emitter": "^2.0.0",
     "@toruslabs/fetch-node-details": "^2.7.0",
