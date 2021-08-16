@@ -71,7 +71,7 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * Populates initial state by calling 'wallet_getProviderState' and emits
      * necessary events.
      */
-    private _initializeState;
+    _initializeState(): Promise<void>;
     /**
      * Internal RPC method. Forwards requests to background via the RPC engine.
      * Also remap ids inbound and outbound.

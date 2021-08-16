@@ -1,7 +1,7 @@
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import TorusJs from "@toruslabs/torus.js";
 import TorusInpageProvider from "./inpage-provider";
-import { BUTTON_POSITION_TYPE, EMBED_TRANSLATION_ITEM, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusParams, TorusPublicKey, UserInfo, VerifierArgs, WALLET_PATH, WhiteLabelParams } from "./interfaces";
+import { BUTTON_POSITION_TYPE, EMBED_TRANSLATION_ITEM, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams, TorusPublicKey, UserInfo, VerifierArgs, WALLET_PATH, WhiteLabelParams } from "./interfaces";
 import ExtendedObjectMultiplex from "./ObjectMultiplex";
 declare class Torus {
     buttonPosition: BUTTON_POSITION_TYPE;
@@ -28,11 +28,7 @@ declare class Torus {
     communicationMux: ExtendedObjectMultiplex;
     isLoginCallback: () => void;
     dappStorageKey: string;
-    constructor({ buttonPosition, modalZIndex, apiKey }?: {
-        buttonPosition?: BUTTON_POSITION_TYPE;
-        modalZIndex?: number;
-        apiKey?: string;
-    });
+    constructor({ buttonPosition, modalZIndex, apiKey }?: TorusCtorArgs);
     init({ buildEnv, enableLogging, enabledVerifiers, network, loginConfig, showTorusButton, integrity, whiteLabel, skipTKey, useLocalStorage, }?: TorusParams): Promise<void>;
     login({ verifier }?: {
         verifier?: string;

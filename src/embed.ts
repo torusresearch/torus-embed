@@ -19,6 +19,7 @@ import {
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
   TORUS_BUILD_ENV,
+  TorusCtorArgs,
   TorusParams,
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
@@ -128,7 +129,7 @@ class Torus {
 
   dappStorageKey: string;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT as BUTTON_POSITION_TYPE, modalZIndex = 99999, apiKey = "torus-default" } = {}) {
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
     this.torusUrl = "";
     this.isLoggedIn = false; // ethereum.enable working
@@ -499,8 +500,9 @@ class Torus {
     detectAccountRequestPrototypeModifier("send");
     detectAccountRequestPrototypeModifier("sendAsync");
 
-    inpageProvider.enable = () =>
-      new Promise((resolve, reject) => {
+    inpageProvider.enable = async () => {
+      await inpageProvider._initializeState();
+      return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ jsonrpc: "2.0", id: getPreopenInstanceId(), method: "eth_requestAccounts", params: [] }, (err, response) => {
           const { result: res } = (response as { result: unknown }) || {};
@@ -537,6 +539,7 @@ class Torus {
           }
         });
       });
+    };
 
     inpageProvider.tryPreopenHandle = (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => {
       const _payload = payload;

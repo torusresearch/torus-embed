@@ -16,6 +16,7 @@ import {
   SendSyncJsonRpcRequest,
   SentWarningsState,
   UnvalidatedJsonRpcRequest,
+  WalletProviderState,
 } from "./interfaces";
 import log from "./loglevel";
 import messages from "./messages";
@@ -127,6 +128,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     this._sendSync = this._sendSync.bind(this);
     this._rpcRequest = this._rpcRequest.bind(this);
     this._warnOfDeprecation = this._warnOfDeprecation.bind(this);
+    this._initializeState = this._initializeState.bind(this);
 
     this.request = this.request.bind(this);
     this.send = this.send.bind(this);
@@ -164,17 +166,15 @@ class TorusInpageProvider extends SafeEventEmitter {
     rpcEngine.push(jsonRpcConnection.middleware);
     this._rpcEngine = rpcEngine;
 
-    this._initializeState();
-
     // json rpc notification listener
     jsonRpcConnection.events.on("notification", (payload) => {
-      const { result, method, params } = payload;
+      const { method, params } = payload;
       if (method === "wallet_accountsChanged") {
-        this._handleAccountsChanged(result);
+        this._handleAccountsChanged(params);
       } else if (method === "wallet_unlockStateChanged") {
-        this._handleUnlockStateChanged(result);
+        this._handleUnlockStateChanged(params);
       } else if (method === "wallet_chainChanged") {
-        this._handleChainChanged(result);
+        this._handleChainChanged(params);
       } else if (EMITTED_NOTIFICATIONS.includes(payload.method)) {
         // EIP 1193 subscriptions, per eth-json-rpc-filters/subscriptionManager
         this.emit("data", payload); // deprecated
@@ -284,16 +284,11 @@ class TorusInpageProvider extends SafeEventEmitter {
    * Populates initial state by calling 'wallet_getProviderState' and emits
    * necessary events.
    */
-  private async _initializeState() {
+  async _initializeState(): Promise<void> {
     try {
       const { accounts, chainId, isUnlocked, networkVersion } = (await this.request({
         method: "wallet_getProviderState",
-      })) as {
-        accounts: string[];
-        chainId: string;
-        isUnlocked: boolean;
-        networkVersion: string;
-      };
+      })) as WalletProviderState;
 
       // indicate that we've connected, for EIP-1193 compliance
       this.emit("connect", { chainId });
@@ -304,6 +299,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     } catch (error) {
       log.error("MetaMask: Failed to get initial state. Please report this bug.", error);
     } finally {
+      log.info("initialized state");
       this._state.initialized = true;
       this.emit("_initialized");
     }
@@ -453,7 +449,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param networkInfo.networkVersion - The latest network ID.
    */
   protected _handleChainChanged({ chainId, networkVersion }: { chainId?: string; networkVersion?: string } = {}): void {
-    if (!chainId || typeof chainId !== "string" || !chainId.startsWith("0x") || !networkVersion || typeof networkVersion !== "string") {
+    if (!chainId || !networkVersion) {
       log.error("MetaMask: Received invalid network parameters. Please report this bug.", { chainId, networkVersion });
       return;
     }

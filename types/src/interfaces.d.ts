@@ -620,3 +620,9 @@ export interface PublicConfigState {
 export declare type Maybe<T> = Partial<T> | null | undefined;
 export declare type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex";
 export declare type IObjectMultiplex = Duplex;
+export declare type WalletProviderState = {
+    accounts: string[];
+    chainId: string;
+    isUnlocked: boolean;
+    networkVersion: string;
+};
