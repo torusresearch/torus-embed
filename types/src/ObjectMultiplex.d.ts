@@ -5,7 +5,7 @@ interface Chunk {
     name: string;
     data: unknown;
 }
-export declare class ObjectMultiplex extends Duplex implements IObjectMultiplex {
+declare class ObjectMultiplex extends Duplex implements IObjectMultiplex {
     private _substreams;
     constructor(opts?: Record<string, unknown>);
     createStream(name: string): Substream;

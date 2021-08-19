@@ -162,12 +162,12 @@ export default Vue.extend({
             // tickerName: 'DES Coin',
           },
           showTorusButton: true,
-          integrity: {
-            version: "1.11.0",
-            check: true,
-            // version: '1.4.2',
-            // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
-          },
+          // integrity: {
+          //   version: "1.11.0",
+          //   check: true,
+          // version: '1.4.2',
+          // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
+          // },
           loginConfig:
             this.buildEnv === "lrc"
               ? {
