@@ -234,6 +234,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     // json rpc notification listener
     jsonRpcConnection.events.on("notification", (payload) => {
       const { result, method, params } = payload;
+      // TODO: handle other methods here
       if (method === "wallet_accountsChanged") {
         this._handleAccountsChanged(result);
       } else if (EMITTED_NOTIFICATIONS.includes(payload.method)) {
