@@ -23,7 +23,7 @@ interface Chunk {
   data: unknown;
 }
 
-export class ObjectMultiplex extends Duplex implements IObjectMultiplex {
+class ObjectMultiplex extends Duplex implements IObjectMultiplex {
   private _substreams: Record<string, Substream | typeof IGNORE_SUBSTREAM>;
 
   constructor(opts: Record<string, unknown> = {}) {
