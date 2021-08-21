@@ -146,6 +146,7 @@ export default Vue.extend({
     async login() {
       try {
         const { torus, web3 } = web3Obj;
+        (window as any).torus = torus;
         await torus?.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {

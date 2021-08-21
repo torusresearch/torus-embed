@@ -499,8 +499,7 @@ class Torus {
     detectAccountRequestPrototypeModifier("send");
     detectAccountRequestPrototypeModifier("sendAsync");
 
-    inpageProvider.enable = async () => {
-      await inpageProvider._initializeState();
+    inpageProvider.enable = () => {
       return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ jsonrpc: "2.0", id: getPreopenInstanceId(), method: "eth_requestAccounts", params: [] }, (err, response) => {
@@ -600,6 +599,7 @@ class Torus {
     this.provider = proxiedInpageProvider;
 
     if (this.provider.shouldSendMetadata) sendSiteMetadata(this.provider._rpcEngine);
+    inpageProvider._initializeState();
     log.debug("Torus - injected provider");
   }
 
