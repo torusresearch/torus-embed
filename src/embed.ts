@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { WindowPostMessageStream } from "@metamask/post-message-stream";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import { setAPIKey } from "@toruslabs/http-helpers";

@@ -1,7 +1,7 @@
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
 import dequal from "fast-deep-equal";
-import { duplex as isDuplex } from "is-stream";
+import { isDuplexStream } from "is-stream";
 import { createIdRemapMiddleware, JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
 import { createStreamMiddleware } from "json-rpc-middleware-stream";
 import pump from "pump";
@@ -101,7 +101,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     { maxEventListeners = 100, shouldSendMetadata = true, jsonRpcStreamName = "provider" }: ProviderOptions = {}
   ) {
     super();
-    if (!isDuplex(connectionStream)) {
+    if (!isDuplexStream(connectionStream)) {
       throw new Error(messages.errors.invalidDuplexStream());
     }
     this.isTorus = true;

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 const ESLintPlugin = require("eslint-webpack-plugin");
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const pkgName = "torus";
 const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1);
@@ -10,6 +11,8 @@ const externals = [
   "fast-deep-equal",
   "loglevel",
   "deepmerge",
+  "eth-rpc-errors",
+  "once",
   // "@toruslabs/fetch-node-details",
   // "@toruslabs/torus.js",
   // "@toruslabs/http-helpers",
@@ -33,6 +36,8 @@ const baseConfig = {
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
       lodash: path.resolve(__dirname, "node_modules/lodash"),
       "js-sha3": path.resolve(__dirname, "node_modules/js-sha3"),
+      "web3-providers-ipc": path.resolve(__dirname, "node_modules/empty-module"),
+      "web3-providers-ws": path.resolve(__dirname, "node_modules/empty-module"),
     },
   },
   module: {
@@ -92,6 +97,10 @@ const cjsConfig = {
     new ESLintPlugin({
       files: "src",
       extensions: ".ts",
+    }),
+    new BundleAnalyzerPlugin({
+      analyzerMode: "disabled", // disabled static
+      openAnalyzer: false,
     }),
   ],
 };
