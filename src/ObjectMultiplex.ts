@@ -79,7 +79,6 @@ class ObjectMultiplex extends Duplex implements IObjectMultiplex {
     this._substreams[name] = IGNORE_SUBSTREAM;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   _read(): void {
     return undefined;
   }
@@ -88,7 +87,7 @@ class ObjectMultiplex extends Duplex implements IObjectMultiplex {
     const { name, data } = chunk;
 
     if (!name) {
-      log.warn(`ObjectMultiplex - malformed chunk without name "${chunk}"`);
+      log.warn(`ObjectMultiplex - malformed chunk without name "${JSON.stringify(chunk || {})}"`);
       return callback();
     }
 

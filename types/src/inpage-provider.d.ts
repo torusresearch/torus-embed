@@ -1,8 +1,7 @@
-import { ObservableStore } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
 import { Duplex } from "readable-stream";
-import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, PublicConfigState, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
+import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
 /**
  * @param {Object} connectionStream - A Node.js duplex stream
  * @param {Object} opts - An options bag
@@ -32,16 +31,30 @@ declare class TorusInpageProvider extends SafeEventEmitter {
     readonly isTorus: true;
     protected _sentWarnings: SentWarningsState;
     protected static _defaultState: BaseProviderState;
-    _publicConfigStore: ObservableStore<PublicConfigState>;
     tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => void;
     enable: () => Promise<string[]>;
     constructor(connectionStream: Duplex, { maxEventListeners, shouldSendMetadata, jsonRpcStreamName }?: ProviderOptions);
-    get publicConfigStore(): ObservableStore<PublicConfigState>;
     /**
      * Returns whether the inpage provider is connected to Torus.
      */
     isConnected(): boolean;
+    /**
+     * Submits an RPC request for the given method, with the given params.
+     * Resolves with the result of the method call, or rejects on error.
+     *
+     * @param {Object} args - The RPC request arguments.
+     * @param {string} args.method - The RPC method name.
+     * @param {unknown[] | Object} [args.params] - The parameters for the RPC method.
+     * @returns {Promise<unknown>} A Promise that resolves with the result of the RPC method,
+     * or rejects if an error is encountered.
+     */
     request<T>(args: RequestArguments): Promise<Maybe<T>>;
+    /**
+     * Submits an RPC request per the given JSON-RPC request object.
+     *
+     * @param {Object} payload - The RPC request object.
+     * @param {Function} cb - The callback function.
+     */
     sendAsync(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<unknown>) => void): void;
     /**
      * We override the following event methods so that we can warn consumers
@@ -53,6 +66,21 @@ declare class TorusInpageProvider extends SafeEventEmitter {
     once(eventName: string, listener: (...args: unknown[]) => void): this;
     prependListener(eventName: string, listener: (...args: unknown[]) => void): this;
     prependOnceListener(eventName: string, listener: (...args: unknown[]) => void): this;
+    /**
+     * Constructor helper.
+     * Populates initial state by calling 'wallet_getProviderState' and emits
+     * necessary events.
+     */
+    _initializeState(): Promise<void>;
+    /**
+     * Internal RPC method. Forwards requests to background via the RPC engine.
+     * Also remap ids inbound and outbound.
+     *
+     * @private
+     * @param {Object} payload - The RPC request object.
+     * @param {Function} callback - The consumer's callback.
+     * @param {boolean} [isInternal=false] - Whether the request is internal.
+     */
     _rpcRequest(payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], callback: (...args: any[]) => void, isInternal?: boolean): void;
     /**
      * When the provider becomes connected, updates internal state and emits
@@ -84,6 +112,37 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * Called when accounts may have changed.
      */
     _handleAccountsChanged(accounts: unknown[], isEthAccounts?: boolean, isInternal?: boolean): void;
+    /**
+     * Upon receipt of a new chainId and networkVersion, emits corresponding
+     * events and sets relevant public state.
+     * Does nothing if neither the chainId nor the networkVersion are different
+     * from existing values.
+     *
+     * @emits MetamaskInpageProvider#chainChanged
+     * @param networkInfo - An object with network info.
+     * @param networkInfo.chainId - The latest chain ID.
+     * @param networkInfo.networkVersion - The latest network ID.
+     */
+    protected _handleChainChanged({ chainId, networkVersion }?: {
+        chainId?: string;
+        networkVersion?: string;
+    }): void;
+    /**
+     * Upon receipt of a new isUnlocked state, sets relevant public state.
+     * Calls the accounts changed handler with the received accounts, or an empty
+     * array.
+     *
+     * Does nothing if the received value is equal to the existing value.
+     * There are no lock/unlock events.
+     *
+     * @param opts - Options bag.
+     * @param opts.accounts - The exposed accounts, if any.
+     * @param opts.isUnlocked - The latest isUnlocked value.
+     */
+    protected _handleUnlockStateChanged({ accounts, isUnlocked }?: {
+        accounts?: string[];
+        isUnlocked?: boolean;
+    }): void;
     /**
      * Warns of deprecation for the given event, if applicable.
      */
