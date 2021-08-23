@@ -423,7 +423,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     if (!dequal(this._state.accounts, finalAccounts)) {
       // we should always have the correct accounts even before eth_accounts
       // returns, except in cases where isInternal is true
-      if (isEthAccounts && this._state.accounts !== null && !isInternal) {
+      if (isEthAccounts && Array.isArray(this._state.accounts) && this._state.accounts.length > 0 && !isInternal) {
         log.error('MetaMask: "eth_accounts" unexpectedly updated accounts. Please report this bug.', finalAccounts);
       }
 
