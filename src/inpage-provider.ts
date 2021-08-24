@@ -1,3 +1,4 @@
+import { ObservableStore, storeAsStream } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
 import dequal from "fast-deep-equal";
@@ -12,6 +13,7 @@ import {
   JsonRpcConnection,
   Maybe,
   ProviderOptions,
+  PublicConfigState,
   RequestArguments,
   SendSyncJsonRpcRequest,
   SentWarningsState,
@@ -92,6 +94,8 @@ class TorusInpageProvider extends SafeEventEmitter {
     hasEmittedConnection: false,
   };
 
+  _publicConfigStore: ObservableStore<PublicConfigState>;
+
   tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => void;
 
   enable: () => Promise<string[]>;
@@ -139,6 +143,70 @@ class TorusInpageProvider extends SafeEventEmitter {
     const mux = new ObjectMultiplex();
     pump(connectionStream, mux as unknown as Duplex, connectionStream, this._handleStreamDisconnect.bind(this, "MetaMask"));
 
+    // subscribe to metamask public config (one-way)
+    this._publicConfigStore = new ObservableStore({ storageKey: "Metamask-Config" });
+
+    // handle isUnlocked changes, and chainChanged and networkChanged events
+    this._publicConfigStore.subscribe((stringifiedState) => {
+      // This is because we are using store as string
+      const state = JSON.parse(stringifiedState as unknown as string);
+      if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
+        this._state.isUnlocked = state.isUnlocked;
+        if (!this._state.isUnlocked) {
+          // accounts are never exposed when the extension is locked
+          this._handleAccountsChanged([]);
+        } else {
+          // this will get the exposed accounts, if any
+          try {
+            this._rpcRequest(
+              { method: "eth_accounts", params: [] },
+              NOOP,
+              true // indicating that eth_accounts _should_ update accounts
+            );
+          } catch (_) {
+            // Swallow error
+          }
+        }
+      }
+
+      if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
+        try {
+          this._rpcRequest(
+            { method: "eth_accounts", params: [] },
+            NOOP,
+            true // indicating that eth_accounts _should_ update accounts
+          );
+        } catch (_) {
+          // Swallow error
+        }
+      }
+
+      // Emit chainChanged event on chain change
+      if ("chainId" in state && state.chainId !== this.chainId) {
+        this.chainId = state.chainId || null;
+        this.emit("chainChanged", this.chainId);
+
+        // indicate that we've connected, for EIP-1193 compliance
+        // we do this here so that iframe can initialize
+        if (!this._state.hasEmittedConnection) {
+          this._handleConnect(this.chainId);
+          this._state.hasEmittedConnection = true;
+        }
+      }
+
+      // Emit networkChanged event on network change
+      if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
+        this.networkVersion = state.networkVersion || null;
+        this.emit("networkChanged", this.networkVersion);
+      }
+    });
+
+    pump(
+      mux.createStream("publicConfig") as unknown as Duplex,
+      storeAsStream(this._publicConfigStore),
+      // RPC requests should still work if only this stream fails
+      logStreamDisconnectWarning.bind(this, "MetaMask PublicConfigStore")
+    );
     // ignore phishing warning message (handled elsewhere)
     mux.ignoreStream("phishing");
 
@@ -188,6 +256,14 @@ class TorusInpageProvider extends SafeEventEmitter {
       // Backward compatibility for older non EIP 1193 subscriptions
       // this.emit('data', null, payload)
     });
+  }
+
+  get publicConfigStore(): ObservableStore<PublicConfigState> {
+    if (!this._sentWarnings.publicConfigStore) {
+      log.warn(messages.warnings.publicConfigStore);
+      this._sentWarnings.publicConfigStore = true;
+    }
+    return this._publicConfigStore;
   }
 
   /**
