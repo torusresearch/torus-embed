@@ -147,59 +147,59 @@ class TorusInpageProvider extends SafeEventEmitter {
     this._publicConfigStore = new ObservableStore({ storageKey: "Metamask-Config" });
 
     // handle isUnlocked changes, and chainChanged and networkChanged events
-    this._publicConfigStore.subscribe((stringifiedState) => {
-      // This is because we are using store as string
-      const state = JSON.parse(stringifiedState as unknown as string);
-      if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
-        this._state.isUnlocked = state.isUnlocked;
-        if (!this._state.isUnlocked) {
-          // accounts are never exposed when the extension is locked
-          this._handleAccountsChanged([]);
-        } else {
-          // this will get the exposed accounts, if any
-          try {
-            this._rpcRequest(
-              { method: "eth_accounts", params: [] },
-              NOOP,
-              true // indicating that eth_accounts _should_ update accounts
-            );
-          } catch (_) {
-            // Swallow error
-          }
-        }
-      }
+    // this._publicConfigStore.subscribe((stringifiedState) => {
+    //   // This is because we are using store as string
+    //   const state = JSON.parse(stringifiedState as unknown as string);
+    //   if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
+    //     this._state.isUnlocked = state.isUnlocked;
+    //     if (!this._state.isUnlocked) {
+    //       // accounts are never exposed when the extension is locked
+    //       this._handleAccountsChanged([]);
+    //     } else {
+    //       // this will get the exposed accounts, if any
+    //       try {
+    //         this._rpcRequest(
+    //           { method: "eth_accounts", params: [] },
+    //           NOOP,
+    //           true // indicating that eth_accounts _should_ update accounts
+    //         );
+    //       } catch (_) {
+    //         // Swallow error
+    //       }
+    //     }
+    //   }
 
-      if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
-        try {
-          this._rpcRequest(
-            { method: "eth_accounts", params: [] },
-            NOOP,
-            true // indicating that eth_accounts _should_ update accounts
-          );
-        } catch (_) {
-          // Swallow error
-        }
-      }
+    //   if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
+    //     try {
+    //       this._rpcRequest(
+    //         { method: "eth_accounts", params: [] },
+    //         NOOP,
+    //         true // indicating that eth_accounts _should_ update accounts
+    //       );
+    //     } catch (_) {
+    //       // Swallow error
+    //     }
+    //   }
 
-      // Emit chainChanged event on chain change
-      if ("chainId" in state && state.chainId !== this.chainId) {
-        this.chainId = state.chainId || null;
-        this.emit("chainChanged", this.chainId);
+    //   // Emit chainChanged event on chain change
+    //   if ("chainId" in state && state.chainId !== this.chainId) {
+    //     this.chainId = state.chainId || null;
+    //     this.emit("chainChanged", this.chainId);
 
-        // indicate that we've connected, for EIP-1193 compliance
-        // we do this here so that iframe can initialize
-        if (!this._state.hasEmittedConnection) {
-          this._handleConnect(this.chainId);
-          this._state.hasEmittedConnection = true;
-        }
-      }
+    //     // indicate that we've connected, for EIP-1193 compliance
+    //     // we do this here so that iframe can initialize
+    //     if (!this._state.hasEmittedConnection) {
+    //       this._handleConnect(this.chainId);
+    //       this._state.hasEmittedConnection = true;
+    //     }
+    //   }
 
-      // Emit networkChanged event on network change
-      if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
-        this.networkVersion = state.networkVersion || null;
-        this.emit("networkChanged", this.networkVersion);
-      }
-    });
+    //   // Emit networkChanged event on network change
+    //   if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
+    //     this.networkVersion = state.networkVersion || null;
+    //     this.emit("networkChanged", this.networkVersion);
+    //   }
+    // });
 
     pump(
       mux.createStream("publicConfig") as unknown as Duplex,
