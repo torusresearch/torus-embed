@@ -55,7 +55,15 @@ const iframeIntegrity = "sha384-LCE8WzUv/xXZg9ngpTnLzmflSLpokk6tnHPhVtaoDooNWFZN
 
 const expectedCacheControlHeader = "max-age=3600";
 
-const UNSAFE_METHODS = ["eth_sendTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign"];
+const UNSAFE_METHODS = [
+  "eth_sendTransaction",
+  "eth_signTypedData",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "personal_sign",
+  "eth_getEncryptionPublicKey",
+  "eth_decrypt",
+];
 
 const isLocalStorageAvailable = storageAvailable("localStorage");
 

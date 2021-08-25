@@ -1,7 +1,8 @@
+import { ObservableStore } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
 import { Duplex } from "readable-stream";
-import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
+import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, PublicConfigState, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
 /**
  * @param {Object} connectionStream - A Node.js duplex stream
  * @param {Object} opts - An options bag
@@ -31,9 +32,11 @@ declare class TorusInpageProvider extends SafeEventEmitter {
     readonly isTorus: true;
     protected _sentWarnings: SentWarningsState;
     protected static _defaultState: BaseProviderState;
+    _publicConfigStore: ObservableStore<PublicConfigState>;
     tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => void;
     enable: () => Promise<string[]>;
     constructor(connectionStream: Duplex, { maxEventListeners, shouldSendMetadata, jsonRpcStreamName }?: ProviderOptions);
+    get publicConfigStore(): ObservableStore<PublicConfigState>;
     /**
      * Returns whether the inpage provider is connected to Torus.
      */
