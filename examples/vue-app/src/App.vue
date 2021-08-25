@@ -146,6 +146,7 @@ export default Vue.extend({
     async login() {
       try {
         const { torus, web3 } = web3Obj;
+        (window as any).torus = torus;
         await torus?.init({
           buildEnv: this.buildEnv,
           enabledVerifiers: {
@@ -422,6 +423,7 @@ export default Vue.extend({
         if (this.chainId !== 1) {
           await torus?.setProvider({ host: "mainnet" });
         }
+        // @ts-ignore
         const instance = new web3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f");
         const balance = await instance.methods.balanceOf(this.publicAddress).call();
         console.log(balance, "dai balance");
@@ -451,6 +453,7 @@ export default Vue.extend({
         if (this.chainId !== 1) {
           await torus?.setProvider({ host: "mainnet" });
         }
+        // @ts-ignore
         const instance = new web3.eth.Contract(tokenAbi, "0xdd974D5C2e2928deA5F71b9825b8b646686BD200");
         let value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
         const allowance = await instance.methods.allowance(this.publicAddress, "0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3").call();

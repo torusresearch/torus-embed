@@ -696,3 +696,10 @@ export type Maybe<T> = Partial<T> | null | undefined;
 export type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex";
 
 export type IObjectMultiplex = Duplex;
+
+export type WalletProviderState = {
+  accounts: string[];
+  chainId: string;
+  isUnlocked: boolean;
+  networkVersion: string;
+};

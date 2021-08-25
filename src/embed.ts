@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 import { WindowPostMessageStream } from "@metamask/post-message-stream";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import { setAPIKey } from "@toruslabs/http-helpers";
@@ -19,6 +18,7 @@ import {
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
   TORUS_BUILD_ENV,
+  TorusCtorArgs,
   TorusParams,
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
@@ -55,7 +55,15 @@ const iframeIntegrity = "sha384-aEBviMan3aHnajyEg/GvhSVD3JrNQeASlA+m8daLiGVEy4yY
 
 const expectedCacheControlHeader = "max-age=3600";
 
-const UNSAFE_METHODS = ["eth_sendTransaction", "eth_signTypedData", "eth_signTypedData_v3", "eth_signTypedData_v4", "personal_sign"];
+const UNSAFE_METHODS = [
+  "eth_sendTransaction",
+  "eth_signTypedData",
+  "eth_signTypedData_v3",
+  "eth_signTypedData_v4",
+  "personal_sign",
+  "eth_getEncryptionPublicKey",
+  "eth_decrypt",
+];
 
 const isLocalStorageAvailable = storageAvailable("localStorage");
 
@@ -128,7 +136,7 @@ class Torus {
 
   dappStorageKey: string;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" } = {}) {
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
     this.torusUrl = "";
     this.isLoggedIn = false; // ethereum.enable working
@@ -499,8 +507,8 @@ class Torus {
     detectAccountRequestPrototypeModifier("send");
     detectAccountRequestPrototypeModifier("sendAsync");
 
-    inpageProvider.enable = () =>
-      new Promise((resolve, reject) => {
+    inpageProvider.enable = () => {
+      return new Promise((resolve, reject) => {
         // If user is already logged in, we assume they have given access to the website
         inpageProvider.sendAsync({ jsonrpc: "2.0", id: getPreopenInstanceId(), method: "eth_requestAccounts", params: [] }, (err, response) => {
           const { result: res } = (response as { result: unknown }) || {};
@@ -537,6 +545,7 @@ class Torus {
           }
         });
       });
+    };
 
     inpageProvider.tryPreopenHandle = (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => {
       const _payload = payload;
@@ -598,6 +607,7 @@ class Torus {
     this.provider = proxiedInpageProvider;
 
     if (this.provider.shouldSendMetadata) sendSiteMetadata(this.provider._rpcEngine);
+    inpageProvider._initializeState();
     log.debug("Torus - injected provider");
   }
 

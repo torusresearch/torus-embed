@@ -30,10 +30,10 @@ class App extends React.Component {
     buildEnv: 'testing' as TORUS_BUILD_ENV_TYPE,
   }
 
-  componentDidMount(): void {
+  async componentDidMount(): Promise<void> {
     const torusEnv = sessionStorage.getItem('pageUsingTorus');
     if (torusEnv) {
-      this.login();
+      await this.login();
     }
   }
 
@@ -72,7 +72,8 @@ class App extends React.Component {
         whiteLabel: whiteLabelData,
         skipTKey: true,
       });
-      await torus.login(); // await torus.ethereum.enable()
+      const acc = await torus.login(); // await torus.ethereum.enable()
+      console.log('acc', acc);
       sessionStorage.setItem('pageUsingTorus', buildEnv);
       web3Obj.setweb3(torus.provider);
       torus.provider.on('chainChanged', (resp) => {
@@ -132,7 +133,7 @@ class App extends React.Component {
   }
 
   changeProvider = async () => {
-    await web3Obj.torus.setProvider({ host: 'ropsten' });
+    await web3Obj.torus.setProvider({ host: 'mainnet' });
     this.console('finished changing provider');
   }
 

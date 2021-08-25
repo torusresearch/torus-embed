@@ -2,7 +2,7 @@ import { ObservableStore, storeAsStream } from "@metamask/obs-store";
 import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
 import dequal from "fast-deep-equal";
-import { duplex as isDuplex } from "is-stream";
+import { isDuplexStream } from "is-stream";
 import { createIdRemapMiddleware, JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
 import { createStreamMiddleware } from "json-rpc-middleware-stream";
 import pump from "pump";
@@ -18,6 +18,7 @@ import {
   SendSyncJsonRpcRequest,
   SentWarningsState,
   UnvalidatedJsonRpcRequest,
+  WalletProviderState,
 } from "./interfaces";
 import log from "./loglevel";
 import messages from "./messages";
@@ -104,7 +105,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     { maxEventListeners = 100, shouldSendMetadata = true, jsonRpcStreamName = "provider" }: ProviderOptions = {}
   ) {
     super();
-    if (!isDuplex(connectionStream)) {
+    if (!isDuplexStream(connectionStream)) {
       throw new Error(messages.errors.invalidDuplexStream());
     }
     this.isTorus = true;
@@ -123,12 +124,15 @@ class TorusInpageProvider extends SafeEventEmitter {
 
     // bind functions (to prevent e.g. web3@1.x from making unbound calls)
     this._handleAccountsChanged = this._handleAccountsChanged.bind(this);
+    this._handleChainChanged = this._handleChainChanged.bind(this);
+    this._handleUnlockStateChanged = this._handleUnlockStateChanged.bind(this);
     this._handleConnect = this._handleConnect.bind(this);
     this._handleDisconnect = this._handleDisconnect.bind(this);
     this._handleStreamDisconnect = this._handleStreamDisconnect.bind(this);
     this._sendSync = this._sendSync.bind(this);
     this._rpcRequest = this._rpcRequest.bind(this);
     this._warnOfDeprecation = this._warnOfDeprecation.bind(this);
+    this._initializeState = this._initializeState.bind(this);
 
     this.request = this.request.bind(this);
     this.send = this.send.bind(this);
@@ -143,59 +147,59 @@ class TorusInpageProvider extends SafeEventEmitter {
     this._publicConfigStore = new ObservableStore({ storageKey: "Metamask-Config" });
 
     // handle isUnlocked changes, and chainChanged and networkChanged events
-    this._publicConfigStore.subscribe((stringifiedState) => {
-      // This is because we are using store as string
-      const state = JSON.parse(stringifiedState as unknown as string);
-      if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
-        this._state.isUnlocked = state.isUnlocked;
-        if (!this._state.isUnlocked) {
-          // accounts are never exposed when the extension is locked
-          this._handleAccountsChanged([]);
-        } else {
-          // this will get the exposed accounts, if any
-          try {
-            this._rpcRequest(
-              { method: "eth_accounts", params: [] },
-              NOOP,
-              true // indicating that eth_accounts _should_ update accounts
-            );
-          } catch (_) {
-            // Swallow error
-          }
-        }
-      }
+    // this._publicConfigStore.subscribe((stringifiedState) => {
+    //   // This is because we are using store as string
+    //   const state = JSON.parse(stringifiedState as unknown as string);
+    //   if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
+    //     this._state.isUnlocked = state.isUnlocked;
+    //     if (!this._state.isUnlocked) {
+    //       // accounts are never exposed when the extension is locked
+    //       this._handleAccountsChanged([]);
+    //     } else {
+    //       // this will get the exposed accounts, if any
+    //       try {
+    //         this._rpcRequest(
+    //           { method: "eth_accounts", params: [] },
+    //           NOOP,
+    //           true // indicating that eth_accounts _should_ update accounts
+    //         );
+    //       } catch (_) {
+    //         // Swallow error
+    //       }
+    //     }
+    //   }
 
-      if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
-        try {
-          this._rpcRequest(
-            { method: "eth_accounts", params: [] },
-            NOOP,
-            true // indicating that eth_accounts _should_ update accounts
-          );
-        } catch (_) {
-          // Swallow error
-        }
-      }
+    //   if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
+    //     try {
+    //       this._rpcRequest(
+    //         { method: "eth_accounts", params: [] },
+    //         NOOP,
+    //         true // indicating that eth_accounts _should_ update accounts
+    //       );
+    //     } catch (_) {
+    //       // Swallow error
+    //     }
+    //   }
 
-      // Emit chainChanged event on chain change
-      if ("chainId" in state && state.chainId !== this.chainId) {
-        this.chainId = state.chainId || null;
-        this.emit("chainChanged", this.chainId);
+    //   // Emit chainChanged event on chain change
+    //   if ("chainId" in state && state.chainId !== this.chainId) {
+    //     this.chainId = state.chainId || null;
+    //     this.emit("chainChanged", this.chainId);
 
-        // indicate that we've connected, for EIP-1193 compliance
-        // we do this here so that iframe can initialize
-        if (!this._state.hasEmittedConnection) {
-          this._handleConnect(this.chainId);
-          this._state.hasEmittedConnection = true;
-        }
-      }
+    //     // indicate that we've connected, for EIP-1193 compliance
+    //     // we do this here so that iframe can initialize
+    //     if (!this._state.hasEmittedConnection) {
+    //       this._handleConnect(this.chainId);
+    //       this._state.hasEmittedConnection = true;
+    //     }
+    //   }
 
-      // Emit networkChanged event on network change
-      if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
-        this.networkVersion = state.networkVersion || null;
-        this.emit("networkChanged", this.networkVersion);
-      }
-    });
+    //   // Emit networkChanged event on network change
+    //   if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
+    //     this.networkVersion = state.networkVersion || null;
+    //     this.emit("networkChanged", this.networkVersion);
+    //   }
+    // });
 
     pump(
       mux.createStream("publicConfig") as unknown as Duplex,
@@ -203,7 +207,6 @@ class TorusInpageProvider extends SafeEventEmitter {
       // RPC requests should still work if only this stream fails
       logStreamDisconnectWarning.bind(this, "MetaMask PublicConfigStore")
     );
-
     // ignore phishing warning message (handled elsewhere)
     mux.ignoreStream("phishing");
 
@@ -233,10 +236,13 @@ class TorusInpageProvider extends SafeEventEmitter {
 
     // json rpc notification listener
     jsonRpcConnection.events.on("notification", (payload) => {
-      const { result, method, params } = payload;
-      // TODO: handle other methods here
+      const { method, params } = payload;
       if (method === "wallet_accountsChanged") {
-        this._handleAccountsChanged(result);
+        this._handleAccountsChanged(params);
+      } else if (method === "wallet_unlockStateChanged") {
+        this._handleUnlockStateChanged(params);
+      } else if (method === "wallet_chainChanged") {
+        this._handleChainChanged(params);
       } else if (EMITTED_NOTIFICATIONS.includes(payload.method)) {
         // EIP 1193 subscriptions, per eth-json-rpc-filters/subscriptionManager
         this.emit("data", payload); // deprecated
@@ -267,6 +273,16 @@ class TorusInpageProvider extends SafeEventEmitter {
     return this._state.isConnected;
   }
 
+  /**
+   * Submits an RPC request for the given method, with the given params.
+   * Resolves with the result of the method call, or rejects on error.
+   *
+   * @param {Object} args - The RPC request arguments.
+   * @param {string} args.method - The RPC method name.
+   * @param {unknown[] | Object} [args.params] - The parameters for the RPC method.
+   * @returns {Promise<unknown>} A Promise that resolves with the result of the RPC method,
+   * or rejects if an error is encountered.
+   */
   async request<T>(args: RequestArguments): Promise<Maybe<T>> {
     if (!args || typeof args !== "object" || Array.isArray(args)) {
       throw ethErrors.rpc.invalidRequest({
@@ -296,6 +312,12 @@ class TorusInpageProvider extends SafeEventEmitter {
     });
   }
 
+  /**
+   * Submits an RPC request per the given JSON-RPC request object.
+   *
+   * @param {Object} payload - The RPC request object.
+   * @param {Function} cb - The callback function.
+   */
   sendAsync(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<unknown>) => void): void {
     this._rpcRequest(payload, callback);
   }
@@ -331,6 +353,43 @@ class TorusInpageProvider extends SafeEventEmitter {
     return super.prependOnceListener(eventName, listener);
   }
 
+  // Private Methods
+  //= ===================
+  /**
+   * Constructor helper.
+   * Populates initial state by calling 'wallet_getProviderState' and emits
+   * necessary events.
+   */
+  async _initializeState(): Promise<void> {
+    try {
+      const { accounts, chainId, isUnlocked, networkVersion } = (await this.request({
+        method: "wallet_getProviderState",
+      })) as WalletProviderState;
+
+      // indicate that we've connected, for EIP-1193 compliance
+      this.emit("connect", { chainId });
+
+      this._handleChainChanged({ chainId, networkVersion });
+      this._handleUnlockStateChanged({ accounts, isUnlocked });
+      this._handleAccountsChanged(accounts);
+    } catch (error) {
+      log.error("MetaMask: Failed to get initial state. Please report this bug.", error);
+    } finally {
+      log.info("initialized state");
+      this._state.initialized = true;
+      this.emit("_initialized");
+    }
+  }
+
+  /**
+   * Internal RPC method. Forwards requests to background via the RPC engine.
+   * Also remap ids inbound and outbound.
+   *
+   * @private
+   * @param {Object} payload - The RPC request object.
+   * @param {Function} callback - The consumer's callback.
+   * @param {boolean} [isInternal=false] - Whether the request is internal.
+   */
   _rpcRequest(payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], callback: (...args: any[]) => void, isInternal = false): void {
     let cb = callback;
     const _payload = payload;
@@ -345,6 +404,9 @@ class TorusInpageProvider extends SafeEventEmitter {
           this._handleAccountsChanged(res.result || [], _payload.method === "eth_accounts", isInternal);
           callback(err, res);
         };
+      } else if (_payload.method === "wallet_getProviderState") {
+        this._rpcEngine.handle(payload as JsonRpcRequest<unknown>, cb);
+        return;
       }
     }
     this.tryPreopenHandle(_payload, cb);
@@ -437,7 +499,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     if (!dequal(this._state.accounts, finalAccounts)) {
       // we should always have the correct accounts even before eth_accounts
       // returns, except in cases where isInternal is true
-      if (isEthAccounts && !isInternal) {
+      if (isEthAccounts && Array.isArray(this._state.accounts) && this._state.accounts.length > 0 && !isInternal) {
         log.error('MetaMask: "eth_accounts" unexpectedly updated accounts. Please report this bug.', finalAccounts);
       }
 
@@ -448,6 +510,61 @@ class TorusInpageProvider extends SafeEventEmitter {
     // handle selectedAddress
     if (this.selectedAddress !== finalAccounts[0]) {
       this.selectedAddress = (finalAccounts[0] as string) || null;
+    }
+  }
+
+  /**
+   * Upon receipt of a new chainId and networkVersion, emits corresponding
+   * events and sets relevant public state.
+   * Does nothing if neither the chainId nor the networkVersion are different
+   * from existing values.
+   *
+   * @emits MetamaskInpageProvider#chainChanged
+   * @param networkInfo - An object with network info.
+   * @param networkInfo.chainId - The latest chain ID.
+   * @param networkInfo.networkVersion - The latest network ID.
+   */
+  protected _handleChainChanged({ chainId, networkVersion }: { chainId?: string; networkVersion?: string } = {}): void {
+    if (!chainId || !networkVersion) {
+      log.error("MetaMask: Received invalid network parameters. Please report this bug.", { chainId, networkVersion });
+      return;
+    }
+
+    if (networkVersion === "loading") {
+      this._handleDisconnect(true);
+    } else {
+      this._handleConnect(chainId);
+
+      if (chainId !== this.chainId) {
+        this.chainId = chainId;
+        if (this._state.initialized) {
+          this.emit("chainChanged", this.chainId);
+        }
+      }
+    }
+  }
+
+  /**
+   * Upon receipt of a new isUnlocked state, sets relevant public state.
+   * Calls the accounts changed handler with the received accounts, or an empty
+   * array.
+   *
+   * Does nothing if the received value is equal to the existing value.
+   * There are no lock/unlock events.
+   *
+   * @param opts - Options bag.
+   * @param opts.accounts - The exposed accounts, if any.
+   * @param opts.isUnlocked - The latest isUnlocked value.
+   */
+  protected _handleUnlockStateChanged({ accounts, isUnlocked }: { accounts?: string[]; isUnlocked?: boolean } = {}): void {
+    if (typeof isUnlocked !== "boolean") {
+      log.error("MetaMask: Received invalid isUnlocked parameter. Please report this bug.", { isUnlocked });
+      return;
+    }
+
+    if (isUnlocked !== this._state.isUnlocked) {
+      this._state.isUnlocked = isUnlocked;
+      this._handleAccountsChanged(accounts || []);
     }
   }
 
