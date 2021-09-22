@@ -17,6 +17,7 @@ export const PAYMENT_PROVIDER = {
   RAMPNETWORK: "rampnetwork",
   XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
+  TRANSAK: "transak",
 } as const;
 
 export const TORUS_BUILD_ENV = {
