@@ -1,10 +1,8 @@
-import { WindowPostMessageStream } from "@metamask/post-message-stream";
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import { setAPIKey } from "@toruslabs/http-helpers";
+import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
 import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "deepmerge";
-import { JsonRpcRequest } from "json-rpc-engine";
-import { Duplex } from "readable-stream";
 
 import configuration from "./config";
 import { handleStream, htmlToElement, runOnLoad } from "./embedUtils";
@@ -28,7 +26,6 @@ import {
   WhiteLabelParams,
 } from "./interfaces";
 import log from "./loglevel";
-import ExtendedObjectMultiplex from "./ObjectMultiplex";
 import PopupHandler from "./PopupHandler";
 import sendSiteMetadata from "./siteMetadata";
 import { setupMultiplex } from "./stream-utils";
@@ -130,7 +127,7 @@ class Torus {
 
   provider: TorusInpageProvider;
 
-  communicationMux: ExtendedObjectMultiplex;
+  communicationMux: ObjectMultiplex;
 
   isLoginCallback: () => void;
 
@@ -246,7 +243,7 @@ class Torus {
     const handleSetup = async () => {
       await runOnLoad(attachIFrame);
       await runOnLoad(this._setupWeb3.bind(this));
-      const initStream = this.communicationMux.getStream("init_stream");
+      const initStream = this.communicationMux.getStream("init_stream") as Substream;
       const initCompletePromise = new Promise((resolve, reject) => {
         initStream.on("data", (chunk) => {
           const { name, data, error } = chunk;
@@ -317,9 +314,9 @@ class Torus {
         return;
       }
 
-      const logOutStream = this.communicationMux.getStream("logout");
+      const logOutStream = this.communicationMux.getStream("logout") as Substream;
       logOutStream.write({ name: "logOut" });
-      const statusStream = this.communicationMux.getStream("status");
+      const statusStream = this.communicationMux.getStream("status") as Substream;
       const statusStreamHandler = (status) => {
         if (!status.loggedIn) {
           this.isLoggedIn = false;
@@ -402,7 +399,7 @@ class Torus {
 
   /** @ignore */
   _sendWidgetVisibilityStatus(status: boolean): void {
-    const torusWidgetVisibilityStream = this.communicationMux.getStream("torus-widget-visibility");
+    const torusWidgetVisibilityStream = this.communicationMux.getStream("torus-widget-visibility") as Substream;
     torusWidgetVisibilityStream.write({
       data: status,
     });
@@ -472,7 +469,7 @@ class Torus {
   _setupWeb3(): void {
     log.info("setupWeb3 running");
     // setup background connection
-    const metamaskStream = new WindowPostMessageStream({
+    const metamaskStream = new BasePostMessageStream({
       name: "embed_metamask",
       target: "iframe_metamask",
       targetWindow: this.torusIframe.contentWindow,
@@ -481,7 +478,7 @@ class Torus {
     // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
     // because the MetamaskInpageProvider also attempts to do so.
     // We create another LocalMessageDuplexStream for communication between dapp <> iframe
-    const communicationStream = new WindowPostMessageStream({
+    const communicationStream = new BasePostMessageStream({
       name: "embed_comm",
       target: "iframe_comm",
       targetWindow: this.torusIframe.contentWindow,
@@ -491,7 +488,7 @@ class Torus {
     // window.metamaskStream = this.communicationStream
 
     // compose the inpage provider
-    const inpageProvider = new TorusInpageProvider(metamaskStream as unknown as Duplex);
+    const inpageProvider = new TorusInpageProvider(metamaskStream);
 
     // detect eth_requestAccounts and pipe to enable for now
     const detectAccountRequestPrototypeModifier = (m) => {
@@ -557,7 +554,7 @@ class Torus {
         });
         _payload.preopenInstanceId = preopenInstanceId;
       }
-      inpageProvider._rpcEngine.handle(_payload as JsonRpcRequest<unknown>[], cb);
+      inpageProvider._rpcEngine.handle(_payload as JRPCRequest<unknown>[], cb);
     };
 
     // Work around for web3@1.0 deleting the bound `sendAsync` but not the unbound
@@ -569,11 +566,11 @@ class Torus {
     });
 
     this.ethereum = proxiedInpageProvider;
-    const communicationMux = setupMultiplex(communicationStream as unknown as Duplex);
+    const communicationMux = setupMultiplex(communicationStream);
 
     this.communicationMux = communicationMux;
 
-    const windowStream = communicationMux.getStream("window");
+    const windowStream = communicationMux.getStream("window") as Substream;
     windowStream.on("data", (chunk) => {
       if (chunk.name === "create_window") {
         // url is the url we need to open
@@ -583,14 +580,14 @@ class Torus {
     });
 
     // show torus widget if button clicked
-    const widgetStream = communicationMux.getStream("widget");
+    const widgetStream = communicationMux.getStream("widget") as Substream;
     widgetStream.on("data", (chunk) => {
       const { data } = chunk;
       this._displayIframe(data);
     });
 
     // Show torus button if wallet has been hydrated/detected
-    const statusStream = communicationMux.getStream("status");
+    const statusStream = communicationMux.getStream("status") as Substream;
     statusStream.on("data", (status) => {
       // login
       if (status.loggedIn) {
@@ -623,7 +620,7 @@ class Torus {
       else if (resolve) resolve([selectedAddress]);
       if (this.isIframeFullScreen) this._displayIframe();
     };
-    const oauthStream = this.communicationMux.getStream("oauth");
+    const oauthStream = this.communicationMux.getStream("oauth") as Substream;
     if (!this.requestedVerifier) {
       this._displayIframe(true);
       handleStream(oauthStream, "data", loginHandler);
@@ -638,7 +635,7 @@ class Torus {
 
   setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest } = {}): Promise<void> {
     return new Promise((resolve, reject) => {
-      const providerChangeStream = this.communicationMux.getStream("provider_change");
+      const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
       const handler = (chunk) => {
         const { err, success } = chunk.data;
         log.info(chunk);
@@ -674,7 +671,7 @@ class Torus {
   _setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest } = {}): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.isInitialized) {
-        const providerChangeStream = this.communicationMux.getStream("provider_change");
+        const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
         const handler = (ev) => {
           log.info(ev);
           const { err, success } = ev.data;
@@ -702,7 +699,7 @@ class Torus {
   }
 
   showWallet(path: WALLET_PATH, params: Record<string, string> = {}): void {
-    const showWalletStream = this.communicationMux.getStream("show_wallet");
+    const showWalletStream = this.communicationMux.getStream("show_wallet") as Substream;
     const finalPath = path ? `/${path}` : "";
     showWalletStream.write({ name: "show_wallet", data: { path: finalPath } });
 
@@ -746,7 +743,7 @@ class Torus {
   getUserInfo(message: string): Promise<UserInfo> {
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
-        const userInfoAccessStream = this.communicationMux.getStream("user_info_access");
+        const userInfoAccessStream = this.communicationMux.getStream("user_info_access") as Substream;
         userInfoAccessStream.write({ name: "user_info_access_request" });
         const userInfoAccessHandler = (chunk) => {
           const {
@@ -759,7 +756,7 @@ class Torus {
             } else if (rejected) {
               reject(new Error("User rejected the request"));
             } else if (newRequest) {
-              const userInfoStream = this.communicationMux.getStream("user_info");
+              const userInfoStream = this.communicationMux.getStream("user_info") as Substream;
               const userInfoHandler = (handlerChunk) => {
                 if (handlerChunk.name === "user_info_response") {
                   if (handlerChunk.data.approved) {
@@ -787,7 +784,7 @@ class Torus {
   /** @ignore */
   _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
     if (preopenInstanceId) {
-      const windowStream = this.communicationMux.getStream("window");
+      const windowStream = this.communicationMux.getStream("window") as Substream;
       const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
       if (this.dappStorageKey) {
         // If multiple instances, it returns the first one
@@ -835,7 +832,7 @@ class Torus {
           reject(new Error(JSON.stringify(errors)));
           return;
         }
-        const topupStream = this.communicationMux.getStream("topup");
+        const topupStream = this.communicationMux.getStream("topup") as Substream;
         const topupHandler = (chunk) => {
           if (chunk.name === "topup_response") {
             if (chunk.data.success) {

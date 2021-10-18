@@ -1,4 +1,4 @@
-import { JsonRpcEngine } from "json-rpc-engine";
+import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 
 import log from "./loglevel";
 import messages from "./messages";
@@ -78,7 +78,7 @@ const getSiteMetadata = async () => ({
 /**
  * Sends site metadata over an RPC request.
  */
-export default async function sendSiteMetadata(engine: JsonRpcEngine): Promise<void> {
+export default async function sendSiteMetadata(engine: JRPCEngine): Promise<void> {
   try {
     const domainMetadata = await getSiteMetadata();
     // call engine.handle directly to avoid normal RPC request handling
