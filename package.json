@@ -58,7 +58,7 @@
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.15.0",
     "@babel/register": "^7.15.3",
-    "@babel/runtime-corejs3": "^7.15.3",
+    "@babel/runtime": "^7.15.3",
     "@types/create-hash": "^1.2.2",
     "@types/node": "^16.7.1",
     "@types/once": "^1.4.0",
