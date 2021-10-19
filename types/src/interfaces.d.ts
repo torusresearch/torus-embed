@@ -15,6 +15,7 @@ export declare const PAYMENT_PROVIDER: {
     readonly RAMPNETWORK: "rampnetwork";
     readonly XANPOOL: "xanpool";
     readonly MERCURYO: "mercuryo";
+    readonly TRANSAK: "transak";
 };
 export declare const TORUS_BUILD_ENV: {
     readonly PRODUCTION: "production";

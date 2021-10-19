@@ -1,7 +1,6 @@
-import SafeEventEmitter from "@metamask/safe-event-emitter";
+import { JRPCId, JRPCMiddleware, JRPCRequest, JRPCVersion, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import createHash from "create-hash";
-import { JsonRpcId, JsonRpcMiddleware, JsonRpcRequest, JsonRpcVersion } from "json-rpc-engine";
-import { Duplex } from "readable-stream";
+import type { Duplex } from "readable-stream";
 
 export const LOGIN_PROVIDER = {
   GOOGLE: "google",
@@ -17,6 +16,7 @@ export const PAYMENT_PROVIDER = {
   RAMPNETWORK: "rampnetwork",
   XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
+  TRANSAK: "transak",
 } as const;
 
 export const TORUS_BUILD_ENV = {
@@ -618,8 +618,8 @@ export interface TorusParams {
 }
 
 export interface UnvalidatedJsonRpcRequest {
-  id?: JsonRpcId;
-  jsonrpc?: JsonRpcVersion;
+  id?: JRPCId;
+  jsonrpc?: JRPCVersion;
   method: string;
   params?: unknown;
   preopenInstanceId?: string;
@@ -660,7 +660,7 @@ export interface BaseProviderState {
 
 export interface JsonRpcConnection {
   events: SafeEventEmitter;
-  middleware: JsonRpcMiddleware<unknown, unknown>;
+  middleware: JRPCMiddleware<unknown, unknown>;
   stream: Duplex;
 }
 
@@ -679,7 +679,7 @@ export interface SentWarningsState {
   };
 }
 
-export interface SendSyncJsonRpcRequest extends JsonRpcRequest<unknown> {
+export interface SendSyncJsonRpcRequest extends JRPCRequest<unknown> {
   method: "eth_accounts" | "eth_coinbase" | "eth_uninstallFilter" | "net_version";
 }
 

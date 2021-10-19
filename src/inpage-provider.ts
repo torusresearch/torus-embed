@@ -1,12 +1,19 @@
 import { ObservableStore, storeAsStream } from "@metamask/obs-store";
-import SafeEventEmitter from "@metamask/safe-event-emitter";
+import {
+  createIdRemapMiddleware,
+  createStreamMiddleware,
+  JRPCEngine,
+  JRPCRequest,
+  JRPCResponse,
+  JRPCSuccess,
+  ObjectMultiplex,
+  SafeEventEmitter,
+} from "@toruslabs/openlogin-jrpc";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
 import dequal from "fast-deep-equal";
 import { isDuplexStream } from "is-stream";
-import { createIdRemapMiddleware, JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
-import { createStreamMiddleware } from "json-rpc-middleware-stream";
 import pump from "pump";
-import { Duplex } from "readable-stream";
+import type { Duplex } from "readable-stream";
 
 import {
   BaseProviderState,
@@ -22,7 +29,6 @@ import {
 } from "./interfaces";
 import log from "./loglevel";
 import messages from "./messages";
-import ObjectMultiplex from "./ObjectMultiplex";
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from "./utils";
 
 // resolve response.result, reject errors
@@ -57,7 +63,7 @@ class TorusInpageProvider extends SafeEventEmitter {
 
   protected _state: BaseProviderState;
 
-  _rpcEngine: JsonRpcEngine;
+  _rpcEngine: JRPCEngine;
 
   protected _jsonRpcConnection: JsonRpcConnection;
 
@@ -141,7 +147,7 @@ class TorusInpageProvider extends SafeEventEmitter {
 
     // setup connectionStream multiplexing
     const mux = new ObjectMultiplex();
-    pump(connectionStream, mux as unknown as Duplex, connectionStream, this._handleStreamDisconnect.bind(this, "MetaMask"));
+    pump(connectionStream, mux, connectionStream, this._handleStreamDisconnect.bind(this, "MetaMask"));
 
     // subscribe to metamask public config (one-way)
     this._publicConfigStore = new ObservableStore({ storageKey: "Metamask-Config" });
@@ -228,7 +234,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     );
 
     // handle RPC requests via dapp-side rpc engine
-    const rpcEngine = new JsonRpcEngine();
+    const rpcEngine = new JRPCEngine();
     rpcEngine.push(createIdRemapMiddleware());
     rpcEngine.push(createErrorMiddleware());
     rpcEngine.push(jsonRpcConnection.middleware);
@@ -318,7 +324,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param {Object} payload - The RPC request object.
    * @param {Function} cb - The callback function.
    */
-  sendAsync(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<unknown>) => void): void {
+  sendAsync(payload: JRPCRequest<unknown>, callback: (error: Error | null, result?: JRPCResponse<unknown>) => void): void {
     this._rpcRequest(payload, callback);
   }
 
@@ -400,12 +406,12 @@ class TorusInpageProvider extends SafeEventEmitter {
 
       if (_payload.method === "eth_accounts" || _payload.method === "eth_requestAccounts") {
         // handle accounts changing
-        cb = (err: Error, res: JsonRpcSuccess<string[]>) => {
+        cb = (err: Error, res: JRPCSuccess<string[]>) => {
           this._handleAccountsChanged(res.result || [], _payload.method === "eth_accounts", isInternal);
           callback(err, res);
         };
       } else if (_payload.method === "wallet_getProviderState") {
-        this._rpcEngine.handle(payload as JsonRpcRequest<unknown>, cb);
+        this._rpcEngine.handle(payload as JRPCRequest<unknown>, cb);
         return;
       }
     }
@@ -587,7 +593,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @returns A Promise that resolves with the JSON-RPC response object for the
    * request.
    */
-  send<T>(method: string, params?: T[]): Promise<JsonRpcResponse<T>>;
+  send<T>(method: string, params?: T[]): Promise<JRPCResponse<T>>;
 
   /**
    * Submits an RPC request per the given JSON-RPC request object.
@@ -597,7 +603,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param callback - An error-first callback that will receive the JSON-RPC
    * response object.
    */
-  send<T>(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<T>) => void): void;
+  send<T>(payload: JRPCRequest<unknown>, callback: (error: Error | null, result?: JRPCResponse<T>) => void): void;
 
   /**
    * Accepts a JSON-RPC request object, and synchronously returns the cached result
@@ -607,7 +613,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param payload - A JSON-RPC request object.
    * @returns A JSON-RPC response object.
    */
-  send<T>(payload: SendSyncJsonRpcRequest): JsonRpcResponse<T>;
+  send<T>(payload: SendSyncJsonRpcRequest): JRPCResponse<T>;
 
   send(methodOrPayload: unknown, callbackOrArgs?: unknown): unknown {
     if (!this._sentWarnings.send) {
@@ -624,7 +630,7 @@ class TorusInpageProvider extends SafeEventEmitter {
       });
     }
     if (methodOrPayload && typeof methodOrPayload === "object" && typeof callbackOrArgs === "function") {
-      return this._rpcRequest(methodOrPayload as JsonRpcRequest<unknown>, callbackOrArgs as (...args: unknown[]) => void);
+      return this._rpcRequest(methodOrPayload as JRPCRequest<unknown>, callbackOrArgs as (...args: unknown[]) => void);
     }
     return this._sendSync(methodOrPayload as SendSyncJsonRpcRequest);
   }
@@ -633,7 +639,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * DEPRECATED.
    * Internal backwards compatibility method, used in send.
    */
-  _sendSync(payload: SendSyncJsonRpcRequest): JsonRpcSuccess<unknown> {
+  _sendSync(payload: SendSyncJsonRpcRequest): JRPCSuccess<unknown> {
     let result;
     switch (payload.method) {
       case "eth_accounts":
