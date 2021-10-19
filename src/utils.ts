@@ -1,8 +1,7 @@
 import randomId from "@chaitanyapotti/random-id";
-import SafeEventEmitter from "@metamask/safe-event-emitter";
 import { get } from "@toruslabs/http-helpers";
+import { JRPCMiddleware, PendingJRPCResponse, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
-import { JsonRpcMiddleware, PendingJsonRpcResponse } from "json-rpc-engine";
 import { LogLevelDesc } from "loglevel";
 
 import { name, version } from "../package.json";
@@ -64,7 +63,7 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
  * @param log - The logging API to use.
  * @returns  json-rpc-engine middleware function
  */
-export function createErrorMiddleware(): JsonRpcMiddleware<unknown, unknown> {
+export function createErrorMiddleware(): JRPCMiddleware<unknown, unknown> {
   return (req, res, next) => {
     // json-rpc-engine will terminate the request when it notices this error
     if (typeof req.method !== "string" || !req.method) {
@@ -88,7 +87,7 @@ export function createErrorMiddleware(): JsonRpcMiddleware<unknown, unknown> {
 // resolve response.result or response, reject errors
 export const getRpcPromiseCallback =
   (resolve: (value?: any) => void, reject: (error?: Error) => void, unwrapResult = true) =>
-  (error: Error, response: PendingJsonRpcResponse<unknown>): void => {
+  (error: Error, response: PendingJRPCResponse<unknown>): void => {
     if (error || response.error) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
