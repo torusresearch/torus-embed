@@ -7,6 +7,7 @@ declare const _default: {
         wyre: IPaymentProvider;
         xanpool: IPaymentProvider;
         mercuryo: IPaymentProvider;
+        transak: IPaymentProvider;
     };
     api: string;
     translations: LocaleLinks<{

@@ -45,25 +45,11 @@ const baseConfig = {
   },
 };
 
-const babelLoaderWithPolyfills = {
+const babelLoader = {
   test: /\.(ts|js)x?$/,
   exclude: /(node_modules|bower_components)/,
   use: {
     loader: "babel-loader",
-  },
-};
-
-const babelLoader = { ...babelLoaderWithPolyfills, use: { loader: "babel-loader", options: { plugins: ["@babel/transform-runtime"] } } };
-
-const umdPolyfilledConfig = {
-  ...baseConfig,
-  output: {
-    ...baseConfig.output,
-    filename: `${pkgName}.polyfill.umd.min.js`,
-    libraryTarget: "umd",
-  },
-  module: {
-    rules: [babelLoaderWithPolyfills],
   },
 };
 
@@ -105,7 +91,7 @@ const cjsConfig = {
   ],
 };
 
-module.exports = [umdPolyfilledConfig, umdConfig, cjsConfig];
+module.exports = [umdConfig, cjsConfig];
 // module.exports = [cjsConfig]
 
 // V5

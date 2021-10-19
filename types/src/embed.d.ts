@@ -74,6 +74,7 @@ declare class Torus {
         wyre: import("./interfaces").IPaymentProvider;
         xanpool: import("./interfaces").IPaymentProvider;
         mercuryo: import("./interfaces").IPaymentProvider;
+        transak: import("./interfaces").IPaymentProvider;
     };
     initiateTopup(provider: PAYMENT_PROVIDER_TYPE, params: PaymentParams): Promise<boolean>;
     /** @ignore */

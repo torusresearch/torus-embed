@@ -89,5 +89,6 @@
       "browser": true,
       "node": true
     }
-  }
+  },
+  "cSpell.words": ["Substream"]
 }

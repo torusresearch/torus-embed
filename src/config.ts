@@ -62,6 +62,18 @@ const paymentProviders = {
     includeFees: true,
     enforceMax: false,
   } as IPaymentProvider,
+  [PAYMENT_PROVIDER.TRANSAK]: {
+    line1: "Credit/ Debit Card/ <br/>Bank Transfer (sepa/gbp)",
+    line2: "0.99% - 5.5% or 5 USD",
+    line3: "500€/day",
+    supportPage: "https://support.transak.com/hc/en-US",
+    minOrderValue: 20,
+    maxOrderValue: 500,
+    validCurrencies: ["USD", "EUR", "GBP", "AUD", "CAD", "SGD"],
+    validCryptoCurrencies: ["ETH", "DAI", "USDC", "USDT"],
+    includeFees: true,
+    enforceMax: false,
+  } as IPaymentProvider,
 };
 
 const translations = {
