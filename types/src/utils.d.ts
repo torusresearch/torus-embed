@@ -1,5 +1,4 @@
-import SafeEventEmitter from "@metamask/safe-event-emitter";
-import { JsonRpcMiddleware, PendingJsonRpcResponse } from "json-rpc-engine";
+import { JRPCMiddleware, PendingJRPCResponse, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { LogLevelDesc } from "loglevel";
 import { IntegrityParams, PaymentParams } from "./interfaces";
 declare type PaymentErrorParams = {
@@ -20,8 +19,8 @@ export declare const validatePaymentProvider: (provider: string, params: Payment
  * @param log - The logging API to use.
  * @returns  json-rpc-engine middleware function
  */
-export declare function createErrorMiddleware(): JsonRpcMiddleware<unknown, unknown>;
-export declare const getRpcPromiseCallback: (resolve: (value?: any) => void, reject: (error?: Error) => void, unwrapResult?: boolean) => (error: Error, response: PendingJsonRpcResponse<unknown>) => void;
+export declare function createErrorMiddleware(): JRPCMiddleware<unknown, unknown>;
+export declare const getRpcPromiseCallback: (resolve: (value?: any) => void, reject: (error?: Error) => void, unwrapResult?: boolean) => (error: Error, response: PendingJRPCResponse<unknown>) => void;
 /**
  * Logs a stream disconnection error. Emits an 'error' if given an
  * EventEmitter that has listeners for the 'error' event.

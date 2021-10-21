@@ -1,7 +1,6 @@
 import { ObservableStore } from "@metamask/obs-store";
-import SafeEventEmitter from "@metamask/safe-event-emitter";
-import { JsonRpcEngine, JsonRpcRequest, JsonRpcResponse, JsonRpcSuccess } from "json-rpc-engine";
-import { Duplex } from "readable-stream";
+import { JRPCEngine, JRPCRequest, JRPCResponse, JRPCSuccess, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
+import type { Duplex } from "readable-stream";
 import { BaseProviderState, JsonRpcConnection, Maybe, ProviderOptions, PublicConfigState, RequestArguments, SendSyncJsonRpcRequest, SentWarningsState, UnvalidatedJsonRpcRequest } from "./interfaces";
 /**
  * @param {Object} connectionStream - A Node.js duplex stream
@@ -22,7 +21,7 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      */
     selectedAddress: string | null;
     protected _state: BaseProviderState;
-    _rpcEngine: JsonRpcEngine;
+    _rpcEngine: JRPCEngine;
     protected _jsonRpcConnection: JsonRpcConnection;
     networkVersion: string | null;
     shouldSendMetadata: boolean;
@@ -58,7 +57,7 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * @param {Object} payload - The RPC request object.
      * @param {Function} cb - The callback function.
      */
-    sendAsync(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<unknown>) => void): void;
+    sendAsync(payload: JRPCRequest<unknown>, callback: (error: Error | null, result?: JRPCResponse<unknown>) => void): void;
     /**
      * We override the following event methods so that we can warn consumers
      * about deprecated events:
@@ -159,7 +158,7 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * @returns A Promise that resolves with the JSON-RPC response object for the
      * request.
      */
-    send<T>(method: string, params?: T[]): Promise<JsonRpcResponse<T>>;
+    send<T>(method: string, params?: T[]): Promise<JRPCResponse<T>>;
     /**
      * Submits an RPC request per the given JSON-RPC request object.
      *
@@ -168,7 +167,7 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * @param callback - An error-first callback that will receive the JSON-RPC
      * response object.
      */
-    send<T>(payload: JsonRpcRequest<unknown>, callback: (error: Error | null, result?: JsonRpcResponse<T>) => void): void;
+    send<T>(payload: JRPCRequest<unknown>, callback: (error: Error | null, result?: JRPCResponse<T>) => void): void;
     /**
      * Accepts a JSON-RPC request object, and synchronously returns the cached result
      * for the given method. Only supports 4 specific RPC methods.
@@ -177,11 +176,11 @@ declare class TorusInpageProvider extends SafeEventEmitter {
      * @param payload - A JSON-RPC request object.
      * @returns A JSON-RPC response object.
      */
-    send<T>(payload: SendSyncJsonRpcRequest): JsonRpcResponse<T>;
+    send<T>(payload: SendSyncJsonRpcRequest): JRPCResponse<T>;
     /**
      * DEPRECATED.
      * Internal backwards compatibility method, used in send.
      */
-    _sendSync(payload: SendSyncJsonRpcRequest): JsonRpcSuccess<unknown>;
+    _sendSync(payload: SendSyncJsonRpcRequest): JRPCSuccess<unknown>;
 }
 export default TorusInpageProvider;
