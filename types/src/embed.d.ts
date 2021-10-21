@@ -1,8 +1,8 @@
 import NodeDetailManager from "@toruslabs/fetch-node-details";
+import { ObjectMultiplex } from "@toruslabs/openlogin-jrpc";
 import TorusJs from "@toruslabs/torus.js";
 import TorusInpageProvider from "./inpage-provider";
 import { BUTTON_POSITION_TYPE, EMBED_TRANSLATION_ITEM, PAYMENT_PROVIDER_TYPE, PaymentParams, TorusCtorArgs, TorusParams, TorusPublicKey, UserInfo, VerifierArgs, WALLET_PATH, WhiteLabelParams } from "./interfaces";
-import ExtendedObjectMultiplex from "./ObjectMultiplex";
 declare class Torus {
     buttonPosition: BUTTON_POSITION_TYPE;
     torusUrl: string;
@@ -25,7 +25,7 @@ declare class Torus {
     embedTranslations: EMBED_TRANSLATION_ITEM;
     ethereum: TorusInpageProvider;
     provider: TorusInpageProvider;
-    communicationMux: ExtendedObjectMultiplex;
+    communicationMux: ObjectMultiplex;
     isLoginCallback: () => void;
     dappStorageKey: string;
     constructor({ buttonPosition, modalZIndex, apiKey }?: TorusCtorArgs);
