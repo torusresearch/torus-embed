@@ -1,5 +1,5 @@
-import { JsonRpcEngine } from "json-rpc-engine";
+import { JRPCEngine } from "@toruslabs/openlogin-jrpc";
 /**
  * Sends site metadata over an RPC request.
  */
-export default function sendSiteMetadata(engine: JsonRpcEngine): Promise<void>;
+export default function sendSiteMetadata(engine: JRPCEngine): Promise<void>;

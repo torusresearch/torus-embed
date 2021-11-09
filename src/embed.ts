@@ -1,6 +1,6 @@
 import NodeDetailManager from "@toruslabs/fetch-node-details";
 import { setAPIKey } from "@toruslabs/http-helpers";
-import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
+import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
 import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "deepmerge";
 
@@ -28,7 +28,6 @@ import {
 import log from "./loglevel";
 import PopupHandler from "./PopupHandler";
 import sendSiteMetadata from "./siteMetadata";
-import { setupMultiplex } from "./stream-utils";
 import {
   FEATURES_CONFIRM_WINDOW,
   FEATURES_DEFAULT_WALLET_WINDOW,
@@ -48,7 +47,7 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-GyOlqMo5NLv0u6BIITzx+StuwXrdk/CnFG+A0WuidHxrlnbn2vdRZmQkblOMWUM6";
+const iframeIntegrity = "sha384-UqF/BnlVpnk4s2tg954swPOCTdPeny0d3w9dCNRwwutPSHToLPFwDXi8mkF0PwgF";
 
 const expectedCacheControlHeader = "max-age=3600";
 

@@ -31,6 +31,8 @@ import log from "./loglevel";
 import messages from "./messages";
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from "./utils";
 
+SafeEventEmitter.defaultMaxListeners = 100;
+
 // resolve response.result, reject errors
 const getRpcPromiseCallback =
   (resolve, reject, unwrapResult = true) =>
