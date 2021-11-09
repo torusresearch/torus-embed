@@ -8,6 +8,13 @@ export declare const LOGIN_PROVIDER: {
     readonly REDDIT: "reddit";
     readonly DISCORD: "discord";
 };
+export declare const V1_V2_LOGIN_PROVIDER_MAP: {
+    readonly google: "tkey-google";
+    readonly facebook: "tkey-facebook";
+    readonly twitch: "tkey-twitch";
+    readonly reddit: "tkey-reddit";
+    readonly discord: "tkey-discord";
+};
 export declare const PAYMENT_PROVIDER: {
     readonly MOONPAY: "moonpay";
     readonly WYRE: "wyre";

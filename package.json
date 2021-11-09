@@ -34,7 +34,7 @@
     "@toruslabs/fetch-node-details": "^3.0.2",
     "@toruslabs/http-helpers": "^1.4.0",
     "@toruslabs/openlogin-jrpc": "^1.0.0",
-    "@toruslabs/torus.js": "^3.0.0",
+    "@toruslabs/torus.js": "file:./toruslabs-torus.js-3.1.0.tgz",
     "create-hash": "^1.2.0",
     "deepmerge": "^4.2.2",
     "end-of-stream": "^1.4.4",

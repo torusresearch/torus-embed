@@ -10,6 +10,13 @@ export const LOGIN_PROVIDER = {
   DISCORD: "discord",
 } as const;
 
+export const V1_V2_LOGIN_PROVIDER_MAP = {
+  [LOGIN_PROVIDER.GOOGLE]: "tkey-google",
+  [LOGIN_PROVIDER.FACEBOOK]: "tkey-facebook",
+  [LOGIN_PROVIDER.TWITCH]: "tkey-twitch",
+  [LOGIN_PROVIDER.REDDIT]: "tkey-reddit",
+  [LOGIN_PROVIDER.DISCORD]: "tkey-discord",
+} as const;
 export const PAYMENT_PROVIDER = {
   MOONPAY: "moonpay",
   WYRE: "wyre",

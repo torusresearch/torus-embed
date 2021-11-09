@@ -21,6 +21,7 @@ import {
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
   UserInfo,
+  V1_V2_LOGIN_PROVIDER_MAP,
   VerifierArgs,
   WALLET_PATH,
   WhiteLabelParams,
@@ -725,18 +726,31 @@ class Torus {
   }
 
   async getPublicAddress({ verifier, verifierId, isExtended = false }: VerifierArgs): Promise<string | TorusPublicKey> {
-    // Select random node from the list of endpoints
-    if (!configuration.supportedVerifierList.includes(verifier)) throw new Error("Unsupported verifier");
+    if (!configuration.supportedVerifierList.includes(verifier) || !V1_V2_LOGIN_PROVIDER_MAP[verifier]) throw new Error("Unsupported verifier");
     const nodeDetails = await this.nodeDetailManager.getNodeDetails(false, true);
-    return this.torusJs.getPublicAddress(
-      nodeDetails.torusNodeEndpoints,
-      nodeDetails.torusNodePub,
-      {
-        verifier,
-        verifierId,
-      },
-      isExtended
-    );
+    const endpoints = nodeDetails.torusNodeEndpoints;
+    const torusNodePubs = nodeDetails.torusNodePub;
+    const v1Verifier = verifier;
+    const v2Verifier = V1_V2_LOGIN_PROVIDER_MAP[verifier];
+    try {
+      const existingV1User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: v1Verifier, verifierId });
+      if (existingV1User.typeOfUser === "v1") {
+        if (!isExtended) return existingV1User.address;
+        return existingV1User;
+      }
+      // we don't support v2 users with v1 verifiers so get or assign the key for v2 user on v2 `verifier`
+      const v2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: v2Verifier, verifierId }, true);
+      if (!isExtended) return v2User.address;
+      return v2User;
+    } catch (error) {
+      if (error?.message.includes("Verifier + VerifierID has not yet been assigned")) {
+        // if user doesn't have key then assign it with v2 verifier
+        const newV2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: v2Verifier, verifierId }, true);
+        if (!isExtended) return newV2User.address;
+        return newV2User;
+      }
+      throw error;
+    }
   }
 
   getUserInfo(message: string): Promise<UserInfo> {
