@@ -1,37 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
-const ESLintPlugin = require("eslint-webpack-plugin");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
+const { EnvironmentPlugin } = require("webpack");
 
-const pkgName = "torus";
-const libraryName = pkgName.charAt(0).toUpperCase() + pkgName.slice(1);
+const pkg = require("./package.json");
 
-const externals = [
-  "@chaitanyapotti/random-id",
-  "fast-deep-equal",
-  "loglevel",
-  "deepmerge",
-  "eth-rpc-errors",
-  "once",
-  // "@toruslabs/fetch-node-details",
-  // "@toruslabs/torus.js",
-  // "@toruslabs/http-helpers",
-];
-
-const { NODE_ENV = "production" } = process.env;
-
-const baseConfig = {
-  mode: NODE_ENV,
-  devtool: NODE_ENV === "production" ? false : "source-map",
-  entry: "./index.ts",
-  target: "web",
+exports.baseConfig = {
   output: {
-    path: path.resolve(__dirname, "dist"),
-    library: libraryName,
     libraryExport: "default",
   },
   resolve: {
-    extensions: [".ts", ".js", ".json"],
     alias: {
       "bn.js": path.resolve(__dirname, "node_modules/bn.js"),
       lodash: path.resolve(__dirname, "node_modules/lodash"),
@@ -40,58 +17,9 @@ const baseConfig = {
       "web3-providers-ws": path.resolve(__dirname, "node_modules/empty-module"),
     },
   },
-  module: {
-    rules: [],
-  },
+  plugins: [new EnvironmentPlugin({ TORUS_EMBED_VERSION: pkg.version })],
 };
 
-const babelLoader = {
-  test: /\.(ts|js)x?$/,
-  exclude: /(node_modules|bower_components)/,
-  use: {
-    loader: "babel-loader",
-  },
-};
-
-const umdConfig = {
-  ...baseConfig,
-  output: {
-    ...baseConfig.output,
-    filename: `${pkgName}.umd.min.js`,
-    libraryTarget: "umd",
-  },
-  module: {
-    rules: [babelLoader],
-  },
-};
-
-const cjsConfig = {
-  ...baseConfig,
-  // optimization: {
-  //   minimize: false,
-  // },
-  output: {
-    ...baseConfig.output,
-    filename: `${pkgName}.cjs.js`,
-    libraryTarget: "commonjs2",
-  },
-  module: {
-    rules: [babelLoader],
-  },
-  externals: [...externals, /^(@babel\/runtime)/i],
-  plugins: [
-    new ESLintPlugin({
-      files: "src",
-      extensions: ".ts",
-    }),
-    new BundleAnalyzerPlugin({
-      analyzerMode: "disabled", // disabled static
-      openAnalyzer: false,
-    }),
-  ],
-};
-
-module.exports = [umdConfig, cjsConfig];
 // module.exports = [cjsConfig]
 
 // V5

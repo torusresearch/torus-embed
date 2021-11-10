@@ -1,10 +1,8 @@
-import randomId from "@chaitanyapotti/random-id";
 import { get } from "@toruslabs/http-helpers";
 import { JRPCMiddleware, PendingJRPCResponse, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
 
-import { name, version } from "../package.json";
 import config from "./config";
 import { IntegrityParams, PaymentParams } from "./interfaces";
 import log from "./loglevel";
@@ -117,16 +115,19 @@ export function logStreamDisconnectWarning(remoteLabel: string, error: Error, em
   }
 }
 
-export const getPreopenInstanceId = randomId;
+export const getPreopenInstanceId = () => Math.random().toString(36).slice(2);
 
 export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams): Promise<{ torusUrl: string; logLevel: LogLevelDesc }> => {
   let torusUrl: string;
   let logLevel: LogLevelDesc;
+  // Do not change this line
+  const version = process.env.TORUS_EMBED_VERSION;
   let versionUsed = integrity.version || version;
   try {
     if ((buildEnv === "binance" || buildEnv === "production") && !integrity.version) {
       let response: { data: string };
-      if (!config.prodTorusUrl) response = await get(`${config.api}/latestversion?name=${name}&version=${version}`, {}, { useAPIKey: true });
+      if (!config.prodTorusUrl)
+        response = await get(`${config.api}/latestversion?name=@toruslabs/torus-embed&version=${version}`, {}, { useAPIKey: true });
       else response = { data: config.prodTorusUrl };
       versionUsed = response.data;
       // eslint-disable-next-line require-atomic-updates

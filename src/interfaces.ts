@@ -115,13 +115,13 @@ export type LOGIN_TYPE =
 export interface TorusCtorArgs {
   /**
    * Determines where the torus widget is visible on the page.
-   * @default bottom-left
+   * @defaultValue bottom-left
    */
   buttonPosition?: BUTTON_POSITION_TYPE;
 
   /**
    * Z-index of the modal and iframe
-   * @default 99999
+   * @defaultValue 99999
    */
   modalZIndex?: number;
 
@@ -160,6 +160,11 @@ export interface NetworkInterface {
 }
 
 export interface BaseLoginOptions {
+  /**
+   * If you need to send custom parameters to the Authorization Server,
+   * make sure to use the original parameter name.
+   */
+  [key: string]: unknown;
   /**
    * - `'page'`: displays the UI with a full page view
    * - `'popup'`: displays the UI with a popup window
@@ -214,12 +219,6 @@ export interface BaseLoginOptions {
    * the Login Widget.
    */
   connection?: string;
-
-  /**
-   * If you need to send custom parameters to the Authorization Server,
-   * make sure to use the original parameter name.
-   */
-  [key: string]: unknown;
 }
 
 export interface JwtParameters extends BaseLoginOptions {
@@ -255,7 +254,7 @@ export interface JwtParameters extends BaseLoginOptions {
 
   /**
    * Whether the verifier id field is case sensitive
-   * @default true
+   * @defaultValue true
    */
   isVerifierIdCaseSensitive?: boolean;
 }
@@ -443,7 +442,7 @@ export interface ThemeParams {
   /**
    * If true, enables dark mode
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   isDark: boolean;
   /**
@@ -458,7 +457,7 @@ export interface IntegrityParams {
   /**
    * Whether to check for integrity.
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   check: boolean;
   /**
@@ -475,27 +474,27 @@ export interface IntegrityParams {
 export interface VerifierStatus {
   /**
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   google?: boolean;
   /**
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   facebook?: boolean;
   /**
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   reddit?: boolean;
   /**
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   twitch?: boolean;
   /**
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   discord?: boolean;
 }
@@ -508,7 +507,7 @@ export interface WhiteLabelParams {
   /**
    * Language of whitelabel.
    *
-   * order of preference: Whitelabel language > user language (in torus-website) > browser language
+   * order of preference: Whitelabel language \> user language (in torus-website) \> browser language
    */
   defaultLanguage?: string;
   /**
@@ -522,19 +521,19 @@ export interface WhiteLabelParams {
   /**
    * Shows/hides topup option in torus-website/widget.
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   topupHide?: boolean;
   /**
    * Shows/hides billboard in torus-website.
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   featuredBillboardHide?: boolean;
   /**
    * Shows/hides disclaimers on login page. Only works if special logins are hidden
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   disclaimerHide?: boolean;
   /**
@@ -574,7 +573,7 @@ export interface TorusParams {
    * beta uses https://beta.tor.us, (currently supports tkey)
    *
    * testing uses https://testing.tor.us (latest internal build)
-   * @default production
+   * @defaultValue production
    */
   buildEnv?: TORUS_BUILD_ENV_TYPE;
   /**
@@ -587,7 +586,7 @@ export interface TorusParams {
    * whether to show/hide torus widget.
    *
    * Defaults to true
-   * @default true
+   * @defaultValue true
    */
   showTorusButton?: boolean;
   /**
@@ -612,14 +611,14 @@ export interface TorusParams {
    * Skips TKey onboarding for new users
    *
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   skipTKey?: boolean;
   /**
    * Prefers to use localStorage instead of sessionStorage for torus iframe. Allows longer lived sessions
    *
    * Defaults to false
-   * @default false
+   * @defaultValue false
    */
   useLocalStorage?: boolean;
 }
