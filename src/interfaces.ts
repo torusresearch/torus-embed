@@ -10,7 +10,7 @@ export const LOGIN_PROVIDER = {
   DISCORD: "discord",
 } as const;
 
-export const V1_V2_LOGIN_PROVIDER_MAP = {
+export const WALLET_OPENLOGIN_VERIFIER_MAP = {
   [LOGIN_PROVIDER.GOOGLE]: "tkey-google",
   [LOGIN_PROVIDER.FACEBOOK]: "tkey-facebook",
   [LOGIN_PROVIDER.TWITCH]: "tkey-twitch",

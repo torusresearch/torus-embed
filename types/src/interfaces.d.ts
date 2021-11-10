@@ -8,7 +8,7 @@ export declare const LOGIN_PROVIDER: {
     readonly REDDIT: "reddit";
     readonly DISCORD: "discord";
 };
-export declare const V1_V2_LOGIN_PROVIDER_MAP: {
+export declare const WALLET_OPENLOGIN_VERIFIER_MAP: {
     readonly google: "tkey-google";
     readonly facebook: "tkey-facebook";
     readonly twitch: "tkey-twitch";
