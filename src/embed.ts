@@ -22,6 +22,7 @@ import {
   UnvalidatedJsonRpcRequest,
   UserInfo,
   VerifierArgs,
+  WALLET_OPENLOGIN_VERIFIER_MAP,
   WALLET_PATH,
   WhiteLabelParams,
 } from "./interfaces";
@@ -47,7 +48,7 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-LCE8WzUv/xXZg9ngpTnLzmflSLpokk6tnHPhVtaoDooNWFZNWgh7b4KFMhc++M5F";
+const iframeIntegrity = "sha384-UqF/BnlVpnk4s2tg954swPOCTdPeny0d3w9dCNRwwutPSHToLPFwDXi8mkF0PwgF";
 
 const expectedCacheControlHeader = "max-age=3600";
 
@@ -725,18 +726,31 @@ class Torus {
   }
 
   async getPublicAddress({ verifier, verifierId, isExtended = false }: VerifierArgs): Promise<string | TorusPublicKey> {
-    // Select random node from the list of endpoints
-    if (!configuration.supportedVerifierList.includes(verifier)) throw new Error("Unsupported verifier");
+    if (!configuration.supportedVerifierList.includes(verifier) || !WALLET_OPENLOGIN_VERIFIER_MAP[verifier]) throw new Error("Unsupported verifier");
     const nodeDetails = await this.nodeDetailManager.getNodeDetails(false, true);
-    return this.torusJs.getPublicAddress(
-      nodeDetails.torusNodeEndpoints,
-      nodeDetails.torusNodePub,
-      {
-        verifier,
-        verifierId,
-      },
-      isExtended
-    );
+    const endpoints = nodeDetails.torusNodeEndpoints;
+    const torusNodePubs = nodeDetails.torusNodePub;
+    const walletVerifier = verifier;
+    const openloginVerifier = WALLET_OPENLOGIN_VERIFIER_MAP[verifier];
+    try {
+      const existingV1User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: walletVerifier, verifierId });
+      if (existingV1User.typeOfUser === "v1") {
+        if (!isExtended) return existingV1User.address;
+        return existingV1User;
+      }
+      // we don't support v2 users with v1 verifiers so get or assign the key for v2 user on v2 `verifier`
+      const v2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
+      if (!isExtended) return v2User.address;
+      return v2User;
+    } catch (error) {
+      if (error?.message.includes("Verifier + VerifierID has not yet been assigned")) {
+        // if user doesn't have key then assign it with v2 verifier
+        const newV2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
+        if (!isExtended) return newV2User.address;
+        return newV2User;
+      }
+      throw error;
+    }
   }
 
   getUserInfo(message: string): Promise<UserInfo> {
