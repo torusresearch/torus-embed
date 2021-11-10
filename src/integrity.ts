@@ -1,4 +1,4 @@
-import createHash from "create-hash/browser";
+import createHash from "create-hash";
 
 import { IHashAlgorithmOptions, SRI } from "./interfaces";
 
