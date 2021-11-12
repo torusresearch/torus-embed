@@ -1,0 +1,79 @@
+name: Build & Release
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        node: ["14.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+
+      - name: Node dependency cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ matrix.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ matrix.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Build
+        run: npm run build
+
+      # Share artifact inside workflow
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: |
+            .
+
+  deploy:
+    strategy:
+      matrix:
+        node: ["14.x"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    # When application is successfully tested and build has been generated
+    # Then we can start with deployment
+    needs: build
+
+    steps:
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      # Download previously shared build
+      - name: Get artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+
+      - name: Deploy to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
