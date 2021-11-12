@@ -42,11 +42,14 @@ jobs:
       # Share artifact inside workflow
       - name: Share artifact inside workflow
         uses: actions/upload-artifact@v2
+        # only use artifacts if going to publish
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           name: build-artifacts
           path: |
             .
             !./node_modules
+            !./examples
 
   deploy:
     strategy:
