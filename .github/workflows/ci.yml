@@ -39,45 +39,8 @@ jobs:
       - name: Run Build
         run: npm run build
 
-      # Share artifact inside workflow
-      - name: Share artifact inside workflow
-        uses: actions/upload-artifact@v2
-        # only use artifacts if going to publish
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          name: build-artifacts
-          path: |
-            .
-            !./node_modules
-            !./examples
-
-  deploy:
-    strategy:
-      matrix:
-        node: ["14.x"]
-        os: [ubuntu-latest]
-
-    runs-on: ${{ matrix.os }}
-
-    if: startsWith(github.ref, 'refs/tags/v')
-
-    # When application is successfully tested and build has been generated
-    # Then we can start with deployment
-    needs: build
-
-    steps:
-      - name: Set up node
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }}
-
-      # Download previously shared build
-      - name: Get artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-
       - name: Deploy to npm
+        if: startsWith(github.ref, 'refs/tags/v')
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
