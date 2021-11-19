@@ -4,7 +4,7 @@
     <section>
       <p>
         Build Environment :
-        <i>{{ this.buildEnv }}</i>
+        <i>{{ buildEnv }}</i>
       </p>
       <div v-if="publicAddress === ''">
         <select name="buildEnv" v-model="buildEnv">
@@ -28,11 +28,11 @@
       <section>
         <div>
           Public Address:
-          <i>{{ this.publicAddress }}</i>
+          <i>{{ publicAddress }}</i>
         </div>
         <div>
           Network:
-          <i>{{ this.chainIdNetworkMap[this.chainId] }}</i>
+          <i>{{ chainIdNetworkMap[chainId] }}</i>
         </div>
       </section>
       <section :style="{ marginTop: '20px' }">
@@ -170,12 +170,30 @@ export default Vue.extend({
           // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
           // },
           loginConfig:
-            this.buildEnv === "lrc"
+            this.buildEnv === "lrc" || this.buildEnv === "development"
               ? {
                   "torus-auth0-email-passwordless": {
                     name: "torus-auth0-email-passwordless",
                     typeOfLogin: "passwordless",
-                    showOnModal: false,
+                    showOnModal: true,
+                  },
+                  "torus-auth0-email-password": {
+                    name: "Torus Email Password",
+                    typeOfLogin: "email_password",
+                    description: "login.buttonText",
+                    clientId: "sqKRBVSdwa4WLkaq419U7Bamlh5vK1H7",
+                    logoHover: "https://images.toruswallet.io/torus-icon.png",
+                    logoLight: "https://images.toruswallet.io/torus-icon.png",
+                    logoDark: "https://images.toruswallet.io/torus-icon.png",
+                    showOnModal: true,
+                    priority: 1,
+                    mainOption: true,
+                    showOnMobile: true,
+                    showOnDesktop: true,
+                    jwtParameters: {
+                      domain: "https://torus-test.auth0.com",
+                      connection: "Username-Password-Authentication",
+                    },
                   },
                 }
               : undefined,

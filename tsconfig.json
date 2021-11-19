@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": ".",
     "moduleResolution": "node",
     "strict": false,
     "module": "es6",

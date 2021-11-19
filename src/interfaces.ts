@@ -109,7 +109,7 @@ export type LOGIN_TYPE =
   | "weibo"
   | "line"
   | "jwt"
-  | "email-password"
+  | "email_password"
   | "passwordless";
 
 export interface TorusCtorArgs {
