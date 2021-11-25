@@ -5,7 +5,7 @@ import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "lodash.merge";
 
 import configuration from "./config";
-import { handleStream, htmlToElement, runOnLoad } from "./embedUtils";
+import { documentReady, handleStream, htmlToElement, runOnLoad } from "./embedUtils";
 import TorusInpageProvider from "./inpage-provider";
 import generateIntegrity from "./integrity";
 import {
@@ -233,46 +233,41 @@ class Torus {
     const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()];
     this.embedTranslations = languageTranslations.embed;
 
-    const attachIFrame = () => {
-      window.document.head.appendChild(this.styleLink);
-      window.document.body.appendChild(this.torusIframe);
-      window.document.body.appendChild(this.torusAlertContainer);
-      this.torusIframe.onload = () => {
-        // only do this if iframe is not full screen
-        if (!this.isIframeFullScreen) this._displayIframe();
-      };
-    };
     const handleSetup = async () => {
-      await runOnLoad(attachIFrame);
-      await runOnLoad(this._setupWeb3.bind(this));
-      const initStream = this.communicationMux.getStream("init_stream") as Substream;
-      const initCompletePromise = new Promise((resolve, reject) => {
-        initStream.on("data", (chunk) => {
-          const { name, data, error } = chunk;
-          if (name === "init_complete" && data.success) {
-            // resolve promise
-            resolve(undefined);
-          } else if (error) {
-            reject(new Error(error));
-          }
-        });
-      });
-      await runOnLoad(async () => {
-        initStream.write({
-          name: "init_stream",
-          data: {
-            enabledVerifiers,
-            loginConfig,
-            whiteLabel: this.whiteLabel,
-            buttonPosition: this.buttonPosition,
-            torusWidgetVisibility: this.torusWidgetVisibility,
-            apiKey: this.apiKey,
-            skipTKey,
-          },
-        });
-        await this._setProvider(network);
-        await initCompletePromise;
-        this.isInitialized = true;
+      await documentReady();
+      return new Promise((resolve, reject) => {
+        window.document.head.appendChild(this.styleLink);
+        window.document.body.appendChild(this.torusIframe);
+        window.document.body.appendChild(this.torusAlertContainer);
+        this.torusIframe.onload = async () => {
+          // only do this if iframe is not full screen
+          this._setupWeb3();
+          const initStream = this.communicationMux.getStream("init_stream") as Substream;
+          initStream.write({
+            name: "init_stream",
+            data: {
+              enabledVerifiers,
+              loginConfig,
+              whiteLabel: this.whiteLabel,
+              buttonPosition: this.buttonPosition,
+              torusWidgetVisibility: this.torusWidgetVisibility,
+              apiKey: this.apiKey,
+              skipTKey,
+              network,
+            },
+          });
+          initStream.on("data", (chunk) => {
+            const { name, data, error } = chunk;
+            if (name === "init_complete" && data.success) {
+              // resolve promise
+              this.isInitialized = true;
+              this._displayIframe(this.isIframeFullScreen);
+              resolve(undefined);
+            } else if (error) {
+              reject(new Error(error));
+            }
+          });
+        };
       });
     };
 
@@ -526,36 +521,6 @@ class Torus {
     });
   }
 
-  protected _setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest } = {}): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.isInitialized) {
-        const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
-        const handler = (ev) => {
-          log.info(ev);
-          const { err, success } = ev.data;
-          if (err) {
-            reject(err);
-          } else if (success) {
-            resolve();
-          } else reject(new Error("some error occured"));
-        };
-        handleStream(providerChangeStream, "data", handler);
-        providerChangeStream.write({
-          name: "show_provider_change",
-          data: {
-            network: {
-              host,
-              chainId,
-              networkName,
-              ...rest,
-            },
-            override: true,
-          },
-        });
-      } else reject(new Error("Already initialized"));
-    });
-  }
-
   protected _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window") as Substream;
@@ -680,6 +645,7 @@ class Torus {
       name: "embed_metamask",
       target: "iframe_metamask",
       targetWindow: this.torusIframe.contentWindow,
+      targetOrigin: this.torusUrl,
     });
 
     // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
@@ -689,6 +655,7 @@ class Torus {
       name: "embed_comm",
       target: "iframe_comm",
       targetWindow: this.torusIframe.contentWindow,
+      targetOrigin: this.torusUrl,
     });
 
     // Backward compatibility with Gotchi :)
@@ -751,7 +718,7 @@ class Torus {
       });
     };
 
-    inpageProvider.tryPreopenHandle = (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => {
+    inpageProvider.tryPreopenHandle = (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: unknown[]) => void) => {
       const _payload = payload;
       if (!Array.isArray(_payload) && UNSAFE_METHODS.includes(_payload.method)) {
         const preopenInstanceId = getPreopenInstanceId();
