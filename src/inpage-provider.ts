@@ -79,7 +79,7 @@ class TorusInpageProvider extends SafeEventEmitter {
 
   _publicConfigStore: ObservableStore<PublicConfigState>;
 
-  tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: any[]) => void) => void;
+  tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: unknown[]) => void) => void;
 
   enable: () => Promise<string[]>;
 
