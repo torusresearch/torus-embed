@@ -680,6 +680,7 @@ class Torus {
       name: "embed_metamask",
       target: "iframe_metamask",
       targetWindow: this.torusIframe.contentWindow,
+      targetOrigin: this.torusUrl,
     });
 
     // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
@@ -689,6 +690,7 @@ class Torus {
       name: "embed_comm",
       target: "iframe_comm",
       targetWindow: this.torusIframe.contentWindow,
+      targetOrigin: this.torusUrl,
     });
 
     // Backward compatibility with Gotchi :)
