@@ -236,13 +236,21 @@ class Torus {
     const handleSetup = async () => {
       await documentReady();
       return new Promise((resolve, reject) => {
-        window.document.head.appendChild(this.styleLink);
-        window.document.body.appendChild(this.torusIframe);
-        window.document.body.appendChild(this.torusAlertContainer);
         this.torusIframe.onload = async () => {
           // only do this if iframe is not full screen
           this._setupWeb3();
           const initStream = this.communicationMux.getStream("init_stream") as Substream;
+          initStream.on("data", (chunk) => {
+            const { name, data, error } = chunk;
+            if (name === "init_complete" && data.success) {
+              // resolve promise
+              this.isInitialized = true;
+              this._displayIframe(this.isIframeFullScreen);
+              resolve(undefined);
+            } else if (error) {
+              reject(new Error(error));
+            }
+          });
           initStream.write({
             name: "init_stream",
             data: {
@@ -256,18 +264,10 @@ class Torus {
               network,
             },
           });
-          initStream.on("data", (chunk) => {
-            const { name, data, error } = chunk;
-            if (name === "init_complete" && data.success) {
-              // resolve promise
-              this.isInitialized = true;
-              this._displayIframe(this.isIframeFullScreen);
-              resolve(undefined);
-            } else if (error) {
-              reject(new Error(error));
-            }
-          });
         };
+        window.document.head.appendChild(this.styleLink);
+        window.document.body.appendChild(this.torusIframe);
+        window.document.body.appendChild(this.torusAlertContainer);
       });
     };
 
@@ -645,7 +645,7 @@ class Torus {
       name: "embed_metamask",
       target: "iframe_metamask",
       targetWindow: this.torusIframe.contentWindow,
-      targetOrigin: this.torusUrl,
+      targetOrigin: new URL(this.torusUrl).origin,
     });
 
     // Due to compatibility reasons, we should not set up multiplexing on window.metamaskstream
@@ -655,7 +655,7 @@ class Torus {
       name: "embed_comm",
       target: "iframe_comm",
       targetWindow: this.torusIframe.contentWindow,
-      targetOrigin: this.torusUrl,
+      targetOrigin: new URL(this.torusUrl).origin,
     });
 
     // Backward compatibility with Gotchi :)
