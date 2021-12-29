@@ -409,6 +409,10 @@ export interface UserInfo {
    * id for discord
    */
   verifierId: string;
+  /**
+   * Returns if the logged in user is new
+   */
+  isNewUser: boolean;
 }
 
 export interface LocaleLinks<T> {
