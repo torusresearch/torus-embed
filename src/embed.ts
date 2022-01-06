@@ -17,6 +17,7 @@ import {
   PaymentParams,
   TORUS_BUILD_ENV,
   TorusCtorArgs,
+  TorusLoginParams,
   TorusParams,
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
@@ -300,7 +301,7 @@ class Torus {
     return undefined;
   }
 
-  login({ verifier = "", login_hint: loginHint = "" } = {}): Promise<string[]> {
+  login({ verifier = "", login_hint: loginHint = "" }: TorusLoginParams = {}): Promise<string[]> {
     if (!this.isInitialized) throw new Error("Call init() first");
     this.requestedVerifier = verifier;
     this.loginHint = loginHint;
