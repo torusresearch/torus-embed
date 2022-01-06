@@ -380,6 +380,7 @@ export interface VerifierArgs {
 
 export interface LoginParams {
   verifier?: string;
+  login_hint?: string;
 }
 
 export interface UserInfo {
