@@ -132,6 +132,11 @@ export interface TorusCtorArgs {
   apiKey?: string;
 }
 
+export interface TorusLoginParams {
+  verifier?: string;
+  login_hint?: string;
+}
+
 export interface NetworkInterface {
   /**
    * If any network other than the ones in enum, it should a JSON RPC URL
@@ -380,6 +385,7 @@ export interface VerifierArgs {
 
 export interface LoginParams {
   verifier?: string;
+  login_hint?: string;
 }
 
 export interface UserInfo {
