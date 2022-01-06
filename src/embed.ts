@@ -17,6 +17,7 @@ import {
   PaymentParams,
   TORUS_BUILD_ENV,
   TorusCtorArgs,
+  TorusLoginParams,
   TorusParams,
   TorusPublicKey,
   UnvalidatedJsonRpcRequest,
@@ -134,6 +135,8 @@ class Torus {
   dappStorageKey: string;
 
   paymentProviders = configuration.paymentProviders;
+
+  private loginHint = "";
 
   constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
@@ -298,9 +301,10 @@ class Torus {
     return undefined;
   }
 
-  login({ verifier = "" } = {}): Promise<string[]> {
+  login({ verifier = "", login_hint: loginHint = "" }: TorusLoginParams = {}): Promise<string[]> {
     if (!this.isInitialized) throw new Error("Call init() first");
     this.requestedVerifier = verifier;
+    this.loginHint = loginHint;
     return this.ethereum.enable();
   }
 
@@ -802,7 +806,10 @@ class Torus {
       handleStream(oauthStream, "data", loginHandler);
       const preopenInstanceId = getPreopenInstanceId();
       this._handleWindow(preopenInstanceId);
-      oauthStream.write({ name: "oauth", data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId } });
+      oauthStream.write({
+        name: "oauth",
+        data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId, login_hint: this.loginHint },
+      });
     }
   }
 
