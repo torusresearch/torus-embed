@@ -71,7 +71,7 @@ jobs:
         env:
           SOURCE_DIR: "./examples/vue-app/dist"
           AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_BETA }}
+          AWS_S3_BUCKET: "demo-eth.tor.us"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
