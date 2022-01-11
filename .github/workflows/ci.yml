@@ -66,7 +66,7 @@ jobs:
       # Copy the files from build folder to the S3 bucket
       - name: Deploy to S3
         if: github.ref == 'refs/heads/master'
-        run: aws s3 cp ./dist s3://demo-eth.tor.us --recursive
+        run: aws s3 cp ./examples/vue-app/dist s3://demo-eth.tor.us --recursive
 
       # Invalidate Cloudfront (this action)
       - name: invalidate
