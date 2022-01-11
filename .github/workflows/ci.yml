@@ -51,7 +51,7 @@ jobs:
         run: |
           npm pack
           cd examples/vue-app
-          npm install
+          npm run install:local
           npm run build
 
       # Set the credentials from repository settings/secrets
