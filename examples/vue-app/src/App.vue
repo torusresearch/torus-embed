@@ -160,7 +160,7 @@ export default Vue.extend({
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
            await torus?.init({
-          buildEnv: "development",
+          buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
           },
