@@ -525,6 +525,33 @@ class Torus {
     });
   }
 
+  loginWithPrivateKey(loginParams: {
+    privateKey: string;
+    userInfo: Partial<UserInfo> & Pick<UserInfo, "email" | "verifier" | "verifierId">;
+  }): Promise<void> {
+    const { privateKey, userInfo } = loginParams;
+    return new Promise((resolve, reject) => {
+      if (this.isInitialized) {
+        if (Buffer.from(privateKey, "hex").length !== 32) {
+          reject(new Error("Invalid private key, Please provide a 32 byte valid secp25k1 private key"));
+          return;
+        }
+        const loginPrivKeyStream = this.communicationMux.getStream("login_with_private_key") as Substream;
+        const loginHandler = (chunk) => {
+          if (chunk.name === "login_with_private_key_response") {
+            if (chunk.data.success) {
+              resolve(chunk.data.success);
+            } else {
+              reject(new Error(chunk.data.error));
+            }
+          }
+        };
+        handleStream(loginPrivKeyStream, "data", loginHandler);
+        loginPrivKeyStream.write({ name: "login_with_private_key_request", data: { privateKey, userInfo } });
+      } else reject(new Error("Torus is not initialized yet"));
+    });
+  }
+
   protected _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window") as Substream;
