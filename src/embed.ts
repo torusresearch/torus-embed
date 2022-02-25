@@ -525,10 +525,7 @@ class Torus {
     });
   }
 
-  loginWithPrivateKey(loginParams: {
-    privateKey: string;
-    userInfo: Partial<UserInfo> & Pick<UserInfo, "email" | "verifier" | "verifierId">;
-  }): Promise<void> {
+  loginWithPrivateKey(loginParams: { privateKey: string; userInfo: Omit<UserInfo, "isNewUser"> }): Promise<void> {
     const { privateKey, userInfo } = loginParams;
     return new Promise((resolve, reject) => {
       if (this.isInitialized) {

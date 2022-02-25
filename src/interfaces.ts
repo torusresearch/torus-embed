@@ -419,6 +419,11 @@ export interface UserInfo {
    * Returns if the logged in user is new
    */
   isNewUser: boolean;
+
+  /**
+   * login type of the logged in user (google, facebook etc)
+   */
+  typeOfLogin: LOGIN_TYPE;
 }
 
 export interface LocaleLinks<T> {

@@ -181,6 +181,9 @@ export default Vue.extend({
           privateKey: this.privateKey,
           userInfo: {
             email: "test@gmail.com",
+            profileImage: "",
+            name:"",
+            typeOfLogin: "google",
             verifierId: "test@gmail.com",
             verifier: "google",
           }
