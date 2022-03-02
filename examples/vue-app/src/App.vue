@@ -48,6 +48,7 @@
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Torus Specific Info</h4>
+        <button @click="showWalletConnect">Show Wallet Connect</button>
         <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
@@ -160,21 +161,22 @@ export default Vue.extend({
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
            await torus?.init({
-          buildEnv: this.buildEnv,
-          enabledVerifiers: {
-            reddit: false,
-          },
-          enableLogging: true,
-          network: {
-            host: this.chainIdNetworkMap[this.chainId], // mandatory
-            chainId: this.chainId,
-            // chainId: 336,
-            // networkName: 'DES Network',
-            // host: 'https://quorum.block360.io/https',
-            // ticker: 'DES',
-            // tickerName: 'DES Coin',
-          },
-          showTorusButton: true,
+            // useWalletConnect: true,
+            buildEnv: this.buildEnv,
+            enabledVerifiers: {
+              reddit: false,
+            },
+            enableLogging: true,
+            network: {
+              host: this.chainIdNetworkMap[this.chainId], // mandatory
+              chainId: this.chainId,
+              // chainId: 336,
+              // networkName: 'DES Network',
+              // host: 'https://quorum.block360.io/https',
+              // ticker: 'DES',
+              // tickerName: 'DES Coin',
+            },
+            showTorusButton: true,
           })
 
         await torus?.loginWithPrivateKey({
@@ -209,6 +211,7 @@ export default Vue.extend({
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
         await torus?.init({
+          // useWalletConnect: true,
           buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
@@ -285,6 +288,10 @@ export default Vue.extend({
       } else {
         torus?.showTorusButton();
       }
+    },
+    async showWalletConnect() {
+       const { torus } = web3Obj;
+       await torus.showWalletConnectScanner();
     },
     console(...args: any[]): void {
       const el = document.querySelector("#console>p");

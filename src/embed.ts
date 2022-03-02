@@ -138,6 +138,8 @@ class Torus {
 
   private loginHint = "";
 
+  private useWalletConnect: boolean;
+
   constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
     this.torusUrl = "";
@@ -183,12 +185,14 @@ class Torus {
     whiteLabel,
     skipTKey = false,
     useLocalStorage = false,
+    useWalletConnect = false,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
     log.info(torusUrl, "url loaded");
     this.torusUrl = torusUrl;
     this.whiteLabel = whiteLabel;
+    this.useWalletConnect = useWalletConnect;
     log.setDefaultLevel(logLevel);
     if (enableLogging) log.enableAll();
     else log.disableAll();
@@ -214,6 +218,7 @@ class Torus {
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
       `<iframe
         id="torusIframe"
+        allow=${useWalletConnect ? "camera" : ""}
         class="torusIframe"
         src="${torusIframeUrl.href}"
         style="display: none; position: fixed; top: 0; right: 0; width: 100%;
@@ -525,7 +530,7 @@ class Torus {
     });
   }
 
-  loginWithPrivateKey(loginParams: { privateKey: string; userInfo: Omit<UserInfo, "isNewUser"> }): Promise<void> {
+  async loginWithPrivateKey(loginParams: { privateKey: string; userInfo: Omit<UserInfo, "isNewUser"> }): Promise<void> {
     const { privateKey, userInfo } = loginParams;
     return new Promise((resolve, reject) => {
       if (this.isInitialized) {
@@ -546,6 +551,28 @@ class Torus {
         handleStream(loginPrivKeyStream, "data", loginHandler);
         loginPrivKeyStream.write({ name: "login_with_private_key_request", data: { privateKey, userInfo } });
       } else reject(new Error("Torus is not initialized yet"));
+    });
+  }
+
+  async showWalletConnectScanner(): Promise<void> {
+    if (!this.useWalletConnect) throw new Error("Set `useWalletConnect` as true in init function options to use wallet connect scanner");
+    return new Promise((resolve, reject) => {
+      if (this.isLoggedIn) {
+        const walletConnectStream = this.communicationMux.getStream("wallet_connect_stream") as Substream;
+        const walletConnectHandler = (chunk) => {
+          if (chunk.name === "wallet_connect_stream_res") {
+            if (chunk.data.success) {
+              resolve(chunk.data.success);
+            } else {
+              reject(new Error(chunk.data.error));
+            }
+            this._displayIframe();
+          }
+        };
+        handleStream(walletConnectStream, "data", walletConnectHandler);
+        walletConnectStream.write({ name: "wallet_connect_stream_req" });
+        this._displayIframe(true);
+      } else reject(new Error("User has not logged in yet"));
     });
   }
 
