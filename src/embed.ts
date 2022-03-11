@@ -437,7 +437,7 @@ class Torus {
 
   async getPublicAddress({ verifier, verifierId, isExtended = false }: VerifierArgs): Promise<string | TorusPublicKey> {
     if (!configuration.supportedVerifierList.includes(verifier) || !WALLET_OPENLOGIN_VERIFIER_MAP[verifier]) throw new Error("Unsupported verifier");
-    const nodeDetails = await this.nodeDetailManager.getNodeDetails(false, true);
+    const nodeDetails = await this.nodeDetailManager.getNodeDetails({ verifier, verifierId });
     const endpoints = nodeDetails.torusNodeEndpoints;
     const torusNodePubs = nodeDetails.torusNodePub;
     const walletVerifier = verifier;
