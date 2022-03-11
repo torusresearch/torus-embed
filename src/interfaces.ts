@@ -419,6 +419,11 @@ export interface UserInfo {
    * Returns if the logged in user is new
    */
   isNewUser: boolean;
+
+  /**
+   * login type of the logged in user (google, facebook etc)
+   */
+  typeOfLogin: LOGIN_TYPE;
 }
 
 export interface LocaleLinks<T> {
@@ -631,6 +636,14 @@ export interface TorusParams {
    * @defaultValue false
    */
   useLocalStorage?: boolean;
+
+  /**
+   * Setting `useWalletConnect` to true allows to display wallet connect qr scanner from torus-embed.
+   *
+   * Defaults to false
+   * @defaultValue false
+   */
+  useWalletConnect?: boolean;
 }
 
 export interface UnvalidatedJsonRpcRequest {
