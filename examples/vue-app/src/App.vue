@@ -7,7 +7,9 @@
         <i>{{ buildEnv }}</i>
       </p>
       <div v-if="publicAddress === ''">
-        <select name="buildEnv" v-model="buildEnv">
+      <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+         <div>
+         <select name="buildEnv" v-model="buildEnv">
           <option value="production">Production</option>
           <option value="binance">Binance</option>
           <option selected value="testing">Testing</option>
@@ -16,6 +18,15 @@
           <option value="beta">Beta</option>
         </select>
         <button @click="login">Login</button>
+       </div>
+        <span> OR </span>
+        <div>
+          <input :style="{ marginLeft: '20px' }" v-model="privateKey" :placeholder="`Enter private key to login`" />
+          <button @click="loginWithPrivateKey">Login With Private Key</button>
+        </div>
+
+      </div>
+
       </div>
       <button v-else @click="logout">Logout</button>
     </section>
@@ -37,6 +48,7 @@
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Torus Specific Info</h4>
+        <button @click="showWalletConnect">Show Wallet Connect</button>
         <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
@@ -99,6 +111,7 @@ export default Vue.extend({
   name: "app",
   data() {
     return {
+      privateKey: "",
       publicAddress: "",
       chainId: 4,
       verifierId: "",
@@ -143,11 +156,62 @@ export default Vue.extend({
           break;
       }
     },
+    async loginWithPrivateKey() {
+      try {
+        const { torus, web3 } = web3Obj;
+        (window as any).torus = torus;
+           await torus?.init({
+            // useWalletConnect: true,
+            buildEnv: this.buildEnv,
+            enabledVerifiers: {
+              reddit: false,
+            },
+            enableLogging: true,
+            network: {
+              host: this.chainIdNetworkMap[this.chainId], // mandatory
+              chainId: this.chainId,
+              // chainId: 336,
+              // networkName: 'DES Network',
+              // host: 'https://quorum.block360.io/https',
+              // ticker: 'DES',
+              // tickerName: 'DES Coin',
+            },
+            showTorusButton: true,
+          })
+
+        await torus?.loginWithPrivateKey({
+          privateKey: this.privateKey,
+          userInfo: {
+            email: "test@gmail.com",
+            profileImage: "",
+            name:"",
+            typeOfLogin: "google",
+            verifierId: "test@gmail.com",
+            verifier: "google",
+          }
+        }); // await torus.ethereum.enable()
+        web3Obj.setweb3(torus?.provider);
+        torus?.provider.on("chainChanged", (resp) => {
+          console.log(resp, "chainchanged");
+          this.chainId = parseInt(resp as string);
+        });
+        torus?.provider.on("accountsChanged", (accounts) => {
+          console.log(accounts, "accountsChanged");
+          this.publicAddress = (Array.isArray(accounts) && accounts[0]) || "";
+        });
+        const accounts = await web3.eth.getAccounts();
+        [this.publicAddress] = accounts;
+        web3.eth.getBalance(accounts[0]).then(console.log).catch(console.error);
+      } catch (error) {
+        console.error(error, "caught in vue-app");
+      }
+    },
     async login() {
       try {
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
         await torus?.init({
+          useWalletConnect: true,
           buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
@@ -224,6 +288,10 @@ export default Vue.extend({
       } else {
         torus?.showTorusButton();
       }
+    },
+    async showWalletConnect() {
+       const { torus } = web3Obj;
+       await torus.showWalletConnectScanner();
     },
     console(...args: any[]): void {
       const el = document.querySelector("#console>p");
