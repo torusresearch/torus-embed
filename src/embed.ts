@@ -199,11 +199,12 @@ class Torus {
     this.torusWidgetVisibility = showTorusButton;
     let dappStorageKey = "";
     if (isLocalStorageAvailable && useLocalStorage) {
-      const storedKey = window.localStorage.getItem(configuration.localStorageKey);
+      const localStorageKey = `${configuration.localStorageKeyPrefix}${window.location.hostname}`;
+      const storedKey = window.localStorage.getItem(localStorageKey);
       if (storedKey) dappStorageKey = storedKey;
       else {
         const generatedKey = `torus-app-${getPreopenInstanceId()}`;
-        window.localStorage.setItem(configuration.localStorageKey, generatedKey);
+        window.localStorage.setItem(localStorageKey, generatedKey);
         dappStorageKey = generatedKey;
       }
     }
