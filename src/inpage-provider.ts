@@ -11,7 +11,7 @@ import {
 } from "@toruslabs/openlogin-jrpc";
 import { EthereumRpcError, ethErrors } from "eth-rpc-errors";
 import dequal from "fast-deep-equal";
-import { isDuplexStream } from "is-stream";
+import { duplex as isDuplexStream } from "is-stream";
 import pump from "pump";
 import type { Duplex } from "readable-stream";
 
