@@ -9,16 +9,16 @@
   "types": "dist/types/index.d.ts",
   "files": [
     "dist",
-    "types"
+    "src"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "start": "rimraf dist/ && torus-scripts start --name=torus",
-    "dev": "rimraf dist/ && cross-env NODE_ENV=development torus-scripts build --name=torus",
-    "build": "rimraf dist/ && cross-env NODE_ENV=production torus-scripts build --name=torus",
+    "start": "torus-scripts start --name=torus",
+    "build": "torus-scripts build --name=torus",
+    "release": "torus-scripts release",
     "prepack": "npm run build",
     "lint:ts": "eslint --fix 'src/**/*.ts'",
     "prepare": "husky install"
@@ -28,10 +28,10 @@
   },
   "dependencies": {
     "@metamask/obs-store": "^7.0.0",
-    "@toruslabs/fetch-node-details": "^5.0.1",
-    "@toruslabs/http-helpers": "^2.2.0",
-    "@toruslabs/openlogin-jrpc": "^1.7.3",
-    "@toruslabs/torus.js": "^5.1.0",
+    "@toruslabs/fetch-node-details": "^6.0.1",
+    "@toruslabs/http-helpers": "^3.0.0",
+    "@toruslabs/openlogin-jrpc": "^2.0.0",
+    "@toruslabs/torus.js": "^6.0.0",
     "create-hash": "^1.2.0",
     "end-of-stream": "^1.4.4",
     "eth-rpc-errors": "^4.0.3",
@@ -44,35 +44,35 @@
     "pump": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.17.9",
+    "@babel/runtime": "^7.18.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@toruslabs/eslint-config-typescript": "^0.2.1",
-    "@toruslabs/torus-scripts": "^0.4.4",
+    "@toruslabs/eslint-config-typescript": "^1.0.1",
+    "@toruslabs/torus-scripts": "^1.0.3",
     "@types/create-hash": "^1.2.2",
-    "@types/lodash.merge": "^4.6.6",
+    "@types/lodash.merge": "^4.6.7",
     "@types/node": "^16",
     "@types/once": "^1.4.0",
     "@types/readable-stream": "^2.3.13",
-    "@typescript-eslint/eslint-plugin": "^5.19.0",
-    "@typescript-eslint/parser": "^5.19.0",
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
     "cross-env": "^7.0.3",
     "empty-module": "0.0.2",
-    "eslint": "^8.13.0",
+    "eslint": "^8.15.0",
     "eslint-plugin-import": "~2.26.0",
     "eslint-plugin-mocha": "^10.0.4",
-    "eslint-plugin-n": "^15.1.0",
+    "eslint-plugin-n": "^15.2.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-tsdoc": "^0.2.16",
-    "husky": "^7.0.4",
-    "lint-staged": "^12.3.8",
-    "mocha": "^9.2.2",
+    "husky": "^8.0.1",
+    "lint-staged": "^12.4.1",
+    "mocha": "^10.0.0",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.4"
   },
   "mocha": {
     "timeout": 0
