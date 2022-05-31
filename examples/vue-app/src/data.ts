@@ -1,13 +1,17 @@
+import { LoginConfigItem } from "@toruslabs/torus-embed";
+
 export const whiteLabelData = {
+  name: "HelloDemo",
+  url: "http://localhost:8080",
   theme: {
     isDark: true,
     colors: {
-      torusBrand1: "#FFA500",
+      torusBrand1: "#FF9900",
       torusGray2: "#FBF7F3",
     },
   },
-  logoDark: "https://startrail.io/images/front/startrail-top__main.svg", // dark logo for light background
-  logoLight: "https://images.toruswallet.io/startrail-logo-light.svg", // light logo for dark background
+  logoDark: "https://images.web3auth.io/example-hello.svg", // dark logo for light background
+  logoLight: "https://images.web3auth.io/example-hello-light.svg", // light logo for dark background
   topupHide: false,
   featuredBillboardHide: true,
   tncLink: {
@@ -67,6 +71,50 @@ export const whiteLabelData = {
       },
     },
   },
+};
+
+export const loginConfig = {
+  "lioneell-auth0-email-password": {
+    name: "jwt",
+    typeOfLogin: "email_password",
+    clientId: "MfPdpVU82zbowrP1zefQg7mCCdXzENTG",
+    description: "Login with Auth0",
+    showOnModal: true,
+    priority: 1,
+    mainOption: true,
+    showOnMobile: true,
+    showOnDesktop: true,
+    logoDark: "https://images.web3auth.io/example-login-hello-dark.svg",
+    logoLight: "https://images.web3auth.io/example-login-hello-light.svg",
+    logoHover: "https://images.web3auth.io/example-login-hello-hover.svg",
+    jwtParameters: {
+      domain: "https://dev-zraq1p5o.us.auth0.com",
+      connection: "Username-Password-Authentication",
+    },
+  } as LoginConfigItem,
+  "torus-auth0-email-passwordless": {
+    name: "torus-auth0-email-passwordless",
+    typeOfLogin: "passwordless",
+    showOnModal: true,
+  } as LoginConfigItem,
+  "torus-auth0-email-password": {
+    name: "Torus Email Password",
+    typeOfLogin: "email_password",
+    description: "login.buttonText",
+    clientId: "sqKRBVSdwa4WLkaq419U7Bamlh5vK1H7",
+    logoHover: "https://images.toruswallet.io/torus-icon.png",
+    logoLight: "https://images.toruswallet.io/torus-icon.png",
+    logoDark: "https://images.toruswallet.io/torus-icon.png",
+    showOnModal: true,
+    priority: 1,
+    mainOption: true,
+    showOnMobile: true,
+    showOnDesktop: true,
+    jwtParameters: {
+      domain: "https://torus-test.auth0.com",
+      connection: "Username-Password-Authentication",
+    },
+  } as LoginConfigItem,
 };
 
 export const getV3TypedData = (chainId: string) => ({
