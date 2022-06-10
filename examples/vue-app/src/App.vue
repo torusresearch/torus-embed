@@ -88,7 +88,12 @@
           </div>
           <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
         </section>
+        <section>
+          <h5>Add Asset</h5>
+          <button @click="addErc20Token">Add Erc20 Token</button>
+        </section>
       </section>
+      
     </section>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
@@ -112,7 +117,7 @@ export default Vue.extend({
     return {
       privateKey: "",
       publicAddress: "",
-      chainId: 4,
+      chainId: 1,
       verifierId: "",
       selectedVerifier: "google",
       placeholder: "Enter google email",
@@ -459,6 +464,28 @@ export default Vue.extend({
         console.error(error);
         this.console("failed");
       }
+    },
+    async addErc20Token() {
+      const { web3 } = web3Obj;
+      try {
+        const res = await (web3.currentProvider as any)?.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+                symbol: 'USDT',
+                decimals: 18,
+                image: 'https://foo.io/token-image.svg',
+              },
+            },
+      })
+       this.console("success", res);
+      } catch (error) {
+        console.error(error);
+        this.console("failed");
+      }
+     
     },
     logout() {
       const { torus } = web3Obj;
