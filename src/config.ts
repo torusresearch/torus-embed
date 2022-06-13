@@ -1,4 +1,4 @@
-import { EMBED_TRANSLATION_ITEM, IPaymentProvider, LocaleLinks, LOGIN_PROVIDER, PAYMENT_PROVIDER } from "./interfaces";
+import { EMBED_TRANSLATION_ITEM, IPaymentProvider, LocaleLinks, PAYMENT_PROVIDER, WALLET_VERIFIERS } from "./interfaces";
 
 const paymentProviders = {
   [PAYMENT_PROVIDER.RAMPNETWORK]: {
@@ -130,7 +130,7 @@ const translations = {
 } as LocaleLinks<{ embed: EMBED_TRANSLATION_ITEM }>;
 
 export default {
-  supportedVerifierList: [LOGIN_PROVIDER.GOOGLE, LOGIN_PROVIDER.REDDIT, LOGIN_PROVIDER.DISCORD],
+  supportedVerifierList: Object.values(WALLET_VERIFIERS),
   paymentProviders,
   api: "https://api.tor.us",
   translations,

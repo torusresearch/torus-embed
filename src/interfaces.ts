@@ -10,12 +10,38 @@ export const LOGIN_PROVIDER = {
   DISCORD: "discord",
 } as const;
 
+export const WALLET_VERIFIERS = {
+  GOOGLE: "google",
+  FACEBOOK: "facebook",
+  TWITCH: "twitch",
+  REDDIT: "reddit",
+  DISCORD: "discord",
+  APPLE: "torus-auth0-apple",
+  GITHUB: "torus-auth0-github",
+  KAKAO: "torus-auth0-kakao",
+  LINE: "torus-auth0-line",
+  LINKEDIN: "torus-auth0-linkedin",
+  TWITTER: "torus-auth0-twitter",
+  WEIBO: "torus-auth0-weibo",
+  WECHAT: "torus-auth0-wechat",
+  EMAIL_PASSWORDLESS: "torus-auth0-email-passwordless",
+} as const;
+
 export const WALLET_OPENLOGIN_VERIFIER_MAP = {
-  [LOGIN_PROVIDER.GOOGLE]: "tkey-google",
-  [LOGIN_PROVIDER.FACEBOOK]: "tkey-facebook",
-  [LOGIN_PROVIDER.TWITCH]: "tkey-twitch",
-  [LOGIN_PROVIDER.REDDIT]: "tkey-reddit",
-  [LOGIN_PROVIDER.DISCORD]: "tkey-discord",
+  [WALLET_VERIFIERS.GOOGLE]: "tkey-google",
+  [WALLET_VERIFIERS.FACEBOOK]: "tkey-facebook",
+  [WALLET_VERIFIERS.TWITCH]: "tkey-twitch",
+  [WALLET_VERIFIERS.REDDIT]: "tkey-reddit",
+  [WALLET_VERIFIERS.DISCORD]: "tkey-discord",
+  [WALLET_VERIFIERS.APPLE]: "tkey-auth0-apple",
+  [WALLET_VERIFIERS.GITHUB]: "tkey-auth0-github",
+  [WALLET_VERIFIERS.KAKAO]: "tkey-auth0-kakao",
+  [WALLET_VERIFIERS.LINE]: "tkey-auth0-line",
+  [WALLET_VERIFIERS.LINKEDIN]: "tkey-auth0-linkedin",
+  [WALLET_VERIFIERS.TWITTER]: "tkey-auth0-twitter",
+  [WALLET_VERIFIERS.WEIBO]: "tkey-auth0-weibo",
+  [WALLET_VERIFIERS.WECHAT]: "tkey-auth0-wechat",
+  [WALLET_VERIFIERS.EMAIL_PASSWORDLESS]: "tkey-auth0-email-passwordless",
 } as const;
 export const PAYMENT_PROVIDER = {
   MOONPAY: "moonpay",
