@@ -57,6 +57,7 @@
             <option selected value="google">Google</option>
             <option value="reddit">Reddit</option>
             <option value="discord">Discord</option>
+             <option value="torus-auth0-email-passwordless">Email Passwordless</option>
           </select>
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
