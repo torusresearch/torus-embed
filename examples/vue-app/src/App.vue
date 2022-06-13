@@ -7,26 +7,25 @@
         <i>{{ buildEnv }}</i>
       </p>
       <div v-if="publicAddress === ''">
-      <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
-         <div>
-         <select name="buildEnv" v-model="buildEnv">
-          <option value="production">Production</option>
-          <option value="binance">Binance</option>
-          <option selected value="testing">Testing</option>
-          <option value="development">Development</option>
-          <option value="lrc">LRC</option>
-          <option value="beta">Beta</option>
-        </select>
-        <button @click="login">Login</button>
-       </div>
-        <span> OR </span>
-        <div>
-          <input :style="{ marginLeft: '20px' }" v-model="privateKey" :placeholder="`Enter private key to login`" />
-          <button @click="loginWithPrivateKey">Login With Private Key</button>
+        <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
+          <div>
+            <select name="buildEnv" v-model="buildEnv">
+              <option value="production">Production</option>
+              <option value="binance">Binance</option>
+              <option selected value="testing">Testing</option>
+              <option value="development">Development</option>
+              <option value="lrc">LRC</option>
+              <option value="beta">Beta</option>
+            </select>
+            <button @click="login(true)">Login</button>
+            <button @click="login(false)">Login without whitelabel</button>
+          </div>
+          <span>OR</span>
+          <div>
+            <input :style="{ marginLeft: '20px' }" v-model="privateKey" :placeholder="`Enter private key to login`" />
+            <button @click="loginWithPrivateKey">Login With Private Key</button>
+          </div>
         </div>
-
-      </div>
-
       </div>
       <button v-else @click="logout">Logout</button>
     </section>
@@ -58,6 +57,7 @@
             <option selected value="google">Google</option>
             <option value="reddit">Reddit</option>
             <option value="discord">Discord</option>
+             <option value="torus-auth0-email-passwordless">Email Passwordless</option>
           </select>
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
@@ -100,7 +100,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from "@toruslabs/torus-embed";
-import { getV3TypedData, getV4TypedData, whiteLabelData } from "./data";
+import { getV3TypedData, getV4TypedData, loginConfig, whiteLabelData } from "./data";
 import { encrypt, recoverTypedMessage } from "eth-sig-util";
 import { ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
@@ -129,7 +129,7 @@ export default Vue.extend({
       messageToEncrypt: "",
       encryptionKey: "",
       messageEncrypted: "",
-      buildEnv: "testing" as TORUS_BUILD_ENV_TYPE,
+      buildEnv: "development" as TORUS_BUILD_ENV_TYPE,
     };
   },
   mounted() {
@@ -160,35 +160,35 @@ export default Vue.extend({
       try {
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
-           await torus?.init({
-            // useWalletConnect: true,
-            buildEnv: this.buildEnv,
-            enabledVerifiers: {
-              reddit: false,
-            },
-            enableLogging: true,
-            network: {
-              host: this.chainIdNetworkMap[this.chainId], // mandatory
-              chainId: this.chainId,
-              // chainId: 336,
-              // networkName: 'DES Network',
-              // host: 'https://quorum.block360.io/https',
-              // ticker: 'DES',
-              // tickerName: 'DES Coin',
-            },
-            showTorusButton: true,
-          })
+        await torus?.init({
+          // useWalletConnect: true,
+          buildEnv: this.buildEnv,
+          enabledVerifiers: {
+            reddit: false,
+          },
+          enableLogging: true,
+          network: {
+            host: this.chainIdNetworkMap[this.chainId], // mandatory
+            chainId: this.chainId,
+            // chainId: 336,
+            // networkName: 'DES Network',
+            // host: 'https://quorum.block360.io/https',
+            // ticker: 'DES',
+            // tickerName: 'DES Coin',
+          },
+          showTorusButton: true,
+        });
 
         await torus?.loginWithPrivateKey({
           privateKey: this.privateKey,
           userInfo: {
             email: "test@gmail.com",
             profileImage: "",
-            name:"",
+            name: "",
             typeOfLogin: "google",
             verifierId: "test@gmail.com",
             verifier: "google",
-          }
+          },
         }); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);
         torus?.provider.on("chainChanged", (resp) => {
@@ -206,12 +206,11 @@ export default Vue.extend({
         console.error(error, "caught in vue-app");
       }
     },
-    async login() {
+    async login(useWhitelabel) {
       try {
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
         await torus?.init({
-          useWalletConnect: true,
           buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
@@ -233,35 +232,8 @@ export default Vue.extend({
           // version: '1.4.2',
           // hash: 'sha384-jwXOV6VJu+PM89ksbCSZyQRjf5FdX8n39nWfE/iQBMh4r5m027ua2tkQ+83FPdp9'
           // },
-          loginConfig:
-            this.buildEnv === "lrc" || this.buildEnv === "development"
-              ? {
-                  "torus-auth0-email-passwordless": {
-                    name: "torus-auth0-email-passwordless",
-                    typeOfLogin: "passwordless",
-                    showOnModal: true,
-                  },
-                  "torus-auth0-email-password": {
-                    name: "Torus Email Password",
-                    typeOfLogin: "email_password",
-                    description: "login.buttonText",
-                    clientId: "sqKRBVSdwa4WLkaq419U7Bamlh5vK1H7",
-                    logoHover: "https://images.toruswallet.io/torus-icon.png",
-                    logoLight: "https://images.toruswallet.io/torus-icon.png",
-                    logoDark: "https://images.toruswallet.io/torus-icon.png",
-                    showOnModal: true,
-                    priority: 1,
-                    mainOption: true,
-                    showOnMobile: true,
-                    showOnDesktop: true,
-                    jwtParameters: {
-                      domain: "https://torus-test.auth0.com",
-                      connection: "Username-Password-Authentication",
-                    },
-                  },
-                }
-              : undefined,
-          whiteLabel: whiteLabelData,
+          loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
+          whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           skipTKey: true,
         });
         await torus?.login(); // await torus.ethereum.enable()
@@ -290,8 +262,8 @@ export default Vue.extend({
       }
     },
     async showWalletConnect() {
-       const { torus } = web3Obj;
-       await torus.showWalletConnectScanner();
+      const { torus } = web3Obj;
+      await torus.showWalletConnectScanner();
     },
     console(...args: any[]): void {
       const el = document.querySelector("#console>p");
