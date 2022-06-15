@@ -1,4 +1,4 @@
-import type Torus from "@toruslabs/torus-embed";
+import Torus from "@toruslabs/torus-embed";
 import type { TORUS_BUILD_ENV_TYPE, TorusInpageProvider, VerifierArgs } from "@toruslabs/torus-embed";
 
 import { useEffect, useState } from "react";
@@ -45,8 +45,7 @@ export default function Home() {
   const [buildEnv, setBuildEnv] = useState<TORUS_BUILD_ENV_TYPE>("testing");
   useEffect(() => {
     const initialize = async () => {
-      const torus = (await import("@toruslabs/torus-embed")).default;
-      web3Obj.torus = new torus({});
+      web3Obj.torus = new Torus({});
       const torusEnv = sessionStorage.getItem("pageUsingTorus");
       if (torusEnv) {
         login();
