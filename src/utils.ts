@@ -186,33 +186,6 @@ export const FEATURES_DEFAULT_WALLET_WINDOW = "directories=0,titlebar=0,toolbar=
 export const FEATURES_DEFAULT_POPUP_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=1200";
 export const FEATURES_CONFIRM_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=450";
 
-export function storageAvailable(type: "localStorage" | "sessionStorage"): boolean {
-  let storage: Storage;
-  try {
-    storage = window[type];
-    const x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return (
-      e &&
-      // everything except Firefox
-      (e.code === 22 ||
-        // Firefox
-        e.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        e.name === "QuotaExceededError" ||
-        // Firefox
-        e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      storage &&
-      storage.length !== 0
-    );
-  }
-}
-
 export function getPopupFeatures(): string {
   // Fixes dual-screen position                             Most browsers      Firefox
   const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
