@@ -91,6 +91,7 @@
         <section>
           <h5>Add Asset</h5>
           <button @click="addErc20Token">Add Erc20 Token</button>
+          <button @click="addCollectible">Add NFT</button>
         </section>
       </section>
       
@@ -477,6 +478,30 @@ export default Vue.extend({
                 symbol: 'USDT',
                 decimals: 18,
                 image: 'https://foo.io/token-image.svg',
+              },
+            },
+      })
+       this.console("success", res);
+      } catch (error) {
+        console.error(error);
+        this.console("failed");
+      }
+     
+    },
+    async addCollectible() {
+      const { web3 } = web3Obj;
+      try {
+        const res = await (web3.currentProvider as any)?.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC721',
+              options: {
+                description: "This is cryptopunk nft",
+                address: "0x282BDD42f4eb70e7A9D9F40c8fEA0825B7f68C5D",
+                id: "4876",
+                image: "https://img.seadn.io/files/6a942ce9e60b9b456167138fd24885f2.png?fit=max&w=600",
+                name: "V1 PUNK #4876",
+                userAddress: "0x9140cF63aa3e840065e68C9e381A57f927273aE9",
               },
             },
       })
