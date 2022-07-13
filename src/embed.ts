@@ -152,6 +152,7 @@ class Torus {
     this.torusJs = new TorusJs({
       metadataHost: "https://metadata.tor.us",
       allowHost: "https://signer.tor.us/api/allow",
+      network: "mainnet",
     });
     this.apiKey = apiKey;
     TorusJs.setAPIKey(apiKey);
