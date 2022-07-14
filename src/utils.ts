@@ -4,7 +4,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
 
 import config from "./config";
-import { IntegrityParams, PaymentParams } from "./interfaces";
+import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams } from "./interfaces";
 import log from "./loglevel";
 
 const { paymentProviders } = config;
@@ -29,7 +29,7 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
     return { errors, isValid: Object.keys(errors).length === 0 };
   }
 
-  const selectedProvider = paymentProviders[provider];
+  const selectedProvider = paymentProviders[provider as PAYMENT_PROVIDER_TYPE];
   const selectedParams = params || {};
 
   // set default values
@@ -47,8 +47,16 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
   if (selectedParams.selectedCurrency && !selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) {
     errors.selectedCurrency = "Unsupported currency";
   }
-  if (selectedParams.selectedCryptoCurrency && !selectedProvider.validCryptoCurrencies.includes(selectedParams.selectedCryptoCurrency)) {
-    errors.selectedCryptoCurrency = "Unsupported cryptoCurrency";
+  if (selectedParams.selectedCryptoCurrency) {
+    const validCryptoCurrenciesByChain = Object.values(selectedProvider.validCryptoCurrenciesByChain)
+      .flat()
+      .map((currency) => currency.value);
+
+    const finalCryptoCurrency =
+      provider === PAYMENT_PROVIDER.MOONPAY ? selectedParams.selectedCryptoCurrency.toLowerCase() : selectedParams.selectedCryptoCurrency;
+
+    if (validCryptoCurrenciesByChain && !validCryptoCurrenciesByChain.includes(finalCryptoCurrency))
+      errors.selectedCryptoCurrency = "Unsupported cryptoCurrency";
   }
   return { errors, isValid: Object.keys(errors).length === 0 };
 };
