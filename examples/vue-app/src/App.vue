@@ -1,12 +1,41 @@
 <template>
   <div id="app">
-    <h3>Login With Torus</h3>
-    <section>
+    <div class="grid text-center justify-center pt-20" v-if="publicAddress === ''">
+      <h6 class="font-bold text-3xl">Login With Torus</h6>
+      <h6 class="font-semibold text-[#595857]">Build Environment : {{ buildEnv }}</h6>
+      <div class="pb-2">
+        <h3 class="font-semibold text-[#595857]">Select build environment</h3>
+        <select name="buildEnv" v-model="buildEnv" class="select-menu bg-dropdown">
+          <option value="production">Production</option>
+          <option value="binance">Binance</option>
+          <option selected value="testing">Testing</option>
+          <option value="development">Development</option>
+          <option value="lrc">LRC</option>
+          <option value="beta">Beta</option>
+        </select>
+      </div>
+      <div>
+        <!-- <button @click="login" class="btn-login">Login</button> -->
+        <button @click="login(true)" class="btn-login m-2">Login</button>
+        <button @click="login(false)" class="btn-login">Login without whitelabel</button>
+      </div>
+      <h6 class="py-4 text-[#595857]">or</h6>
+      <div class="pb-2">
+        <h3 class="font-semibold text-[#595857]">Private Key</h3>
+        <!-- <input :style="{ marginLeft: '20px' }" v-model="privateKey" :placeholder="`Enter private key to login`" /> -->
+        <input placeholder="Enter private key to login" v-model="privateKey" class="btn-login px-4 py-2" />
+      </div>
+      <div>
+        <!-- <button @click="loginWithPrivateKey">Login With Private Key</button> -->
+        <button @click="loginWithPrivateKey" class="btn-login">Login with Private Key</button>
+      </div>
+    </div>
+    <!-- <h3>Login With Torus</h3>
       <p>
         Build Environment :
         <i>{{ buildEnv }}</i>
-      </p>
-      <div v-if="publicAddress === ''">
+      </p> -->
+      <!-- <div v-if="publicAddress === ''">
         <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
           <div>
             <select name="buildEnv" v-model="buildEnv">
@@ -27,76 +56,128 @@
           </div>
         </div>
       </div>
-      <button v-else @click="logout">Logout</button>
-    </section>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-      v-if="publicAddress !== ''"
-    >
-      <section>
-        <div>
-          Public Address:
-          <i>{{ publicAddress }}</i>
+      <button v-else @click="logout">Logout</button> -->
+    <!-- </section> -->
+    <div v-else>
+      <div class="flex box md:rows-span-2 m-6 items-center py-4">
+        <div class="ml-6">
+          <h6 class="text-2xl font-semibold text-left">demo-eth.tor.us</h6>
+          <h6 class="text-left">Build environment : {{ buildEnv }}</h6>
         </div>
-        <div>
-          Network:
-          <i>{{ chainIdNetworkMap[chainId] }}</i>
+        <div class="ml-auto">
+          <button
+            type="button"
+            class="copy-btn"
+            @click="
+              () => {
+                copyToClip(publicAddress);
+              }
+            "
+          >
+            <img class="pr-1" src="./assets/copy.svg" />
+            <span>{{ copied ? "Copied!" : getAddress(publicAddress) }}</span>
+          </button>
+          <button type="button" class="wifi-btn">
+            <img src="./assets/wifi.svg" />
+            <div class="font-semibold pl-1">{{ getNetworkType(chainIdNetworkMap[chainId]) }}</div>
+          </button>
+          <button type="button" @click="logout" class="btn-logout">
+            <img src="./assets/logout.svg" class="pr-3 pl-0" />
+            Logout
+          </button>
         </div>
-      </section>
-      <section :style="{ marginTop: '20px' }">
-        <h4>Torus Specific Info</h4>
-        <button @click="showWalletConnect">Show Wallet Connect</button>
-        <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
-        <button @click="getUserInfo">Get User Info</button>
-        <button @click="createPaymentTx">Create Payment Tx</button>
-        <button @click="changeProvider">Change Provider</button>
-        <div :style="{ marginTop: '20px' }">
-          <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
-            <option selected value="google">Google</option>
-            <option value="reddit">Reddit</option>
-            <option value="discord">Discord</option>
-             <option value="torus-auth0-email-passwordless">Email Passwordless</option>
-          </select>
-          <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
-        </div>
-        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
-      </section>
-      <section :style="{ marginTop: '20px' }">
-        <h4>Blockchain Apis</h4>
-        <section>
-          <h5>Signing</h5>
-          <button @click="signMessageWithoutPopup">sign_eth_no_popup</button>
-          <button @click="signPersonalMsg">personal_sign</button>
-          <button @click="signMessage">sign_eth</button>
-          <button @click="signTypedData_v1">sign typed data v1</button>
-          <button @click="signTypedData_v3">sign typed data v3</button>
-          <button @click="signTypedData_v4">sign typed data v4</button>
-        </section>
-        <section>
-          <h5>Transactions</h5>
-          <button @click="sendEth">Send Eth</button>
-          <button @click="sendDai">Send DAI</button>
-          <button @click="approveKnc">Approve Knc</button>
-        </section>
-        <section>
-          <h5>Encrypt / Decrypt</h5>
-          <button @click="getEncryptionKey">Get Encryption Key</button>
-          <div>
-            <input :style="{ marginReft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
-            <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
+      </div>
+      <div class="grid grid-cols-5 gap-7 m-6 height-fit">
+        <div class="grid grid-cols-2 col-span-5 md:col-span-2 text-left gap-2 p-4 box md:pb-74">
+          <div class="col-span-2">
+            <h6 class="text-xl font-semibold">Torus Specific Info</h6>
+            <div>
+              <label for="default-toggle" class="inline-flex relative items-center cursor-pointer">
+                <input type="checkbox" id="default-toggle" class="sr-only peer" @click="toggleTorusWidget" checked/>
+                <div
+                  class="w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                ></div>
+                <span class="ml-3 text-sm font-medium">Show Torus Button</span>
+              </label>
+            </div>
           </div>
-          <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
-        </section>
-        <section>
-          <h5>Add Asset</h5>
-          <button @click="addErc20Token">Add Erc20 Token</button>
-          <button @click="addCollectible">Add NFT</button>
-        </section>
-      </section>
-      
-    </section>
+          <div class="col-span-1">
+            <div class="font-semibold">Wallet connect</div>
+            <div><button class="btn" @click="showWalletConnect">Show wallet connect</button></div>
+          </div>
+          <div class="col-span-1">
+            <div class="font-semibold">Payment Transaction</div>
+            <div><button class="btn" @click="createPaymentTx">Create</button></div>
+          </div>
+          <div class="col-span-1">
+            <div class="font-semibold">User Info</div>
+            <div><button class="btn" @click="getUserInfo">Get User Info</button></div>
+          </div>
+          <div class="col-span-1">
+            <div class="font-semibold">Provider</div>
+            <div><button class="btn" @click="changeProvider">Change Provider</button></div>
+          </div>
+          <div class="col-span-1">
+            <div class="font-semibold">Public address</div>
+            <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged" class="select-menu-public bg-dropdown">
+              <option selected value="google">Google</option>
+              <option value="reddit">Reddit</option>
+              <option value="discord">Discord</option>
+              <option value="torus-auth0-email-passwordless">Email Passwordless</option>
+            </select>
+          </div>
+          <div class="col-span-1"></div>
+          <div class="col-span-1">
+            <input v-model="verifierId" :placeholder="placeholder" class="btn p-1"/>
+          </div>
+          <div class="col-span-1">
+            <button :disabled="!verifierId" class="btn" @click="getPublicAddress">Get Public Address</button>
+          </div>
+          <div class="col-span-2">
+            <h6 class="text-xl font-semibold">Blockchain APIs</h6>
+          </div>
+          <div class="col-span-2 text-left">
+            <div class="font-semibold">Signing</div>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="btn" @click="signMessageWithoutPopup">ETH without popup</button>
+              <button class="btn" @click="signPersonalMsg">Personal Sign</button>
+              <button class="btn" @click="signMessage">ETH Sign</button>
+              <button class="btn" @click="signTypedData_v1">Typed data v1</button>
+              <button class="btn" @click="signTypedData_v3">Typed data v2</button>
+              <button class="btn" @click="signTypedData_v4">Typed data v3</button>
+          </div>
+          </div>
+          <div class="col-span-2 text-left">
+            <div class="font-semibold">Transactions</div>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="btn" @click="sendEth">Send ETH</button>
+              <button class="btn" @click="sendDai">Send DAI</button>
+              <button class="btn" @click="approveKnc">approve Knc</button>
+            </div>
+          </div>
+          <div class="col-span-2 text-left">
+            <div class="font-semibold">
+              Encrypt / Decrypt
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button class="btn" @click="getEncryptionKey">Get Encryption Key</button>
+            </div>
+          </div>
+          <div class="col-span-1 text-left">
+            <input v-model="messageToEncrypt" placeholder="Message to encrypt" class="btn p-1"/>
+          </div>
+          <div class="col-span-2 text-left">
+            <div class="grid grid-cols-2 gap-2">
+              <button class="btn" :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
+              <button class="btn" :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button></div>
+          </div>
+        </div>
+        <div class="box-grey" id="console">
+          <p ref="consoleDiv" style="white-space: pre-line"></p>
+          <div><button class="clear-button" @click="clearUiconsole">Clear console</button></div>
+        </div>
+      </div>
+    </div>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
     </div>
@@ -112,7 +193,7 @@ import { ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
 import web3Obj from "./helpers";
 import tokenAbi from "human-standard-token-abi";
-
+import copyToClipboard from "copy-to-clipboard";
 export default Vue.extend({
   name: "app",
   data() {
@@ -136,6 +217,8 @@ export default Vue.extend({
       encryptionKey: "",
       messageEncrypted: "",
       buildEnv: "development" as TORUS_BUILD_ENV_TYPE,
+      copied: false as boolean,
+      modelValue: true as boolean,
     };
   },
   mounted() {
@@ -635,6 +718,27 @@ export default Vue.extend({
     stringifiableToHex(value: any): string {
       return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)));
     },
+    copyToClip(account: string) {
+      this.copied = true;
+      copyToClipboard(account);
+      setTimeout(() => {
+        this.copied = false;
+      }, 500);
+    },
+    getNetworkType(network: string) {
+      if (network === "devnet") return "Solana Mainnet";
+      return network;
+    },
+    getAddress(address: string) {
+      if (address.length < 11) {
+        return address;
+      }
+      if (typeof address !== "string") return "";
+      return `${address.slice(0, 5)}...${address.slice(-5)}`;
+    },
+    clearUiconsole(){
+      this.$refs['consoleDiv'].innerHTML = "";
+    },
   },
 });
 </script>
@@ -642,29 +746,84 @@ export default Vue.extend({
 <style>
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; */
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin-top: 60px; */
 }
 #console {
-  border: 0px solid black;
-  height: 40px;
   padding: 2px;
   text-align: left;
-  width: calc(100% - 20px);
-  border-radius: 5px;
-  margin-top: 20px;
-  margin-bottom: 80px;
 }
 #console > p {
   margin: 0.5em;
 }
-button {
+/* button {
   height: 25px;
   margin: 5px;
   background: none;
   border-radius: 5px;
+} */
+.select-menu {
+  @apply h-12 w-80 rounded-3xl text-center bg-white bg-no-repeat p-1;
+  border: solid 1px;
+  /* -webkit-appearance: none;
+  -moz-appearance: none; */
+  background-position: right 16px top 50%;
+}
+.select-menu-public {
+  @apply rounded-3xl text-center bg-white bg-no-repeat p-1;
+  border: solid 1px;
+  /* -webkit-appearance: none;
+  -moz-appearance: none; */
+  background-position: right 16px top 50%;
+}
+.btn-login {
+  @apply h-12 w-80 bg-white rounded-3xl;
+  border: 1px solid #6f717a;
+}
+.box {
+  @apply bg-white max-h-screen overflow-auto;
+  border: 1px solid #f3f3f4;
+  border-radius: 20px;
+  box-shadow: 4px 4px 20px rgba(46, 91, 255, 0.1);
+}
+.copy-btn {
+  @apply h-6 px-2 m-2 text-sm inline-flex items-center overflow-hidden rounded-3xl leading-4 font-bold;
+  background-color: #e9e9ea;
+  color: #7F8FA4;
+}
+
+.wifi-btn {
+  @apply h-6 text-sm inline-flex items-center text-center p-2 rounded-3xl ;
+  background-color: #cde0ff;
+}
+.btn-login {
+  @apply h-12 w-80 bg-white rounded-3xl;
+  border: 1px solid #6f717a;
+}
+.btn-logout {
+  @apply h-12 w-32 bg-white rounded-3xl pl-6 m-2 text-sm inline-flex items-center;
+  border: 1px solid #f3f3f4;
+}
+.box-grey {
+  @apply col-span-5 md:col-span-3 overflow-hidden rounded-3xl relative;
+  border: 1px solid #f3f3f4;
+  box-shadow: 4px 4px 20px rgba(46, 91, 255, 0.1);
+  min-height: 400px;
+  background-color: #f3f3f4;
+}
+.btn {
+  @apply w-full m-0 bg-white rounded-3xl text-sm lg:text-base font-medium;
+  border: 1px solid #6f717a;
+  min-height: 44px;
+}
+.clear-button {
+  @apply absolute md:fixed right-8 bottom-2 md:right-8 md:bottom-12 w-28 h-7 rounded-md bg-[#f3f3f4];
+  border: 1px solid #0f1222;
+}
+.btn:disabled {
+  @apply bg-gray-100 opacity-30;
 }
 </style>
