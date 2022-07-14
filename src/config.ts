@@ -2,47 +2,6 @@ import { EMBED_TRANSLATION_ITEM, IPaymentProvider, LocaleLinks, PAYMENT_PROVIDER
 import { supportedFiatCurrencies } from "./supportedCurrencies";
 
 const paymentProviders = {
-  [PAYMENT_PROVIDER.SIMPLEX]: {
-    line1: "Credit/ Debit Card",
-    line2: "5% or 10 USD",
-    line3: "$20,000/day, $50,000/mo",
-    supportPage: "https://www.simplex.com/support/",
-    minOrderValue: 50,
-    maxOrderValue: 20_000,
-    validCurrencies: supportedFiatCurrencies(PAYMENT_PROVIDER.SIMPLEX),
-    // Disable simplex until API is fixed
-    validCryptoCurrenciesByChain: {
-      // TODO constantize cryptos e.g. {[ETH]: sdfsaf, [USDC]: {}}
-      [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
-        { value: "AAVE", display: "AAVE" },
-        { value: "BAT", display: "BAT" },
-        { value: "BUSD", display: "BUSD" },
-        { value: "DAI", display: "DAI" },
-        { value: "ETH", display: "ETH" },
-        { value: "MKR", display: "MKR" },
-        { value: "MATIC-ERC20", display: "MATIC" },
-        { value: "USDT", display: "USDT" },
-        { value: "USDC", display: "USDC" },
-      ],
-      // BUSD? BUSD-BSC? BUSD-SC?
-      // USDC-SC or USDC?
-      [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [
-        { value: "BNB", display: "BNB" },
-        { value: "BUSD-SC", display: "BUSD" },
-        { value: "CAKE", display: "CAKE" },
-        { value: "USDC-SC", display: "USDC" },
-      ],
-      [SUPPORTED_PAYMENT_NETWORK.MATIC]: [
-        { value: "MATIC", display: "MATIC" },
-        { value: "USDC-MATIC", display: "USDC" },
-      ],
-      // AVAXC or AVAX-C?
-      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "AVAX-C", display: "AVAX" }],
-    },
-    includeFees: true,
-    api: true,
-    enforceMax: true,
-  } as IPaymentProvider,
   [PAYMENT_PROVIDER.MOONPAY]: {
     line1: "Credit/ Debit Card/ Apple Pay",
     line2: "4.5% or 5 USD",
