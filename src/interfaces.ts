@@ -17,6 +17,7 @@ export const WALLET_OPENLOGIN_VERIFIER_MAP = {
   [LOGIN_PROVIDER.REDDIT]: "tkey-reddit",
   [LOGIN_PROVIDER.DISCORD]: "tkey-discord",
 } as const;
+
 export const PAYMENT_PROVIDER = {
   MOONPAY: "moonpay",
   WYRE: "wyre",
@@ -24,6 +25,15 @@ export const PAYMENT_PROVIDER = {
   XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
   TRANSAK: "transak",
+  SIMPLEX: "simplex",
+} as const;
+
+export const SUPPORTED_PAYMENT_NETWORK = {
+  MAINNET: "mainnet",
+  MATIC: "matic",
+  BSC_MAINNET: "bsc_mainnet",
+  AVALANCHE_MAINNET: "avalanche_mainnet",
+  XDAI: "xdai",
 } as const;
 
 export const TORUS_BUILD_ENV = {
@@ -37,6 +47,8 @@ export const TORUS_BUILD_ENV = {
 
 export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
 
+export type SUPPORTED_PAYMENT_NETWORK_TYPE = typeof SUPPORTED_PAYMENT_NETWORK[keyof typeof SUPPORTED_PAYMENT_NETWORK];
+
 export type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
 
 export interface IPaymentProvider {
@@ -47,7 +59,7 @@ export interface IPaymentProvider {
   minOrderValue: number;
   maxOrderValue: number;
   validCurrencies: string[];
-  validCryptoCurrencies: string[];
+  validCryptoCurrenciesByChain: Partial<Record<string, { value: string; display: string }[]>>;
   includeFees: boolean;
   enforceMax: boolean;
   sell?: boolean;
@@ -362,6 +374,10 @@ export interface PaymentParams {
    * Cryptocurrency to buy
    */
   selectedCryptoCurrency?: string;
+  /**
+   * Chain Network to use
+   */
+  chainNetwork?: SUPPORTED_PAYMENT_NETWORK_TYPE;
 }
 
 export interface VerifierArgs {
