@@ -10,12 +10,22 @@ export const LOGIN_PROVIDER = {
   DISCORD: "discord",
 } as const;
 
+export const WALLET_VERIFIERS = {
+  GOOGLE: "google",
+  FACEBOOK: "facebook",
+  TWITCH: "twitch",
+  REDDIT: "reddit",
+  DISCORD: "discord",
+  EMAIL_PASSWORDLESS: "torus-auth0-email-passwordless",
+} as const;
+
 export const WALLET_OPENLOGIN_VERIFIER_MAP = {
-  [LOGIN_PROVIDER.GOOGLE]: "tkey-google",
-  [LOGIN_PROVIDER.FACEBOOK]: "tkey-facebook",
-  [LOGIN_PROVIDER.TWITCH]: "tkey-twitch",
-  [LOGIN_PROVIDER.REDDIT]: "tkey-reddit",
-  [LOGIN_PROVIDER.DISCORD]: "tkey-discord",
+  [WALLET_VERIFIERS.GOOGLE]: "tkey-google",
+  [WALLET_VERIFIERS.FACEBOOK]: "tkey-facebook",
+  [WALLET_VERIFIERS.TWITCH]: "tkey-twitch",
+  [WALLET_VERIFIERS.REDDIT]: "tkey-reddit",
+  [WALLET_VERIFIERS.DISCORD]: "tkey-discord",
+  [WALLET_VERIFIERS.EMAIL_PASSWORDLESS]: "tkey-auth0-email-passwordless",
 } as const;
 
 export const PAYMENT_PROVIDER = {
