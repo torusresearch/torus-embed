@@ -187,6 +187,7 @@ class Torus {
     skipTKey = false,
     useLocalStorage = false,
     useWalletConnect = false,
+    mfaLevel = "default",
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -272,6 +273,7 @@ class Torus {
               apiKey: this.apiKey,
               skipTKey,
               network,
+              mfaLevel,
             },
           });
         };

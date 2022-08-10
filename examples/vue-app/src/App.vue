@@ -241,6 +241,7 @@ export default Vue.extend({
           loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           skipTKey: true,
+          mfaLevel: "optional",
         });
         await torus?.login(); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);
