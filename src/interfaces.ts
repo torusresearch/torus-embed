@@ -669,6 +669,17 @@ export interface TorusParams {
    * @defaultValue false
    */
   useWalletConnect?: boolean;
+
+  /**
+   * Setting mfa level to `default` will present mfa screen to user on every third login
+   * Setting mfa level to `optional` will present mfa screen to user on every login but user can skip it
+   * Setting mfa level to `mandatory` will make it mandatory for user to setup mfa after login
+   * Setting mfa level to`none` will make the user skip the mfa setup screen
+   *
+   * Defaults to default
+   * @defaultValue default
+   */
+  mfaLevel?: "none" | "default" | "optional" | "mandatory";
 }
 
 export interface UnvalidatedJsonRpcRequest {
