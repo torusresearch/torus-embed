@@ -7,7 +7,7 @@ export default {
   plugins: [
     json(),
     replace({
-      "process.env.TORUS_EMBED_VERSION": `"${pkg.version}"`,
+      "process.env.TORUS_EMBED_VERSION": `"${pkg.originalVersion}"`,
       preventAssignment: true,
     }),
   ],
