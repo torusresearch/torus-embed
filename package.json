@@ -1,7 +1,7 @@
 {
-  "name": "@toruslabs/torus-embed",
-  "version": "1.27.3",
-  "description": "Embed script for Torus",
+  "name": "@cere/torus-embed",
+  "version": "0.0.1",
+  "description": "Embed script for Torus (Cere frok)",
   "main": "dist/torus.cjs.js",
   "module": "dist/torus.esm.js",
   "unpkg": "dist/torus.umd.min.js",
@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/torusresearch/torus-embed.git"
+    "url": "git+https://github.com/cere-io/torus-embed.git"
   },
   "scripts": {
     "start": "torus-scripts start --name=torus",
