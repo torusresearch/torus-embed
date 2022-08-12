@@ -146,6 +146,19 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
   }
   log.info("version used: ", versionUsed);
   switch (buildEnv) {
+    case "cere-prod":
+      torusUrl = "https://wallet.cere.io";
+      logLevel = "error";
+      break;
+    case "cere-dev":
+      torusUrl = "https://wallet.dev.cere.io";
+      logLevel = "debug";
+      break;
+    case "cere-stage":
+      torusUrl = "https://wallet.stage.cere.io";
+      logLevel = "debug";
+      break;
+
     case "binance":
       torusUrl = `https://binance.tor.us/v${versionUsed}`;
       logLevel = "info";
