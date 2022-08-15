@@ -654,13 +654,6 @@ export interface TorusParams {
    * @defaultValue false
    */
   skipTKey?: boolean;
-  /**
-   * Prefers to use localStorage instead of sessionStorage for torus iframe. Allows longer lived sessions
-   *
-   * Defaults to false
-   * @defaultValue false
-   */
-  useLocalStorage?: boolean;
 
   /**
    * Setting `useWalletConnect` to true allows to display wallet connect qr scanner from torus-embed.
