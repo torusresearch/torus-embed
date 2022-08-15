@@ -48,7 +48,7 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-YPbTfkfMg/Jz4VU2fKg8b94HUnYfi0QmMZEkWFQn+S4kOEyzAusNZ4mrlDrvHExO";
+const iframeIntegrity = "sha384-5tscg7if92/jZDzF+UBm0jz1AC+vm6BMvZtwlYSHJxL0a6bq93tVmDDtA17mtYBl";
 
 const expectedCacheControlHeader = "max-age=3600";
 
@@ -147,6 +147,7 @@ class Torus {
     this.torusJs = new TorusJs({
       metadataHost: "https://metadata.tor.us",
       allowHost: "https://signer.tor.us/api/allow",
+      network: "mainnet",
     });
     this.apiKey = apiKey;
     TorusJs.setAPIKey(apiKey);
@@ -179,6 +180,7 @@ class Torus {
     whiteLabel,
     skipTKey = false,
     useWalletConnect = false,
+    mfaLevel = "default",
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -249,6 +251,7 @@ class Torus {
               apiKey: this.apiKey,
               skipTKey,
               network,
+              mfaLevel,
             },
           });
         };
