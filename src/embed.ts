@@ -140,7 +140,7 @@ class Torus {
 
   private isCustomLogin = false;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, buttonSize = 56, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
     this.buttonSize = buttonSize;
     this.torusUrl = "";
