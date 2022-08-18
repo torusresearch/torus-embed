@@ -46,6 +46,9 @@ export const SUPPORTED_PAYMENT_NETWORK = {
 } as const;
 
 export const TORUS_BUILD_ENV = {
+  CERE: "cere",
+  CERE_DEV: "cere-dev",
+  CERE_STAGE: "cere-stage",
   PRODUCTION: "production",
   DEVELOPMENT: "development",
   BINANCE: "binance",
