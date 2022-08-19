@@ -86,6 +86,8 @@ const isLocalStorageAvailable = storageAvailable("localStorage");
 })();
 
 class Torus {
+  isCereWallet = false;
+
   buttonPosition: BUTTON_POSITION_TYPE = BUTTON_POSITION.BOTTOM_LEFT;
 
   torusUrl: string;
@@ -189,6 +191,11 @@ class Torus {
     useWalletConnect = false,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.isCereWallet = [TORUS_BUILD_ENV.CERE, TORUS_BUILD_ENV.CERE_DEV, TORUS_BUILD_ENV.CERE_STAGE].includes(buildEnv as any);
+    this.torusWidgetVisibility = this.isCereWallet ? false : showTorusButton;
+
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
     log.info(torusUrl, "url loaded");
     this.torusUrl = torusUrl;
@@ -197,7 +204,7 @@ class Torus {
     log.setDefaultLevel(logLevel);
     if (enableLogging) log.enableAll();
     else log.disableAll();
-    this.torusWidgetVisibility = showTorusButton;
+
     let dappStorageKey = "";
     if (isLocalStorageAvailable && useLocalStorage) {
       const localStorageKey = `${configuration.localStorageKeyPrefix}${window.location.hostname}`;
@@ -371,6 +378,10 @@ class Torus {
   }
 
   showTorusButton(): void {
+    if (this.isCereWallet) {
+      return; // Wallet widget is yet implemented in Cere wallet
+    }
+
     this.torusWidgetVisibility = true;
     this._sendWidgetVisibilityStatus(true);
     this._displayIframe();
