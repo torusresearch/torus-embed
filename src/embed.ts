@@ -85,6 +85,8 @@ const UNSAFE_METHODS = [
 class Torus {
   buttonPosition: BUTTON_POSITION_TYPE = BUTTON_POSITION.BOTTOM_LEFT;
 
+  buttonSize: number;
+
   torusUrl: string;
 
   torusIframe: HTMLIFrameElement;
@@ -135,8 +137,9 @@ class Torus {
 
   private useWalletConnect: boolean;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, buttonSize = 56, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
+    this.buttonSize = buttonSize;
     this.torusUrl = "";
     this.isLoggedIn = false; // ethereum.enable working
     this.isInitialized = false; // init done
@@ -247,6 +250,7 @@ class Torus {
               loginConfig,
               whiteLabel: this.whiteLabel,
               buttonPosition: this.buttonPosition,
+              buttonSize: this.buttonSize,
               torusWidgetVisibility: this.torusWidgetVisibility,
               apiKey: this.apiKey,
               skipTKey,
@@ -622,11 +626,12 @@ class Torus {
 
   protected _displayIframe(isFull = false): void {
     const style: Partial<CSSStyleDeclaration> = {};
+    const size = this.buttonSize + 14; // 15px padding
     // set phase
     if (!isFull) {
       style.display = this.torusWidgetVisibility ? "block" : "none";
-      style.height = "70px";
-      style.width = "70px";
+      style.height = `${size}px`;
+      style.width = `${size}px`;
       switch (this.buttonPosition) {
         case BUTTON_POSITION.TOP_LEFT:
           style.top = "0px";

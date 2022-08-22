@@ -141,6 +141,12 @@ export interface TorusCtorArgs {
   buttonPosition?: BUTTON_POSITION_TYPE;
 
   /**
+   * Size of the widget button
+   * @defaultValue 56
+   */
+  buttonSize?: number;
+
+  /**
    * Z-index of the modal and iframe
    * @defaultValue 99999
    */
