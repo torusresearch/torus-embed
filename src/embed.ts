@@ -190,7 +190,8 @@ class Torus {
     this.torusUrl = torusUrl;
     this.whiteLabel = whiteLabel;
     this.useWalletConnect = useWalletConnect;
-    this.isCustomLogin = (loginConfig && Object.keys(loginConfig).length > 0) || (whiteLabel && Object.keys(whiteLabel).length > 0);
+    this.isCustomLogin = !!(loginConfig && Object.keys(loginConfig).length > 0) || !!(whiteLabel && Object.keys(whiteLabel).length > 0);
+
     log.setDefaultLevel(logLevel);
     if (enableLogging) log.enableAll();
     else log.disableAll();
@@ -199,9 +200,8 @@ class Torus {
     if (torusIframeUrl.pathname.endsWith("/")) torusIframeUrl.pathname += "popup";
     else torusIframeUrl.pathname += "/popup";
 
-    if (this.isCustomLogin) {
-      torusIframeUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
-    }
+    torusIframeUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
     // Iframe code
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
       `<iframe
@@ -413,9 +413,8 @@ class Torus {
         Object.keys(params).forEach((x) => {
           finalUrl.searchParams.append(x, params[x]);
         });
-        if (this.isCustomLogin) {
-          finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
-        }
+        finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
         const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW });
         walletWindow.open();
       }
@@ -569,10 +568,9 @@ class Torus {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window") as Substream;
       const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
-      if (this.isCustomLogin) {
-        if (finalUrl.hash) finalUrl.hash += `&isCustomLogin=${this.isCustomLogin}`;
-        else finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
-      }
+      if (finalUrl.hash) finalUrl.hash += `&isCustomLogin=${this.isCustomLogin}`;
+      else finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
       const handledWindow = new PopupHandler({ url: finalUrl, target, features });
       handledWindow.open();
       if (!handledWindow.window) {
