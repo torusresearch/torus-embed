@@ -13,6 +13,7 @@ import {
   BUTTON_POSITION_TYPE,
   EMBED_TRANSLATION_ITEM,
   LOGIN_PROVIDER,
+  NetworkInterface,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
   TORUS_BUILD_ENV,
@@ -363,7 +364,7 @@ class Torus {
     this._displayIframe();
   }
 
-  setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest } = {}): Promise<void> {
+  setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest }: NetworkInterface): Promise<void> {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
       const handler = (chunk) => {
