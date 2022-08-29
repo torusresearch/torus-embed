@@ -57,7 +57,7 @@
             <option selected value="google">Google</option>
             <option value="reddit">Reddit</option>
             <option value="discord">Discord</option>
-             <option value="torus-auth0-email-passwordless">Email Passwordless</option>
+            <option value="torus-auth0-email-passwordless">Email Passwordless</option>
           </select>
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
@@ -84,7 +84,7 @@
           <h5>Encrypt / Decrypt</h5>
           <button @click="getEncryptionKey">Get Encryption Key</button>
           <div>
-            <input :style="{ marginReft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
+            <input :style="{ marginLeft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
             <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
           </div>
           <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
@@ -95,7 +95,6 @@
           <button @click="addCollectible">Add NFT</button>
         </section>
       </section>
-      
     </section>
     <div id="console" style="white-space: pre-line">
       <p style="white-space: pre-line"></p>
@@ -147,7 +146,7 @@ export default Vue.extend({
   },
   methods: {
     onSelectedVerifierChanged(e: Event) {
-      this.selectedVerifier = (<HTMLSelectElement>e.target).value;
+      this.selectedVerifier = (e.target as HTMLSelectElement).value;
       switch (this.selectedVerifier) {
         case "google":
           this.placeholder = "Enter google email";
@@ -472,45 +471,43 @@ export default Vue.extend({
       const { web3 } = web3Obj;
       try {
         const res = await (web3.currentProvider as any)?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-                symbol: 'USDT',
-                decimals: 18,
-                image: 'https://foo.io/token-image.svg',
-              },
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              symbol: "USDT",
+              decimals: 18,
+              image: "https://foo.io/token-image.svg",
             },
-      })
-       this.console("success", res);
+          },
+        });
+        this.console("success", res);
       } catch (error) {
         console.error(error);
         this.console("failed");
       }
-     
     },
     async addCollectible() {
       const { web3 } = web3Obj;
       try {
         const res = await (web3.currentProvider as any)?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC721',
-              options: {
-                address: "0x282BDD42f4eb70e7A9D9F40c8fEA0825B7f68C5D",
-                id: "4876",
-                image: "https://img.seadn.io/files/6a942ce9e60b9b456167138fd24885f2.png?fit=max&w=600",
-                name: "V1 PUNK #4876",
-              },
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC721",
+            options: {
+              address: "0x282BDD42f4eb70e7A9D9F40c8fEA0825B7f68C5D",
+              id: "4876",
+              image: "https://img.seadn.io/files/6a942ce9e60b9b456167138fd24885f2.png?fit=max&w=600",
+              name: "V1 PUNK #4876",
             },
-      })
-       this.console("success", res);
+          },
+        });
+        this.console("success", res);
       } catch (error) {
         console.error(error);
         this.console("failed");
       }
-     
     },
     logout() {
       const { torus } = web3Obj;
