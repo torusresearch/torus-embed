@@ -2,6 +2,53 @@
 
 [![npm version](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed.svg)](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed)
 ![npm](https://img.shields.io/npm/dw/@toruslabs/torus-embed)
+[![minzip](https://img.shields.io/bundlephobia/minzip/@toruslabs/torus-embed?label=%22%22)](https://bundlephobia.com/result?p=@toruslabs/torus-embed)
+
+> [Web3Auth](https://web3auth.io) is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
+
+## 📖 Documentation
+
+Checkout the official [Torus Documentation for Torus Embed](https://docs.tor.us/wallet/api-reference/installation) to get started.
+
+## 🔗 Installation
+
+```shell
+npm install --save @toruslabs/torus-embed
+```
+
+## ⚡ Quick Start
+
+### Get your Client ID from Web3Auth Dashboard
+
+Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a new Torus Wallet project. Use the Client ID of the project to start your integration.
+
+![Web3Auth Dashboard - Torus Wallets](https://user-images.githubusercontent.com/6962565/187207423-d7b8f085-3388-477c-b945-c7db1b991839.png)
+
+## Initialize & Login
+
+```ts
+import Torus from "@toruslabs/torus-embed";
+import Web3 from "web3";
+
+const torus = new Torus();
+await torus.init();
+await torus.login(); // await torus.ethereum.enable()
+const web3 = new Web3(torus.provider); 
+```
+
+## 🩹 Examples
+
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/tree/main/web-core-sdk)
+
+## 🌐 Demo
+
+Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+
+## 💬 Troubleshooting and Discussions
+
+- Have a look at our [GitHub Discussions](https://github.com/Web3Auth/Web3Auth/discussions?discussions_q=sort%3Atop) to see if anyone has any questions or issues you might be having.
+- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions
+- Join our [Discord](https://discord.gg/web3auth) to join our community and get private integration support or help with your integration.
 
 ## Introduction
 
