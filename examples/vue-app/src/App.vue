@@ -134,7 +134,7 @@ export default Vue.extend({
       messageToEncrypt: "",
       encryptionKey: "",
       messageEncrypted: "",
-      buildEnv: "development" as TORUS_BUILD_ENV_TYPE,
+      buildEnv: "testing" as TORUS_BUILD_ENV_TYPE,
     };
   },
   mounted() {
