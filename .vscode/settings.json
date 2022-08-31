@@ -1,3 +1,9 @@
 {
-  "cSpell.words": ["latestversion", "topup", "toruslabs", "Whitelabel"]
+  "cSpell.words": ["latestversion", "topup", "toruslabs", "Whitelabel"],
+  "eslint.workingDirectories": [
+    {
+      "changeProcessCWD": true,
+      "directory": "./examples/vue-app/*"
+    }
+  ]
 }

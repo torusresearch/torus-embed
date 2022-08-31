@@ -141,6 +141,12 @@ export interface TorusCtorArgs {
   buttonPosition?: BUTTON_POSITION_TYPE;
 
   /**
+   * Size of the widget button
+   * @defaultValue 56
+   */
+  buttonSize?: number;
+
+  /**
    * Z-index of the modal and iframe
    * @defaultValue 99999
    */
@@ -654,13 +660,6 @@ export interface TorusParams {
    * @defaultValue false
    */
   skipTKey?: boolean;
-  /**
-   * Prefers to use localStorage instead of sessionStorage for torus iframe. Allows longer lived sessions
-   *
-   * Defaults to false
-   * @defaultValue false
-   */
-  useLocalStorage?: boolean;
 
   /**
    * Setting `useWalletConnect` to true allows to display wallet connect qr scanner from torus-embed.
@@ -669,6 +668,17 @@ export interface TorusParams {
    * @defaultValue false
    */
   useWalletConnect?: boolean;
+
+  /**
+   * Setting mfa level to `default` will present mfa screen to user on every third login
+   * Setting mfa level to `optional` will present mfa screen to user on every login but user can skip it
+   * Setting mfa level to `mandatory` will make it mandatory for user to setup mfa after login
+   * Setting mfa level to`none` will make the user skip the mfa setup screen
+   *
+   * Defaults to default
+   * @defaultValue default
+   */
+  mfaLevel?: "none" | "default" | "optional" | "mandatory";
 }
 
 export interface UnvalidatedJsonRpcRequest {
