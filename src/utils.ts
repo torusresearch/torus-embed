@@ -180,7 +180,11 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
       logLevel = "debug";
       break;
     default:
-      torusUrl = `https://app.tor.us/v${versionUsed}`;
+      /**
+       * [Hot fix] Donwgrade Tor.us wallet application
+       */
+      torusUrl = `https://app.tor.us/v1.27.3`;
+      // torusUrl = `https://app.tor.us/v${versionUsed}`;
       logLevel = "error";
       break;
   }
