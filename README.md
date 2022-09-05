@@ -1,4 +1,4 @@
-# Torus Embed — New Frictionless login for Dapps
+# Torus Embed — New Frictionless login for Dapps by [Web3Auth](https://web3auth.io/docs)
 
 [![npm version](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed.svg)](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed)
 ![npm](https://img.shields.io/npm/dw/@toruslabs/torus-embed)
