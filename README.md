@@ -1,4 +1,4 @@
-# Torus Embed — New Frictionless login for Dapps by [Web3Auth](https://web3auth.io/docs)
+# Torus Embed — New Frictionless login for Dapps by [Web3Auth](https://docs.tor.us)
 
 [![npm version](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed.svg)](https://badge.fury.io/js/%40toruslabs%2Ftorus-embed)
 ![npm](https://img.shields.io/npm/dw/@toruslabs/torus-embed)
@@ -38,11 +38,11 @@ const web3 = new Web3(torus.provider);
 
 ## 🩹 Examples
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/Web3Auth/examples/tree/main/web-core-sdk)
+Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/torusresearch/torus-embed/tree/develop/examples)
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo-app.web3auth.io/) to see how Web3Auth can be used in your application.
+Checkout the [Torus Embed Demo](https://demo-eth.tor.us) to see how `Torus Embed` can be used in your application.
 
 ## 💬 Troubleshooting and Discussions
 
