@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="grid text-center justify-center pt-20" v-if="publicAddress === ''">
+    <div class="grid text-center justify-center pt-20 flex justify-center items-center" v-if="publicAddress === ''">
       <h6 class="font-bold text-3xl">Login With Torus</h6>
       <h6 class="font-semibold text-[#595857]">Build Environment : {{ buildEnv }}</h6>
       <div class="pb-2">
@@ -35,7 +35,7 @@
         Build Environment :
         <i>{{ buildEnv }}</i>
       </p> -->
-      <!-- <div v-if="publicAddress === ''">
+    <!-- <div v-if="publicAddress === ''">
         <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
           <div>
             <select name="buildEnv" v-model="buildEnv">
@@ -87,37 +87,37 @@
           </button>
         </div>
       </div>
-      <div class="grid grid-cols-5 gap-7 m-6 height-fit">
+      <div class="grid grid-cols-5 gap-7 m-6 height-fit overflow-auto">
         <div class="grid grid-cols-2 col-span-5 md:col-span-2 text-left gap-2 p-4 box md:pb-74">
           <div class="col-span-2">
             <h6 class="text-xl font-semibold">Torus Specific Info</h6>
             <div>
               <label for="default-toggle" class="inline-flex relative items-center cursor-pointer">
-                <input type="checkbox" id="default-toggle" class="sr-only peer" @click="toggleTorusWidget" checked/>
+                <input type="checkbox" id="default-toggle" class="sr-only peer" @click="toggleTorusWidget" checked />
                 <div
-                  class="w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                  class="w-11 h-6 rounded-full peer bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
                 ></div>
                 <span class="ml-3 text-sm font-medium">Show Torus Button</span>
               </label>
             </div>
           </div>
-          <div class="col-span-1">
+          <div class="col-span-1 pt-2">
             <div class="font-semibold">Wallet connect</div>
             <div><button class="btn" @click="showWalletConnect">Show wallet connect</button></div>
           </div>
-          <div class="col-span-1">
+          <div class="col-span-1 pt-2">
             <div class="font-semibold">Payment Transaction</div>
             <div><button class="btn" @click="createPaymentTx">Create</button></div>
           </div>
-          <div class="col-span-1">
+          <div class="col-span-1 pt-2">
             <div class="font-semibold">User Info</div>
             <div><button class="btn" @click="getUserInfo">Get User Info</button></div>
           </div>
-          <div class="col-span-1">
+          <div class="col-span-1 pt-2">
             <div class="font-semibold">Provider</div>
             <div><button class="btn" @click="changeProvider">Change Provider</button></div>
           </div>
-          <div class="col-span-1">
+          <div class="col-span-1 pt-2">
             <div class="font-semibold">Public address</div>
             <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged" class="select-menu-public bg-dropdown">
               <option selected value="google">Google</option>
@@ -128,58 +128,54 @@
           </div>
           <div class="col-span-1"></div>
           <div class="col-span-1">
-            <input v-model="verifierId" :placeholder="placeholder" class="btn p-1"/>
+            <input v-model="verifierId" :placeholder="placeholder" class="btn p-2" />
           </div>
           <div class="col-span-1">
             <button :disabled="!verifierId" class="btn" @click="getPublicAddress">Get Public Address</button>
           </div>
-          <div class="col-span-2">
+          <div class="col-span-2 pt-2">
             <h6 class="text-xl font-semibold">Blockchain APIs</h6>
           </div>
-          <div class="col-span-2 text-left">
+          <div class="col-span-2 text-left pt-2">
             <div class="font-semibold">Signing</div>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-3 gap-4">
               <button class="btn" @click="signMessageWithoutPopup">ETH without popup</button>
               <button class="btn" @click="signPersonalMsg">Personal Sign</button>
               <button class="btn" @click="signMessage">ETH Sign</button>
               <button class="btn" @click="signTypedData_v1">Typed data v1</button>
               <button class="btn" @click="signTypedData_v3">Typed data v2</button>
               <button class="btn" @click="signTypedData_v4">Typed data v3</button>
+            </div>
           </div>
-          </div>
-          <div class="col-span-2 text-left">
+          <div class="col-span-2 text-left pt-2">
             <div class="font-semibold">Transactions</div>
-            <div class="grid grid-cols-3 gap-2">
+            <div class="grid grid-cols-3 gap-4">
               <button class="btn" @click="sendEth">Send ETH</button>
               <button class="btn" @click="sendDai">Send DAI</button>
               <button class="btn" @click="approveKnc">approve Knc</button>
             </div>
           </div>
           <div class="col-span-2 text-left">
-            <div class="font-semibold">
-              Encrypt / Decrypt
-            </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="font-semibold">Encrypt / Decrypt</div>
+            <div class="grid grid-cols-2 gap-4">
               <button class="btn" @click="getEncryptionKey">Get Encryption Key</button>
             </div>
           </div>
-          <div class="col-span-1 text-left">
-            <input v-model="messageToEncrypt" placeholder="Message to encrypt" class="btn p-1"/>
+          <div class="col-span-2 text-left">
+            <textarea v-model="messageToEncrypt" placeholder="Message to encrypt" class="rounded-lg w-full p-2 bg-gray-100 min-h-[60px]"></textarea>
           </div>
           <div class="col-span-2 text-left">
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-4">
               <button class="btn" :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
-              <button class="btn" :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button></div>
+              <button class="btn" :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
+            </div>
           </div>
         </div>
         <div class="box-grey" id="console">
           <p ref="consoleDiv" style="white-space: pre-line"></p>
-          <div><button class="clear-button" @click="clearUiconsole">Clear console</button></div>
+          <button class="clear-button" @click="clearUiconsole">Clear console</button>
         </div>
       </div>
-    </div>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
     </div>
   </div>
 </template>
@@ -554,45 +550,43 @@ export default Vue.extend({
       const { web3 } = web3Obj;
       try {
         const res = await (web3.currentProvider as any)?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-                symbol: 'USDT',
-                decimals: 18,
-                image: 'https://foo.io/token-image.svg',
-              },
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC20",
+            options: {
+              address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              symbol: "USDT",
+              decimals: 18,
+              image: "https://foo.io/token-image.svg",
             },
-      })
-       this.console("success", res);
+          },
+        });
+        this.console("success", res);
       } catch (error) {
         console.error(error);
         this.console("failed");
       }
-     
     },
     async addCollectible() {
       const { web3 } = web3Obj;
       try {
         const res = await (web3.currentProvider as any)?.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC721',
-              options: {
-                address: "0x282BDD42f4eb70e7A9D9F40c8fEA0825B7f68C5D",
-                id: "4876",
-                image: "https://img.seadn.io/files/6a942ce9e60b9b456167138fd24885f2.png?fit=max&w=600",
-                name: "V1 PUNK #4876",
-              },
+          method: "wallet_watchAsset",
+          params: {
+            type: "ERC721",
+            options: {
+              address: "0x282BDD42f4eb70e7A9D9F40c8fEA0825B7f68C5D",
+              id: "4876",
+              image: "https://img.seadn.io/files/6a942ce9e60b9b456167138fd24885f2.png?fit=max&w=600",
+              name: "V1 PUNK #4876",
             },
-      })
-       this.console("success", res);
+          },
+        });
+        this.console("success", res);
       } catch (error) {
         console.error(error);
         this.console("failed");
       }
-     
     },
     logout() {
       const { torus } = web3Obj;
@@ -736,8 +730,8 @@ export default Vue.extend({
       if (typeof address !== "string") return "";
       return `${address.slice(0, 5)}...${address.slice(-5)}`;
     },
-    clearUiconsole(){
-      this.$refs['consoleDiv'].innerHTML = "";
+    clearUiconsole() {
+      this.$refs["consoleDiv"].innerHTML = "";
     },
   },
 });
@@ -770,14 +764,14 @@ export default Vue.extend({
   border: solid 1px;
   /* -webkit-appearance: none;
   -moz-appearance: none; */
-  background-position: right 16px top 50%;
+  background-position: right;
 }
 .select-menu-public {
   @apply rounded-3xl text-center bg-white bg-no-repeat p-1;
   border: solid 1px;
   /* -webkit-appearance: none;
   -moz-appearance: none; */
-  background-position: right 16px top 50%;
+  background-position: right;
 }
 .btn-login {
   @apply h-12 w-80 bg-white rounded-3xl;
@@ -792,11 +786,11 @@ export default Vue.extend({
 .copy-btn {
   @apply h-6 px-2 m-2 text-sm inline-flex items-center overflow-hidden rounded-3xl leading-4 font-bold;
   background-color: #e9e9ea;
-  color: #7F8FA4;
+  color: #7f8fa4;
 }
 
 .wifi-btn {
-  @apply h-6 text-sm inline-flex items-center text-center p-2 rounded-3xl ;
+  @apply h-6 text-sm inline-flex items-center text-center p-2 rounded-3xl;
   background-color: #cde0ff;
 }
 .btn-login {
@@ -820,10 +814,14 @@ export default Vue.extend({
   min-height: 44px;
 }
 .clear-button {
-  @apply absolute md:fixed right-8 bottom-2 md:right-8 md:bottom-12 w-28 h-7 rounded-md bg-[#f3f3f4];
+  @apply fixed md:absolute right-2 bottom-2 w-28 h-7 rounded-md bg-[#f3f3f4];
   border: 1px solid #0f1222;
 }
 .btn:disabled {
   @apply bg-gray-100 opacity-30;
+}
+.height-fit {
+  @layer max-h-fit relative;
+  height: 80vh;
 }
 </style>
