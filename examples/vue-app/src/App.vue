@@ -170,6 +170,14 @@
               <button class="btn" :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
             </div>
           </div>
+          <div class="col-span-2 text-left pt-2">
+            <div class="font-semibold">Add Assets</div>
+            <div class="grid grid-cols-2 gap-4">
+              <button class="btn" @click="addErc20Token">Add ERC20 Token</button>
+              <button class="btn" @click="addCollectible">Add NFT</button>
+              <!-- <button class="btn" @click="approveKnc">approve Knc</button> -->
+            </div>
+          </div>
         </div>
         <div class="box-grey" id="console">
           <p ref="consoleDiv" style="white-space: pre-line"></p>
@@ -226,7 +234,7 @@ export default Vue.extend({
   },
   methods: {
     onSelectedVerifierChanged(e: Event) {
-      this.selectedVerifier = (<HTMLSelectElement>e.target).value;
+      this.selectedVerifier = (e.target as HTMLSelectElement).value;
       switch (this.selectedVerifier) {
         case "google":
           this.placeholder = "Enter google email";
@@ -320,6 +328,7 @@ export default Vue.extend({
           loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           skipTKey: true,
+          mfaLevel: "optional",
         });
         await torus?.login(); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);

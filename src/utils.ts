@@ -4,7 +4,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
 
 import config from "./config";
-import { IntegrityParams, PaymentParams } from "./interfaces";
+import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams } from "./interfaces";
 import log from "./loglevel";
 
 const { paymentProviders } = config;
@@ -29,7 +29,7 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
     return { errors, isValid: Object.keys(errors).length === 0 };
   }
 
-  const selectedProvider = paymentProviders[provider];
+  const selectedProvider = paymentProviders[provider as PAYMENT_PROVIDER_TYPE];
   const selectedParams = params || {};
 
   // set default values
@@ -47,8 +47,16 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
   if (selectedParams.selectedCurrency && !selectedProvider.validCurrencies.includes(selectedParams.selectedCurrency)) {
     errors.selectedCurrency = "Unsupported currency";
   }
-  if (selectedParams.selectedCryptoCurrency && !selectedProvider.validCryptoCurrencies.includes(selectedParams.selectedCryptoCurrency)) {
-    errors.selectedCryptoCurrency = "Unsupported cryptoCurrency";
+  if (selectedParams.selectedCryptoCurrency) {
+    const validCryptoCurrenciesByChain = Object.values(selectedProvider.validCryptoCurrenciesByChain)
+      .flat()
+      .map((currency) => currency.value);
+
+    const finalCryptoCurrency =
+      provider === PAYMENT_PROVIDER.MOONPAY ? selectedParams.selectedCryptoCurrency.toLowerCase() : selectedParams.selectedCryptoCurrency;
+
+    if (validCryptoCurrenciesByChain && !validCryptoCurrenciesByChain.includes(finalCryptoCurrency))
+      errors.selectedCryptoCurrency = "Unsupported cryptoCurrency";
   }
   return { errors, isValid: Object.keys(errors).length === 0 };
 };
@@ -185,33 +193,6 @@ export const FEATURES_PROVIDER_CHANGE_WINDOW = "directories=0,titlebar=0,toolbar
 export const FEATURES_DEFAULT_WALLET_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=740,width=1315";
 export const FEATURES_DEFAULT_POPUP_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=1200";
 export const FEATURES_CONFIRM_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=450";
-
-export function storageAvailable(type: "localStorage" | "sessionStorage"): boolean {
-  let storage: Storage;
-  try {
-    storage = window[type];
-    const x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return (
-      e &&
-      // everything except Firefox
-      (e.code === 22 ||
-        // Firefox
-        e.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        e.name === "QuotaExceededError" ||
-        // Firefox
-        e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      storage &&
-      storage.length !== 0
-    );
-  }
-}
 
 export function getPopupFeatures(): string {
   // Fixes dual-screen position                             Most browsers      Firefox

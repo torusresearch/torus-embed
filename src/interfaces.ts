@@ -27,6 +27,7 @@ export const WALLET_OPENLOGIN_VERIFIER_MAP = {
   [WALLET_VERIFIERS.DISCORD]: "tkey-discord",
   [WALLET_VERIFIERS.EMAIL_PASSWORDLESS]: "tkey-auth0-email-passwordless",
 } as const;
+
 export const PAYMENT_PROVIDER = {
   MOONPAY: "moonpay",
   WYRE: "wyre",
@@ -34,6 +35,14 @@ export const PAYMENT_PROVIDER = {
   XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
   TRANSAK: "transak",
+} as const;
+
+export const SUPPORTED_PAYMENT_NETWORK = {
+  MAINNET: "mainnet",
+  MATIC: "matic",
+  BSC_MAINNET: "bsc_mainnet",
+  AVALANCHE_MAINNET: "avalanche_mainnet",
+  XDAI: "xdai",
 } as const;
 
 export const TORUS_BUILD_ENV = {
@@ -47,6 +56,8 @@ export const TORUS_BUILD_ENV = {
 
 export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
 
+export type SUPPORTED_PAYMENT_NETWORK_TYPE = typeof SUPPORTED_PAYMENT_NETWORK[keyof typeof SUPPORTED_PAYMENT_NETWORK];
+
 export type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
 
 export interface IPaymentProvider {
@@ -57,7 +68,7 @@ export interface IPaymentProvider {
   minOrderValue: number;
   maxOrderValue: number;
   validCurrencies: string[];
-  validCryptoCurrencies: string[];
+  validCryptoCurrenciesByChain: Partial<Record<string, { value: string; display: string }[]>>;
   includeFees: boolean;
   enforceMax: boolean;
   sell?: boolean;
@@ -128,6 +139,12 @@ export interface TorusCtorArgs {
    * @defaultValue bottom-left
    */
   buttonPosition?: BUTTON_POSITION_TYPE;
+
+  /**
+   * Size of the widget button
+   * @defaultValue 56
+   */
+  buttonSize?: number;
 
   /**
    * Z-index of the modal and iframe
@@ -372,6 +389,10 @@ export interface PaymentParams {
    * Cryptocurrency to buy
    */
   selectedCryptoCurrency?: string;
+  /**
+   * Chain Network to use
+   */
+  chainNetwork?: SUPPORTED_PAYMENT_NETWORK_TYPE;
 }
 
 export interface VerifierArgs {
@@ -639,13 +660,6 @@ export interface TorusParams {
    * @defaultValue false
    */
   skipTKey?: boolean;
-  /**
-   * Prefers to use localStorage instead of sessionStorage for torus iframe. Allows longer lived sessions
-   *
-   * Defaults to false
-   * @defaultValue false
-   */
-  useLocalStorage?: boolean;
 
   /**
    * Setting `useWalletConnect` to true allows to display wallet connect qr scanner from torus-embed.
@@ -654,6 +668,17 @@ export interface TorusParams {
    * @defaultValue false
    */
   useWalletConnect?: boolean;
+
+  /**
+   * Setting mfa level to `default` will present mfa screen to user on every third login
+   * Setting mfa level to `optional` will present mfa screen to user on every login but user can skip it
+   * Setting mfa level to `mandatory` will make it mandatory for user to setup mfa after login
+   * Setting mfa level to`none` will make the user skip the mfa setup screen
+   *
+   * Defaults to default
+   * @defaultValue default
+   */
+  mfaLevel?: "none" | "default" | "optional" | "mandatory";
 }
 
 export interface UnvalidatedJsonRpcRequest {
