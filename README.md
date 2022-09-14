@@ -38,7 +38,7 @@ const web3 = new Web3(torus.provider);
 
 ## 🩹 Examples
 
-Checkout the examples for your preferred blockchain and platform in our [examples repository](https://github.com/torusresearch/torus-embed/tree/develop/examples)
+Checkout the example of `Torus Embed` in our [example directory.](https://github.com/torusresearch/torus-embed/tree/develop/examples)
 
 ## 🌐 Demo
 
