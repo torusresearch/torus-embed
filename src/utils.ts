@@ -1,4 +1,3 @@
-import { get } from "@toruslabs/http-helpers";
 import { JRPCMiddleware, PendingJRPCResponse, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
@@ -130,20 +129,8 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
   let logLevel: LogLevelDesc;
   // Do not change this line
   const version = process.env.TORUS_EMBED_VERSION;
-  let versionUsed = integrity.version || version;
-  try {
-    if ((buildEnv === "binance" || buildEnv === "production") && !integrity.version) {
-      let response: { data: string };
-      if (!config.prodTorusUrl)
-        response = await get(`${config.api}/latestversion?name=@toruslabs/torus-embed&version=${version}`, {}, { useAPIKey: true });
-      else response = { data: config.prodTorusUrl };
-      versionUsed = response.data;
-      // eslint-disable-next-line require-atomic-updates
-      config.prodTorusUrl = response.data;
-    }
-  } catch (error) {
-    log.error(error, "unable to fetch latest version");
-  }
+  const versionUsed = integrity.version || version;
+
   log.info("version used: ", versionUsed);
   switch (buildEnv) {
     case "cere":
@@ -180,11 +167,7 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
       logLevel = "debug";
       break;
     default:
-      /**
-       * [Hot fix] Donwgrade Tor.us wallet application
-       */
-      torusUrl = `https://app.tor.us/v1.27.3`;
-      // torusUrl = `https://app.tor.us/v${versionUsed}`;
+      torusUrl = `https://app.tor.us/v${versionUsed}`;
       logLevel = "error";
       break;
   }
