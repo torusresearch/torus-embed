@@ -4,7 +4,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
 
 import config from "./config";
-import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams } from "./interfaces";
+import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams, TORUS_BUILD_ENV_TYPE } from "./interfaces";
 import log from "./loglevel";
 
 const { paymentProviders } = config;
@@ -125,7 +125,10 @@ export function logStreamDisconnectWarning(remoteLabel: string, error: Error, em
 
 export const getPreopenInstanceId = () => Math.random().toString(36).slice(2);
 
-export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams): Promise<{ torusUrl: string; logLevel: LogLevelDesc }> => {
+export const getTorusUrl = async (
+  buildEnv: TORUS_BUILD_ENV_TYPE,
+  integrity: IntegrityParams
+): Promise<{ torusUrl: string; logLevel: LogLevelDesc }> => {
   let torusUrl: string;
   let logLevel: LogLevelDesc;
   // Do not change this line
@@ -153,6 +156,14 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
     case "testing":
       torusUrl = "https://testing.tor.us";
       logLevel = "debug";
+      break;
+    case "bnb":
+      torusUrl = "https://bnb.tor.us";
+      logLevel = "error";
+      break;
+    case "polygon":
+      torusUrl = "https://polygon.tor.us";
+      logLevel = "error";
       break;
     case "lrc":
       torusUrl = "https://lrc.tor.us";
