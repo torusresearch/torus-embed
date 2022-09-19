@@ -1,7 +1,5 @@
-import NodeDetailManager from "@toruslabs/fetch-node-details";
-import { setAPIKey } from "@toruslabs/http-helpers";
+import { get, setAPIKey } from "@toruslabs/http-helpers";
 import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
-import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "lodash.merge";
 
 import configuration from "./config";
@@ -102,10 +100,6 @@ class Torus {
 
   torusAlert: HTMLDivElement;
 
-  nodeDetailManager: NodeDetailManager;
-
-  torusJs: TorusJs;
-
   apiKey: string;
 
   modalZIndex: number;
@@ -149,14 +143,13 @@ class Torus {
     this.torusWidgetVisibility = true;
     this.requestedVerifier = "";
     this.currentVerifier = "";
-    this.nodeDetailManager = new NodeDetailManager();
-    this.torusJs = new TorusJs({
-      metadataHost: "https://metadata.tor.us",
-      allowHost: "https://signer.tor.us/api/allow",
-      network: "mainnet",
-    });
+    // this.nodeDetailManager = new NodeDetailManager();
+    // this.torusJs = new TorusJs({
+    //   metadataHost: "https://metadata.tor.us",
+    //   allowHost: "https://signer.tor.us/api/allow",
+    //   network: "mainnet",
+    // });
     this.apiKey = apiKey;
-    TorusJs.setAPIKey(apiKey);
     setAPIKey(apiKey);
     this.modalZIndex = modalZIndex;
     this.alertZIndex = modalZIndex + 1000;
@@ -430,30 +423,23 @@ class Torus {
 
   async getPublicAddress({ verifier, verifierId, isExtended = false }: VerifierArgs): Promise<string | TorusPublicKey> {
     if (!configuration.supportedVerifierList.includes(verifier) || !WALLET_OPENLOGIN_VERIFIER_MAP[verifier]) throw new Error("Unsupported verifier");
-    const nodeDetails = await this.nodeDetailManager.getNodeDetails({ verifier, verifierId });
-    const endpoints = nodeDetails.torusNodeEndpoints;
-    const torusNodePubs = nodeDetails.torusNodePub;
     const walletVerifier = verifier;
     const openloginVerifier = WALLET_OPENLOGIN_VERIFIER_MAP[verifier];
-    try {
-      const existingV1User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: walletVerifier, verifierId });
-      if (existingV1User.typeOfUser === "v1") {
-        if (!isExtended) return existingV1User.address;
-        return existingV1User;
-      }
-      // we don't support v2 users with v1 verifiers so get or assign the key for v2 user on v2 `verifier`
-      const v2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
-      if (!isExtended) return v2User.address;
-      return v2User;
-    } catch (error) {
-      if (error?.message.includes("Verifier + VerifierID has not yet been assigned")) {
-        // if user doesn't have key then assign it with v2 verifier
-        const newV2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
-        if (!isExtended) return newV2User.address;
-        return newV2User;
-      }
-      throw error;
-    }
+    const url = new URL(`https://api.tor.us/lookup/torus`);
+    url.searchParams.append("verifier", openloginVerifier);
+    url.searchParams.append("verifierId", verifierId);
+    url.searchParams.append("walletVerifier", walletVerifier);
+    url.searchParams.append("network", "mainnet");
+    url.searchParams.append("isExtended", isExtended.toString());
+    return get(
+      url.href,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      },
+      { useAPIKey: true }
+    );
   }
 
   getUserInfo(message: string): Promise<UserInfo> {
