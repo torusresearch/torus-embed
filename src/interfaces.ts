@@ -52,6 +52,8 @@ export const TORUS_BUILD_ENV = {
   TESTING: "testing",
   LRC: "lrc",
   BETA: "beta",
+  BNB: "bnb",
+  POLYGON: "polygon",
 } as const;
 
 export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
@@ -613,6 +615,10 @@ export interface TorusParams {
    * development uses http://localhost:4050 (expects torus-website to be run locally),
    *
    * binance uses https://binance.tor.us,
+   *
+   * bnb uses https://bnb.tor.us,
+   *
+   * polygon uses https://polygon.tor.us,
    *
    * lrc uses https://lrc.tor.us,
    *
