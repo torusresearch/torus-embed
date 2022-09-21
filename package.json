@@ -1,6 +1,6 @@
 {
   "name": "@cere/torus-embed",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "originalVersion": "1.36.1",
   "description": "Embed script for Torus (Cere frok)",
   "main": "dist/torus.cjs.js",
@@ -47,7 +47,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@toruslabs/eslint-config-typescript": "^1.1.0",
-    "@toruslabs/torus-scripts": "^1.1.1",
+    "@toruslabs/torus-scripts": "^1.0.5",
     "@types/create-hash": "^1.2.2",
     "@types/lodash.merge": "^4.6.7",
     "@types/node": "^16",

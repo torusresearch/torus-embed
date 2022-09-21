@@ -8,7 +8,7 @@ const paymentProviders = {
     line3: "2,000€/day, 10,000€/mo",
     supportPage: "https://help.moonpay.io/en/",
     minOrderValue: 24.99,
-    maxOrderValue: 50_000,
+    maxOrderValue: 50000,
     validCurrencies: supportedFiatCurrencies(PAYMENT_PROVIDER.MOONPAY),
     validCryptoCurrenciesByChain: {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
@@ -70,7 +70,7 @@ const paymentProviders = {
     line3: "5,000€/purchase, 20,000€/mo",
     supportPage: "https://instant.ramp.network/",
     minOrderValue: 50,
-    maxOrderValue: 20_000,
+    maxOrderValue: 20000,
     validCurrencies: supportedFiatCurrencies(PAYMENT_PROVIDER.RAMPNETWORK),
     validCryptoCurrenciesByChain: {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
