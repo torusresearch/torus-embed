@@ -3,7 +3,7 @@ import { ethErrors } from "eth-rpc-errors";
 import { LogLevelDesc } from "loglevel";
 
 import config from "./config";
-import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams } from "./interfaces";
+import { IntegrityParams, PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE, PaymentParams, TORUS_BUILD_ENV_TYPE } from "./interfaces";
 import log from "./loglevel";
 
 const { paymentProviders } = config;
@@ -124,7 +124,10 @@ export function logStreamDisconnectWarning(remoteLabel: string, error: Error, em
 
 export const getPreopenInstanceId = () => Math.random().toString(36).slice(2);
 
-export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams): Promise<{ torusUrl: string; logLevel: LogLevelDesc }> => {
+export const getTorusUrl = async (
+  buildEnv: TORUS_BUILD_ENV_TYPE,
+  integrity: IntegrityParams
+): Promise<{ torusUrl: string; logLevel: LogLevelDesc }> => {
   let torusUrl: string;
   let logLevel: LogLevelDesc;
   // Do not change this line
@@ -153,6 +156,14 @@ export const getTorusUrl = async (buildEnv: string, integrity: IntegrityParams):
     case "testing":
       torusUrl = "https://testing.tor.us";
       logLevel = "debug";
+      break;
+    case "bnb":
+      torusUrl = "https://bnb.tor.us";
+      logLevel = "error";
+      break;
+    case "polygon":
+      torusUrl = "https://polygon.tor.us";
+      logLevel = "error";
       break;
     case "lrc":
       torusUrl = "https://lrc.tor.us";
@@ -193,33 +204,6 @@ export const FEATURES_PROVIDER_CHANGE_WINDOW = "directories=0,titlebar=0,toolbar
 export const FEATURES_DEFAULT_WALLET_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=740,width=1315";
 export const FEATURES_DEFAULT_POPUP_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=1200";
 export const FEATURES_CONFIRM_WINDOW = "directories=0,titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=700,width=450";
-
-export function storageAvailable(type: "localStorage" | "sessionStorage"): boolean {
-  let storage: Storage;
-  try {
-    storage = window[type];
-    const x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return (
-      e &&
-      // everything except Firefox
-      (e.code === 22 ||
-        // Firefox
-        e.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        e.name === "QuotaExceededError" ||
-        // Firefox
-        e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      storage &&
-      storage.length !== 0
-    );
-  }
-}
 
 export function getPopupFeatures(): string {
   // Fixes dual-screen position                             Most browsers      Firefox
