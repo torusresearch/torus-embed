@@ -1,7 +1,5 @@
-import NodeDetailManager from "@toruslabs/fetch-node-details";
-import { setAPIKey } from "@toruslabs/http-helpers";
+import { get, setAPIKey } from "@toruslabs/http-helpers";
 import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
-import TorusJs from "@toruslabs/torus.js";
 import deepmerge from "lodash.merge";
 
 import configuration from "./config";
@@ -13,6 +11,7 @@ import {
   BUTTON_POSITION_TYPE,
   EMBED_TRANSLATION_ITEM,
   LOGIN_PROVIDER,
+  NetworkInterface,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
   TORUS_BUILD_ENV,
@@ -37,7 +36,6 @@ import {
   getPreopenInstanceId,
   getTorusUrl,
   getUserLanguage,
-  storageAvailable,
   validatePaymentProvider,
 } from "./utils";
 
@@ -49,7 +47,7 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-1fw4uibEy7k/fIc+PrvRqcvhiKoHw7/Er2RT5fW0GrvGD5GoiBBcKlFlyaPcdjcR";
+const iframeIntegrity = "sha384-hUCVf4/dRFTMtyB6vphvJ0RhfaCQbcanNY5t1ZWC+MuBiRlt0l1ame3BBMhh+qN/";
 
 const expectedCacheControlHeader = "max-age=3600";
 
@@ -62,8 +60,6 @@ const UNSAFE_METHODS = [
   "eth_getEncryptionPublicKey",
   "eth_decrypt",
 ];
-
-const isLocalStorageAvailable = storageAvailable("localStorage");
 
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
 (async function preLoadIframe() {
@@ -88,6 +84,8 @@ const isLocalStorageAvailable = storageAvailable("localStorage");
 class Torus {
   buttonPosition: BUTTON_POSITION_TYPE = BUTTON_POSITION.BOTTOM_LEFT;
 
+  buttonSize: number;
+
   torusUrl: string;
 
   torusIframe: HTMLIFrameElement;
@@ -101,10 +99,6 @@ class Torus {
   torusWidgetVisibility: boolean;
 
   torusAlert: HTMLDivElement;
-
-  nodeDetailManager: NodeDetailManager;
-
-  torusJs: TorusJs;
 
   apiKey: string;
 
@@ -132,35 +126,34 @@ class Torus {
 
   isLoginCallback: () => void;
 
-  dappStorageKey: string;
-
   paymentProviders = configuration.paymentProviders;
 
   private loginHint = "";
 
   private useWalletConnect: boolean;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
+  private isCustomLogin = false;
+
+  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, buttonSize = 56, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
+    this.buttonSize = buttonSize;
     this.torusUrl = "";
     this.isLoggedIn = false; // ethereum.enable working
     this.isInitialized = false; // init done
     this.torusWidgetVisibility = true;
     this.requestedVerifier = "";
     this.currentVerifier = "";
-    this.nodeDetailManager = new NodeDetailManager();
-    this.torusJs = new TorusJs({
-      metadataHost: "https://metadata.tor.us",
-      allowHost: "https://signer.tor.us/api/allow",
-      network: "mainnet",
-    });
+    // this.nodeDetailManager = new NodeDetailManager();
+    // this.torusJs = new TorusJs({
+    //   metadataHost: "https://metadata.tor.us",
+    //   allowHost: "https://signer.tor.us/api/allow",
+    //   network: "mainnet",
+    // });
     this.apiKey = apiKey;
-    TorusJs.setAPIKey(apiKey);
     setAPIKey(apiKey);
     this.modalZIndex = modalZIndex;
     this.alertZIndex = modalZIndex + 1000;
     this.isIframeFullScreen = false;
-    this.dappStorageKey = "";
   }
 
   async init({
@@ -185,8 +178,8 @@ class Torus {
     },
     whiteLabel,
     skipTKey = false,
-    useLocalStorage = false,
     useWalletConnect = false,
+    mfaLevel = "default",
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -194,28 +187,18 @@ class Torus {
     this.torusUrl = torusUrl;
     this.whiteLabel = whiteLabel;
     this.useWalletConnect = useWalletConnect;
+    this.isCustomLogin = !!(loginConfig && Object.keys(loginConfig).length > 0) || !!(whiteLabel && Object.keys(whiteLabel).length > 0);
+
     log.setDefaultLevel(logLevel);
     if (enableLogging) log.enableAll();
     else log.disableAll();
     this.torusWidgetVisibility = showTorusButton;
-    let dappStorageKey = "";
-    if (isLocalStorageAvailable && useLocalStorage) {
-      const localStorageKey = `${configuration.localStorageKeyPrefix}${window.location.hostname}`;
-      const storedKey = window.localStorage.getItem(localStorageKey);
-      if (storedKey) dappStorageKey = storedKey;
-      else {
-        const generatedKey = `torus-app-${getPreopenInstanceId()}`;
-        window.localStorage.setItem(localStorageKey, generatedKey);
-        dappStorageKey = generatedKey;
-      }
-    }
-    this.dappStorageKey = dappStorageKey;
     const torusIframeUrl = new URL(torusUrl);
     if (torusIframeUrl.pathname.endsWith("/")) torusIframeUrl.pathname += "popup";
     else torusIframeUrl.pathname += "/popup";
-    if (dappStorageKey) {
-      torusIframeUrl.hash = `#dappStorageKey=${dappStorageKey}`;
-    }
+
+    torusIframeUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
     // Iframe code
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
       `<iframe
@@ -268,10 +251,12 @@ class Torus {
               loginConfig,
               whiteLabel: this.whiteLabel,
               buttonPosition: this.buttonPosition,
+              buttonSize: this.buttonSize,
               torusWidgetVisibility: this.torusWidgetVisibility,
               apiKey: this.apiKey,
               skipTKey,
               network,
+              mfaLevel,
             },
           });
         };
@@ -376,7 +361,7 @@ class Torus {
     this._displayIframe();
   }
 
-  setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest } = {}): Promise<void> {
+  setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest }: NetworkInterface): Promise<void> {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
       const handler = (chunk) => {
@@ -426,9 +411,8 @@ class Torus {
         Object.keys(params).forEach((x) => {
           finalUrl.searchParams.append(x, params[x]);
         });
-        if (this.dappStorageKey) {
-          finalUrl.hash = `#dappStorageKey=${this.dappStorageKey}`;
-        }
+        finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
         const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW });
         walletWindow.open();
       }
@@ -439,30 +423,23 @@ class Torus {
 
   async getPublicAddress({ verifier, verifierId, isExtended = false }: VerifierArgs): Promise<string | TorusPublicKey> {
     if (!configuration.supportedVerifierList.includes(verifier) || !WALLET_OPENLOGIN_VERIFIER_MAP[verifier]) throw new Error("Unsupported verifier");
-    const nodeDetails = await this.nodeDetailManager.getNodeDetails({ verifier, verifierId });
-    const endpoints = nodeDetails.torusNodeEndpoints;
-    const torusNodePubs = nodeDetails.torusNodePub;
     const walletVerifier = verifier;
     const openloginVerifier = WALLET_OPENLOGIN_VERIFIER_MAP[verifier];
-    try {
-      const existingV1User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: walletVerifier, verifierId });
-      if (existingV1User.typeOfUser === "v1") {
-        if (!isExtended) return existingV1User.address;
-        return existingV1User;
-      }
-      // we don't support v2 users with v1 verifiers so get or assign the key for v2 user on v2 `verifier`
-      const v2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
-      if (!isExtended) return v2User.address;
-      return v2User;
-    } catch (error) {
-      if (error?.message.includes("Verifier + VerifierID has not yet been assigned")) {
-        // if user doesn't have key then assign it with v2 verifier
-        const newV2User = await this.torusJs.getUserTypeAndAddress(endpoints, torusNodePubs, { verifier: openloginVerifier, verifierId }, true);
-        if (!isExtended) return newV2User.address;
-        return newV2User;
-      }
-      throw error;
-    }
+    const url = new URL(`https://api.tor.us/lookup/torus`);
+    url.searchParams.append("verifier", openloginVerifier);
+    url.searchParams.append("verifierId", verifierId);
+    url.searchParams.append("walletVerifier", walletVerifier);
+    url.searchParams.append("network", "mainnet");
+    url.searchParams.append("isExtended", isExtended.toString());
+    return get(
+      url.href,
+      {
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      },
+      { useAPIKey: true }
+    );
   }
 
   getUserInfo(message: string): Promise<UserInfo> {
@@ -582,11 +559,9 @@ class Torus {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window") as Substream;
       const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
-      if (this.dappStorageKey) {
-        // If multiple instances, it returns the first one
-        if (finalUrl.hash) finalUrl.hash += `&dappStorageKey=${this.dappStorageKey}`;
-        else finalUrl.hash = `#dappStorageKey=${this.dappStorageKey}`;
-      }
+      if (finalUrl.hash) finalUrl.hash += `&isCustomLogin=${this.isCustomLogin}`;
+      else finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
       const handledWindow = new PopupHandler({ url: finalUrl, target, features });
       handledWindow.open();
       if (!handledWindow.window) {
@@ -650,11 +625,12 @@ class Torus {
 
   protected _displayIframe(isFull = false): void {
     const style: Partial<CSSStyleDeclaration> = {};
+    const size = this.buttonSize + 14; // 15px padding
     // set phase
     if (!isFull) {
       style.display = this.torusWidgetVisibility ? "block" : "none";
-      style.height = "70px";
-      style.width = "70px";
+      style.height = `${size}px`;
+      style.width = `${size}px`;
       switch (this.buttonPosition) {
         case BUTTON_POSITION.TOP_LEFT:
           style.top = "0px";
