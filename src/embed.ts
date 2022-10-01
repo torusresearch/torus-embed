@@ -47,7 +47,7 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-hUCVf4/dRFTMtyB6vphvJ0RhfaCQbcanNY5t1ZWC+MuBiRlt0l1ame3BBMhh+qN/";
+const iframeIntegrity = "sha384-hs3X0AsBvd98/B7Ovwv/YGu2q4yAWDn9PoqKitW0fOWQXVdBHNPFxEffnDOcsaKy";
 
 const expectedCacheControlHeader = "max-age=3600";
 
