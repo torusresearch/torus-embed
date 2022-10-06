@@ -1,6 +1,6 @@
 {
   "name": "@cere/torus-embed",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "originalVersion": "1.36.1",
   "description": "Embed script for Torus (Cere frok)",
   "main": "dist/torus.cjs.js",
