@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
-        "@toruslabs/torus-embed": "file:./toruslabs-torus-embed-1.12.1.tgz",
+        "@toruslabs/torus-embed": "file:../../toruslabs-torus-embed-1.36.4.tgz",
         "eth-sig-util": "^3.0.1",
         "ethers": "^5.4.1",
         "human-standard-token-abi": "^2.0.0",
