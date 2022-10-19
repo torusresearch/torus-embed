@@ -62,24 +62,24 @@ const UNSAFE_METHODS = [
 ];
 
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
-(async function preLoadIframe() {
-  try {
-    if (typeof document === "undefined") return;
-    const torusIframeHtml = document.createElement("link");
-    const { torusUrl } = await getTorusUrl("production", { check: false, hash: iframeIntegrity, version: "" });
-    torusIframeHtml.href = `${torusUrl}/popup`;
-    torusIframeHtml.crossOrigin = "anonymous";
-    torusIframeHtml.type = "text/html";
-    torusIframeHtml.rel = "prefetch";
-    if (torusIframeHtml.relList && torusIframeHtml.relList.supports) {
-      if (torusIframeHtml.relList.supports("prefetch")) {
-        document.head.appendChild(torusIframeHtml);
-      }
-    }
-  } catch (error) {
-    log.warn(error);
-  }
-})();
+// (async function preLoadIframe() {
+//   try {
+//     if (typeof document === "undefined") return;
+//     const torusIframeHtml = document.createElement("link");
+//     const { torusUrl } = await getTorusUrl("production", { check: false, hash: iframeIntegrity, version: "" });
+//     torusIframeHtml.href = `${torusUrl}/popup`;
+//     torusIframeHtml.crossOrigin = "anonymous";
+//     torusIframeHtml.type = "text/html";
+//     torusIframeHtml.rel = "prefetch";
+//     if (torusIframeHtml.relList && torusIframeHtml.relList.supports) {
+//       if (torusIframeHtml.relList.supports("prefetch")) {
+//         document.head.appendChild(torusIframeHtml);
+//       }
+//     }
+//   } catch (error) {
+//     log.warn(error);
+//   }
+// })();
 
 class Torus {
   buttonPosition: BUTTON_POSITION_TYPE = BUTTON_POSITION.BOTTOM_LEFT;
@@ -130,6 +130,8 @@ class Torus {
 
   private loginHint = "";
 
+  private loginOptions: TorusLoginParams["loginOptions"] = {};
+
   private useWalletConnect: boolean;
 
   private isCustomLogin = false;
@@ -161,14 +163,7 @@ class Torus {
     enableLogging = false,
     // deprecated: use loginConfig instead
     enabledVerifiers = defaultVerifiers,
-    network = {
-      host: "mainnet",
-      chainId: null,
-      networkName: "",
-      blockExplorer: "",
-      ticker: "",
-      tickerName: "",
-    },
+    network,
     loginConfig = {},
     showTorusButton = true,
     integrity = {
@@ -203,7 +198,7 @@ class Torus {
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
       `<iframe
         id="torusIframe"
-        allow=${useWalletConnect ? "camera" : ""}
+        ${useWalletConnect ? 'allow="camera"' : ""}
         class="torusIframe"
         src="${torusIframeUrl.href}"
         style="display: none; position: fixed; top: 0; right: 0; width: 100%;
@@ -293,10 +288,11 @@ class Torus {
     return undefined;
   }
 
-  login({ verifier = "", login_hint: loginHint = "" }: TorusLoginParams = {}): Promise<string[]> {
+  login({ verifier = "", login_hint: loginHint = "", loginOptions = {} }: TorusLoginParams = {}): Promise<string[]> {
     if (!this.isInitialized) throw new Error("Call init() first");
     this.requestedVerifier = verifier;
     this.loginHint = loginHint;
+    this.loginOptions = loginOptions;
     return this.ethereum.enable();
   }
 
@@ -780,9 +776,15 @@ class Torus {
     const windowStream = communicationMux.getStream("window") as Substream;
     windowStream.on("data", (chunk) => {
       if (chunk.name === "create_window") {
-        // url is the url we need to open
-        // we can pass the final url upfront so that it removes the step of redirecting to /redirect and waiting for finalUrl
-        this._createPopupBlockAlert(chunk.data.preopenInstanceId, chunk.data.url);
+        this._handleWindow(chunk.data.preopenInstanceId, {
+          url: chunk.data.url,
+          target: "_blank",
+          features: FEATURES_DEFAULT_WALLET_WINDOW,
+        });
+      }
+
+      if (chunk.name === "redirect") {
+        window.location.href = chunk.data.url;
       }
     });
 
@@ -819,7 +821,7 @@ class Torus {
     const loginHandler = (data) => {
       const { err, selectedAddress } = data;
       if (err) {
-        log.error(err);
+        log.warn(err);
         if (reject) reject(err);
       }
       // returns an array (cause accounts expects it)
@@ -837,7 +839,13 @@ class Torus {
       this._handleWindow(preopenInstanceId);
       oauthStream.write({
         name: "oauth",
-        data: { calledFromEmbed, verifier: this.requestedVerifier, preopenInstanceId, login_hint: this.loginHint },
+        data: {
+          calledFromEmbed,
+          verifier: this.requestedVerifier,
+          preopenInstanceId,
+          login_hint: this.loginHint,
+          loginOptions: this.loginOptions,
+        },
       });
     }
   }

@@ -19,5 +19,5 @@ exports.baseConfig = {
       "web3-providers-ws": path.resolve(__dirname, "node_modules/empty-module"),
     },
   },
-  plugins: [new EnvironmentPlugin({ TORUS_EMBED_VERSION: pkg.originalVersion })],
+  plugins: [new EnvironmentPlugin({ TORUS_EMBED_VERSION: pkg.clientVersion })],
 };

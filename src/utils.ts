@@ -178,7 +178,7 @@ export const getTorusUrl = async (
       logLevel = "debug";
       break;
     default:
-      torusUrl = `https://app.tor.us/v${versionUsed}`;
+      torusUrl = `https://wallet.cere.io`;
       logLevel = "error";
       break;
   }

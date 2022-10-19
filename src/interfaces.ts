@@ -167,6 +167,11 @@ export interface TorusCtorArgs {
 export interface TorusLoginParams {
   verifier?: string;
   login_hint?: string;
+  loginOptions?: {
+    idToken?: string;
+    uxMode?: "redirect" | "popup";
+    redirectUrl?: string;
+  };
 }
 
 export interface NetworkInterface {
