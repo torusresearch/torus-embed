@@ -835,8 +835,13 @@ class Torus {
       oauthStream.write({ name: "oauth_modal", data: { calledFromEmbed } });
     } else {
       handleStream(oauthStream, "data", loginHandler);
-      const preopenInstanceId = getPreopenInstanceId();
-      this._handleWindow(preopenInstanceId);
+      let preopenInstanceId: string | undefined;
+
+      if (this.loginOptions.uxMode !== "redirect") {
+        preopenInstanceId = getPreopenInstanceId();
+        this._handleWindow(preopenInstanceId);
+      }
+
       oauthStream.write({
         name: "oauth",
         data: {
