@@ -602,7 +602,7 @@ class Torus {
   }
 
   protected _getLogoUrl(): string {
-    let logoUrl = `${this.torusUrl}/images/torus_icon-blue.svg`;
+    let logoUrl = `${this.torusUrl}/images/logo.svg`;
     if (this.whiteLabel?.theme?.isDark) {
       logoUrl = this.whiteLabel?.logoLight || logoUrl;
     } else {
