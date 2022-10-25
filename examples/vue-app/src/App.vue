@@ -241,6 +241,7 @@ export default Vue.extend({
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           skipTKey: true,
           mfaLevel: "optional",
+          hideSupportChat: false,
         });
         await torus?.login(); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);

@@ -685,6 +685,7 @@ export interface TorusParams {
    * @defaultValue default
    */
   mfaLevel?: "none" | "default" | "optional" | "mandatory";
+  hideSupportChat?: boolean;
 }
 
 export interface UnvalidatedJsonRpcRequest {
