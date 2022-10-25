@@ -693,6 +693,8 @@ export interface TorusParams {
    * @defaultValue default
    */
   mfaLevel?: "none" | "default" | "optional" | "mandatory";
+
+  context?: unknown;
 }
 
 export interface UnvalidatedJsonRpcRequest {

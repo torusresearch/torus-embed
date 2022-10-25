@@ -175,6 +175,7 @@ class Torus {
     skipTKey = false,
     useWalletConnect = false,
     mfaLevel = "default",
+    context,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -252,6 +253,7 @@ class Torus {
               skipTKey,
               network,
               mfaLevel,
+              context,
             },
           });
         };
@@ -391,7 +393,14 @@ class Torus {
     });
   }
 
-  showWallet(path: WALLET_PATH, params: Record<string, string> = {}): void {
+  showWallet(
+    path: WALLET_PATH,
+    params: Record<string, string> = {},
+    options: {
+      target?: string;
+      onClose?: () => void;
+    } = {}
+  ): void {
     const showWalletStream = this.communicationMux.getStream("show_wallet") as Substream;
     const finalPath = path ? `/${path}` : "";
     showWalletStream.write({ name: "show_wallet", data: { path: finalPath } });
@@ -399,7 +408,7 @@ class Torus {
     const showWalletHandler = (chunk) => {
       if (chunk.name === "show_wallet_instance") {
         // Let the error propogate up (hence, no try catch)
-        const { instanceId } = chunk.data;
+        const { instanceId, target } = chunk.data;
         const finalUrl = new URL(`${this.torusUrl}/wallet${finalPath}`);
         // Using URL constructor to prevent js injection and allow parameter validation.!
         finalUrl.searchParams.append("integrity", "true");
@@ -409,8 +418,17 @@ class Torus {
         });
         finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
-        const walletWindow = new PopupHandler({ url: finalUrl, features: FEATURES_DEFAULT_WALLET_WINDOW });
+        const walletWindow = new PopupHandler({
+          target: options.target || target,
+          url: finalUrl,
+          features: FEATURES_DEFAULT_WALLET_WINDOW,
+        });
+
         walletWindow.open();
+
+        if (options.onClose) {
+          walletWindow.once("close", options.onClose);
+        }
       }
     };
 
