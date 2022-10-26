@@ -435,6 +435,7 @@ const PROVIDER_SUPPORTED_FIAT_CURRENCIES = {
     "USD",
     "ZAR",
   ],
+  [PAYMENT_PROVIDER.BANXA]: ["EUR", "GBP", "USD"],
 };
 
 const cryptoCompareCurrenciesSet = new Set(CRYPTO_COMPARE_CURRENCIES);
