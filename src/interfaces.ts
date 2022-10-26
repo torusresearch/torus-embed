@@ -694,7 +694,15 @@ export interface TorusParams {
    */
   mfaLevel?: "none" | "default" | "optional" | "mandatory";
 
+  /**
+   * [Cere wallet] Holds the current host application context
+   */
   context?: unknown;
+
+  /**
+   * [Cere wallet] Holds current Open Login session id
+   */
+  sessionId?: string;
 }
 
 export interface UnvalidatedJsonRpcRequest {

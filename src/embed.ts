@@ -176,6 +176,7 @@ class Torus {
     useWalletConnect = false,
     mfaLevel = "default",
     context,
+    sessionId,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -254,6 +255,7 @@ class Torus {
               network,
               mfaLevel,
               context,
+              sessionId,
             },
           });
         };
