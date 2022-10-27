@@ -193,7 +193,7 @@ const paymentProviders = {
         { value: "COMP", display: "COMP" },
         { value: "ENJ", display: "ENJ" },
       ],
-      [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [{ value: "BNB", display: "BNB" }],
+      // [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [{ value: "BNB", display: "BNB" }],
     },
     includeFees: true,
     enforceMax: true,
