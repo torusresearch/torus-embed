@@ -171,6 +171,34 @@ const paymentProviders = {
     includeFees: true,
     enforceMax: true,
   } as IPaymentProvider,
+  [PAYMENT_PROVIDER.BANXA]: {
+    line1: "Debit Card/ <br>Apple Pay/ Bank transfer",
+    line2: "0.49% - 2.9%",
+    line3: "5,000€/purchase, 20,000€/mo",
+    supportPage: "https://support.banxa.com",
+    minOrderValue: 20,
+    maxOrderValue: 15_000,
+    validCurrencies: supportedFiatCurrencies(PAYMENT_PROVIDER.BANXA),
+    validCryptoCurrenciesByChain: {
+      [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
+        { value: "ETH", display: "ETH" },
+        { value: "USDT", display: "USDT" },
+        { value: "BUSD", display: "BUSD" },
+        { value: "LINK", display: "LINK" },
+        { value: "USDC", display: "USDC" },
+        { value: "CHZ", display: "CHZ" },
+        { value: "BAT", display: "BAT" },
+        { value: "MANA", display: "MANA" },
+        { value: "AAVE", display: "AAVE" },
+        { value: "COMP", display: "COMP" },
+        { value: "ENJ", display: "ENJ" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.MATIC]: [{ value: "MATIC", display: "MATIC" }],
+      // [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [{ value: "BNB", display: "BNB" }],
+    },
+    includeFees: true,
+    enforceMax: true,
+  },
 };
 
 const translations = {
