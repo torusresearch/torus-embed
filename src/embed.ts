@@ -14,6 +14,7 @@ import {
   NetworkInterface,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
+  PopupMode,
   TORUS_BUILD_ENV,
   TorusCtorArgs,
   TorusLoginParams,
@@ -60,26 +61,6 @@ const UNSAFE_METHODS = [
   "eth_getEncryptionPublicKey",
   "eth_decrypt",
 ];
-
-// preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267
-// (async function preLoadIframe() {
-//   try {
-//     if (typeof document === "undefined") return;
-//     const torusIframeHtml = document.createElement("link");
-//     const { torusUrl } = await getTorusUrl("production", { check: false, hash: iframeIntegrity, version: "" });
-//     torusIframeHtml.href = `${torusUrl}/popup`;
-//     torusIframeHtml.crossOrigin = "anonymous";
-//     torusIframeHtml.type = "text/html";
-//     torusIframeHtml.rel = "prefetch";
-//     if (torusIframeHtml.relList && torusIframeHtml.relList.supports) {
-//       if (torusIframeHtml.relList.supports("prefetch")) {
-//         document.head.appendChild(torusIframeHtml);
-//       }
-//     }
-//   } catch (error) {
-//     log.warn(error);
-//   }
-// })();
 
 class Torus {
   buttonPosition: BUTTON_POSITION_TYPE = BUTTON_POSITION.BOTTOM_LEFT;
@@ -136,7 +117,15 @@ class Torus {
 
   private isCustomLogin = false;
 
-  constructor({ buttonPosition = BUTTON_POSITION.BOTTOM_LEFT, buttonSize = 56, modalZIndex = 99999, apiKey = "torus-default" }: TorusCtorArgs = {}) {
+  private popupMode: PopupMode = "popup";
+
+  constructor({
+    buttonPosition = BUTTON_POSITION.BOTTOM_LEFT,
+    buttonSize = 56,
+    modalZIndex = 99999,
+    apiKey = "torus-default",
+    popupMode = "popup",
+  }: TorusCtorArgs = {}) {
     this.buttonPosition = buttonPosition;
     this.buttonSize = buttonSize;
     this.torusUrl = "";
@@ -156,6 +145,7 @@ class Torus {
     this.modalZIndex = modalZIndex;
     this.alertZIndex = modalZIndex + 1000;
     this.isIframeFullScreen = false;
+    this.popupMode = popupMode;
   }
 
   async init({
@@ -177,6 +167,7 @@ class Torus {
     mfaLevel = "default",
     context,
     sessionId,
+    popupMode,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -195,6 +186,10 @@ class Torus {
     else torusIframeUrl.pathname += "/popup";
 
     torusIframeUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
+
+    if (popupMode) {
+      this.popupMode = popupMode;
+    }
 
     // Iframe code
     this.torusIframe = htmlToElement<HTMLIFrameElement>(
@@ -571,32 +566,51 @@ class Torus {
     });
   }
 
-  protected _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
-    if (preopenInstanceId) {
-      const windowStream = this.communicationMux.getStream("window") as Substream;
+  protected _handleWindow(
+    preopenInstanceId: string,
+    {
+      url,
+      target,
+      features,
+      popupMode = "popup",
+    }: {
+      url?: string;
+      target?: string;
+      features?: string;
+      popupMode?: PopupMode;
+    } = {}
+  ): void {
+    if (!preopenInstanceId) {
+      return;
+    }
+
+    const windowStream = this.communicationMux.getStream("window") as Substream;
+
+    if (popupMode === "popup") {
       const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
+
       if (finalUrl.hash) finalUrl.hash += `&isCustomLogin=${this.isCustomLogin}`;
       else finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
       const handledWindow = new PopupHandler({ url: finalUrl, target, features });
+
       handledWindow.open();
+
       if (!handledWindow.window) {
         this._createPopupBlockAlert(preopenInstanceId, finalUrl.href);
+
         return;
       }
-      windowStream.write({
-        name: "opened_window",
-        data: {
-          preopenInstanceId,
-        },
-      });
+
       const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
         if (receivedId === preopenInstanceId && close) {
           handledWindow.close();
           windowStream.removeListener("data", closeHandler);
         }
       };
+
       windowStream.on("data", closeHandler);
+
       handledWindow.once("close", () => {
         windowStream.write({
           data: {
@@ -604,9 +618,18 @@ class Torus {
             closed: true,
           },
         });
+
         windowStream.removeListener("data", closeHandler);
       });
     }
+
+    windowStream.write({
+      name: "opened_window",
+      data: {
+        popupMode,
+        preopenInstanceId,
+      },
+    });
   }
 
   protected _setEmbedWhiteLabel(element: HTMLElement): void {
@@ -773,6 +796,7 @@ class Torus {
         const preopenInstanceId = getPreopenInstanceId();
         this._handleWindow(preopenInstanceId, {
           target: "_blank",
+          popupMode: this.popupMode, // Transaction popups should support `popupMode` option
           features: FEATURES_CONFIRM_WINDOW,
         });
         _payload.preopenInstanceId = preopenInstanceId;
@@ -799,6 +823,7 @@ class Torus {
         this._handleWindow(chunk.data.preopenInstanceId, {
           url: chunk.data.url,
           target: "_blank",
+          popupMode: chunk.popupMode || "popup",
           features: FEATURES_DEFAULT_WALLET_WINDOW,
         });
       }

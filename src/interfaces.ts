@@ -138,6 +138,8 @@ export type LOGIN_TYPE =
   | "email_password"
   | "passwordless";
 
+export type PopupMode = "modal" | "popup";
+
 export interface TorusCtorArgs {
   /**
    * Determines where the torus widget is visible on the page.
@@ -162,6 +164,11 @@ export interface TorusCtorArgs {
    * Get yours today at {@link https://developer.tor.us | Dashboard}
    */
   apiKey?: string;
+
+  /**
+   * [Cere wallet] Popup mode
+   */
+  popupMode?: PopupMode;
 }
 
 export interface TorusLoginParams {
@@ -703,6 +710,11 @@ export interface TorusParams {
    * [Cere wallet] Holds current Open Login session id
    */
   sessionId?: string;
+
+  /**
+   * [Cere wallet] Transaction popups mode. Overrides the constructor option.
+   */
+  popupMode?: PopupMode;
 }
 
 export interface UnvalidatedJsonRpcRequest {
