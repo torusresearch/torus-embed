@@ -35,6 +35,7 @@ export const PAYMENT_PROVIDER = {
   XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
   TRANSAK: "transak",
+  BANXA: "banxa",
 } as const;
 
 export const SUPPORTED_PAYMENT_NETWORK = {
