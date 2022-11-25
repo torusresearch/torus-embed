@@ -107,18 +107,7 @@ export type EMBED_TRANSLATION_ITEM = {
 export type BUTTON_POSITION_TYPE = typeof BUTTON_POSITION[keyof typeof BUTTON_POSITION];
 
 export type WALLET_PATH = "transfer" | "topup" | "home" | "settings" | "history" | "discover";
-export type ETHEREUM_NETWORK_TYPE =
-  | "ropsten"
-  | "rinkeby"
-  | "kovan"
-  | "mainnet"
-  | "goerli"
-  | "localhost"
-  | "matic"
-  | "mumbai"
-  | "xdai"
-  | "bsc_mainnet"
-  | "bsc_testnet";
+export type ETHEREUM_NETWORK_TYPE = "sepolia" | "mainnet" | "goerli" | "localhost" | "matic" | "mumbai" | "xdai" | "bsc_mainnet" | "bsc_testnet";
 
 export type LOGIN_TYPE =
   | "google"
