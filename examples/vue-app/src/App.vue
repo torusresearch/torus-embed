@@ -47,7 +47,6 @@
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Torus Specific Info</h4>
-        <button @click="showWalletConnect">Show Wallet Connect</button>
         <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
@@ -62,6 +61,15 @@
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
         <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
+      </section>
+      <section>
+        <h4>Wallet Connect</h4>
+        <div>
+          <input :style="{ marginLeft: '20px' }" v-model="walletConnectUri" placeholder="Wallet connect uri" />
+          <button :disabled="!walletConnectUri" @click="connectWithWalletConnect">Connect with URI</button>
+
+          <button @click="showWalletConnect">Show Wallet Connect Scanner</button>
+        </div>
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Blockchain Apis</h4>
@@ -135,6 +143,7 @@ export default Vue.extend({
       encryptionKey: "",
       messageEncrypted: "",
       buildEnv: "testing" as TORUS_BUILD_ENV_TYPE,
+      walletConnectUri: "",
     };
   },
   mounted() {
@@ -182,6 +191,7 @@ export default Vue.extend({
             // tickerName: 'DES Coin',
           },
           showTorusButton: true,
+          useWalletConnect: true,
         });
 
         await torus?.loginWithPrivateKey({
@@ -241,6 +251,7 @@ export default Vue.extend({
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           skipTKey: true,
           mfaLevel: "optional",
+          useWalletConnect: true,
         });
         await torus?.login(); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);
@@ -269,7 +280,25 @@ export default Vue.extend({
     },
     async showWalletConnect() {
       const { torus } = web3Obj;
-      await torus.showWalletConnectScanner();
+      torus
+        .showWalletConnectScanner()
+        .then((data) => {
+          console.log("showWalletConnectScanner", data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    async connectWithWalletConnect() {
+      const { torus } = web3Obj;
+      torus
+        .connectWithWalletConnect(this.walletConnectUri)
+        .then((data) => {
+          console.log("connectWithWalletConnect", data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     },
     console(...args: any[]): void {
       const el = document.querySelector("#console>p");
