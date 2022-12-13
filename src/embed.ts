@@ -555,26 +555,6 @@ class Torus {
     });
   }
 
-  async connectWithWalletConnect(uri: string): Promise<void> {
-    if (!this.useWalletConnect) throw new Error("Set `useWalletConnect` as true in init function options to use wallet connect scanner");
-    return new Promise((resolve, reject) => {
-      if (this.isLoggedIn) {
-        const walletConnectStream = this.communicationMux.getStream("wallet_connect_stream") as Substream;
-        const walletConnectHandler = (chunk) => {
-          if (chunk.name === "wallet_connect_stream_res") {
-            if (chunk.data.success) {
-              resolve(chunk.data.success);
-            } else {
-              reject(new Error(chunk.data.error));
-            }
-          }
-        };
-        handleStream(walletConnectStream, "data", walletConnectHandler);
-        walletConnectStream.write({ name: "wallet_connect_uri_stream_req", data: { uri } });
-      } else reject(new Error("User has not logged in yet"));
-    });
-  }
-
   protected _handleWindow(preopenInstanceId: string, { url, target, features }: { url?: string; target?: string; features?: string } = {}): void {
     if (preopenInstanceId) {
       const windowStream = this.communicationMux.getStream("window") as Substream;

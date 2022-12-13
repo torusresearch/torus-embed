@@ -47,6 +47,7 @@
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Torus Specific Info</h4>
+        <button @click="showWalletConnect">Show Wallet Connect</button>
         <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
@@ -61,15 +62,6 @@
           <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
         </div>
         <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
-      </section>
-      <section>
-        <h4>Wallet Connect</h4>
-        <div>
-          <input :style="{ marginLeft: '20px' }" v-model="walletConnectUri" placeholder="Wallet connect uri" />
-          <button :disabled="!walletConnectUri" @click="connectWithWalletConnect">Connect with URI</button>
-
-          <button @click="showWalletConnect">Show Wallet Connect Scanner</button>
-        </div>
       </section>
       <section :style="{ marginTop: '20px' }">
         <h4>Blockchain Apis</h4>
@@ -143,7 +135,6 @@ export default Vue.extend({
       encryptionKey: "",
       messageEncrypted: "",
       buildEnv: "testing" as TORUS_BUILD_ENV_TYPE,
-      walletConnectUri: "",
     };
   },
   mounted() {
@@ -284,17 +275,6 @@ export default Vue.extend({
         .showWalletConnectScanner()
         .then((data) => {
           console.log("showWalletConnectScanner", data);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    },
-    async connectWithWalletConnect() {
-      const { torus } = web3Obj;
-      torus
-        .connectWithWalletConnect(this.walletConnectUri)
-        .then((data) => {
-          console.log("connectWithWalletConnect", data);
         })
         .catch((error) => {
           console.error(error);
