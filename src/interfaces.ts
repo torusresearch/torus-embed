@@ -176,7 +176,7 @@ export interface TorusLoginParams {
   login_hint?: string;
   loginOptions?: {
     idToken?: string;
-    uxMode?: "redirect" | "popup";
+    uxMode?: "redirect" | PopupMode;
     redirectUrl?: string;
   };
 }

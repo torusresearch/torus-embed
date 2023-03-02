@@ -884,7 +884,10 @@ class Torus {
 
       if (this.loginOptions.uxMode !== "redirect") {
         preopenInstanceId = getPreopenInstanceId();
-        this._handleWindow(preopenInstanceId);
+
+        this._handleWindow(preopenInstanceId, {
+          popupMode: this.loginOptions.uxMode,
+        });
       }
 
       oauthStream.write({
