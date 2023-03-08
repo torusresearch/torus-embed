@@ -57,11 +57,11 @@ export const TORUS_BUILD_ENV = {
   POLYGON: "polygon",
 } as const;
 
-export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
+export type PAYMENT_PROVIDER_TYPE = (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
 
-export type SUPPORTED_PAYMENT_NETWORK_TYPE = typeof SUPPORTED_PAYMENT_NETWORK[keyof typeof SUPPORTED_PAYMENT_NETWORK];
+export type SUPPORTED_PAYMENT_NETWORK_TYPE = (typeof SUPPORTED_PAYMENT_NETWORK)[keyof typeof SUPPORTED_PAYMENT_NETWORK];
 
-export type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
+export type TORUS_BUILD_ENV_TYPE = (typeof TORUS_BUILD_ENV)[keyof typeof TORUS_BUILD_ENV];
 
 export interface IPaymentProvider {
   line1: string;
@@ -104,7 +104,7 @@ export type EMBED_TRANSLATION_ITEM = {
   clickHere: string;
 };
 
-export type BUTTON_POSITION_TYPE = typeof BUTTON_POSITION[keyof typeof BUTTON_POSITION];
+export type BUTTON_POSITION_TYPE = (typeof BUTTON_POSITION)[keyof typeof BUTTON_POSITION];
 
 export type WALLET_PATH = "transfer" | "topup" | "home" | "settings" | "history" | "discover";
 export type ETHEREUM_NETWORK_TYPE = "sepolia" | "mainnet" | "goerli" | "localhost" | "matic" | "mumbai" | "xdai" | "bsc_mainnet" | "bsc_testnet";
