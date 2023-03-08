@@ -59,6 +59,8 @@ const UNSAFE_METHODS = [
   "personal_sign",
   "eth_getEncryptionPublicKey",
   "eth_decrypt",
+  "wallet_addEthereumChain",
+  "wallet_switchEthereumChain",
 ];
 
 // preload for iframe doesn't work https://bugs.chromium.org/p/chromium/issues/detail?id=593267

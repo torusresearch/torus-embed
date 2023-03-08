@@ -52,6 +52,8 @@
         <button @click="getUserInfo">Get User Info</button>
         <button @click="createPaymentTx">Create Payment Tx</button>
         <button @click="changeProvider">Change Provider</button>
+        <button @click="addChain">Add Chain with provider</button>
+        <button @click="switchChain">Switch Chain with provider</button>
         <div :style="{ marginTop: '20px' }">
           <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
             <option selected value="google">Google</option>
@@ -134,7 +136,7 @@ export default Vue.extend({
       messageToEncrypt: "",
       encryptionKey: "",
       messageEncrypted: "",
-      buildEnv: "testing" as TORUS_BUILD_ENV_TYPE,
+      buildEnv: "lrc" as TORUS_BUILD_ENV_TYPE,
     };
   },
   mounted() {
@@ -522,6 +524,52 @@ export default Vue.extend({
     changeProvider() {
       const { torus } = web3Obj;
       torus?.setProvider({ host: "bsc_testnet" }).then(this.console).catch(this.console);
+    },
+
+    addChain() {
+      const { web3 } = web3Obj;
+      const self = this;
+      (web3.currentProvider as any)?.send(
+        {
+          method: "wallet_addEthereumChain",
+          params: {
+            chainId: "0x2",
+            chainName: "Ethereum",
+            nativeCurrency: {
+              name: "ether",
+              symbol: "ETH", // 2-6 characters long
+              decimals: 18,
+            },
+            rpcUrls: ["https://rpc.ankr.com/eth"],
+          },
+        },
+        (err: Error, result: any) => {
+          if (err) {
+            return console.error(err);
+          }
+          self.encryptionKey = result.result;
+          return self.console(`add chain result => ${result.result}`);
+        }
+      );
+    },
+    switchChain() {
+      const { web3 } = web3Obj;
+      const self = this;
+      (web3.currentProvider as any)?.send(
+        {
+          method: "wallet_switchEthereumChain",
+          params: {
+            chainId: "0x5"
+          },
+        },
+        (err: Error, result: any) => {
+          if (err) {
+            return console.error(err);
+          }
+          self.encryptionKey = result.result;
+          return self.console(`switch chain result => ${result.result}`);
+        }
+      );
     },
     async sendDai() {
       try {

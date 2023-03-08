@@ -42,10 +42,9 @@ class PopupHandler extends EventEmitter {
     );
   }
 
-  open(): Promise<void> {
+  open(): void {
     this.window = window.open(this.url.href, this.target, this.features);
     if (this.window?.focus) this.window.focus();
-    return Promise.resolve();
   }
 
   close(): void {
