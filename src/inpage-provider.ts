@@ -239,7 +239,12 @@ class TorusInpageProvider extends SafeEventEmitter {
     /**
      * Forward all `message` events to the provider
      */
-    jsonRpcConnection.events.on("notification", (payload) => this.emit("message", payload));
+    jsonRpcConnection.events.on("notification", (payload) => {
+      // Forward only messages with `type` property for backward compatibility
+      if (payload.type) {
+        this.emit("message", payload);
+      }
+    });
 
     // json rpc notification listener
     jsonRpcConnection.events.on("notification", (payload) => {
