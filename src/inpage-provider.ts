@@ -236,6 +236,11 @@ class TorusInpageProvider extends SafeEventEmitter {
     rpcEngine.push(jsonRpcConnection.middleware);
     this._rpcEngine = rpcEngine;
 
+    /**
+     * Forward all `message` events to the provider
+     */
+    jsonRpcConnection.events.on("message", (payload) => this.emit("message", payload));
+
     // json rpc notification listener
     jsonRpcConnection.events.on("notification", (payload) => {
       const { method, params } = payload;
