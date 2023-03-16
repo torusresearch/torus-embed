@@ -60,6 +60,7 @@ const UNSAFE_METHODS = [
   "personal_sign",
   "eth_getEncryptionPublicKey",
   "eth_decrypt",
+  "ed25519_transfer",
 ];
 
 class Torus {
@@ -210,7 +211,11 @@ class Torus {
     const link = window.document.createElement("link");
     link.setAttribute("rel", "stylesheet");
     link.setAttribute("type", "text/css");
-    link.setAttribute("href", `${torusUrl}/css/widget.css`);
+
+    const widgetCssUrl = new URL(torusUrl);
+    widgetCssUrl.pathname += "css/widget.css";
+
+    link.setAttribute("href", widgetCssUrl.href);
     this.styleLink = link;
 
     const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel || {};
