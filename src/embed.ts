@@ -853,7 +853,15 @@ class Torus {
         this.isLoggedIn = status.loggedIn;
         this.currentVerifier = status.verifier;
       } // logout
-      else this._displayIframe();
+      else {
+        this.isLoggedIn = false;
+        this.currentVerifier = "";
+        this.requestedVerifier = "";
+
+        this._sendWidgetVisibilityStatus(false);
+        this._displayIframe();
+      }
+
       if (this.isLoginCallback) {
         this.isLoginCallback();
         delete this.isLoginCallback;
