@@ -28,4 +28,4 @@ jobs:
       - name: Publish package
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN_PUBLISH}}
-        run: npm publish
+        run: npm publish --access public
