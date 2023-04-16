@@ -1,5 +1,5 @@
-import Web3 from "web3";
 import Torus from "@toruslabs/torus-embed";
+import Web3 from "web3";
 
 type Web3Object = {
   web3: Web3;

@@ -1,121 +1,247 @@
 <template>
-  <div id="app">
-    <h3>Login With Torus</h3>
-    <section>
-      <p>
-        Build Environment :
-        <i>{{ buildEnv }}</i>
-      </p>
-      <div v-if="publicAddress === ''">
-        <div style="display: flex; justify-content: center; flex-direction: column; align-items: center">
-          <div>
-            <select name="buildEnv" v-model="buildEnv">
-              <option value="production">Production</option>
-              <option value="binance">Binance</option>
-              <option selected value="testing">Testing</option>
-              <option value="development">Development</option>
-              <option value="lrc">LRC</option>
-              <option value="beta">Beta</option>
-            </select>
-            <button @click="login(true)">Login</button>
-            <button @click="login(false)">Login without whitelabel</button>
+  <div v-if="!publicAddress" class="login-container h-screen">
+    <h3 class="login-heading">Login With Torus</h3>
+    <p class="login-subheading">Build Environment : {{ buildEnv }}</p>
+    <div class="align-left md-bottom-gutter">
+      <label class="btn-label">Select build environment</label>
+      <select v-model="buildEnv" name="buildEnv" class="login-input select-input">
+        <option value="production">Production</option>
+        <option value="binance">Binance</option>
+        <option selected value="testing">Testing</option>
+        <option value="development">Development</option>
+        <option value="lrc">LRC</option>
+        <option value="beta">Beta</option>
+      </select>
+    </div>
+    <button class="custom-btn cursor-pointer block md-bottom-gutter" @click="login(true)">Login</button>
+    <button class="custom-btn cursor-pointer block md-bottom-gutter" @click="login(false)">Login without whitelabel</button>
+    <h6 class="or">or</h6>
+    <div class="flex-col block">
+      <input
+        v-model="privateKey"
+        class="login-input select-input md-bottom-gutter"
+        style="width: 100% !important"
+        :placeholder="`Enter private key to login`"
+      />
+      <button class="custom-btn cursor-pointer block" @click="loginWithPrivateKey">Login With Private Key</button>
+    </div>
+  </div>
+  <div v-else class="dashboard-container p-0">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-heading">demo-eth.tor.us</h1>
+        <p class="dashboard-subheading">Build environment : {{ buildEnv }}</p>
+      </div>
+      <div class="dashboard-action-container">
+        <button class="dashboard-action-address" :title="publicAddress" @click.stop="copyAccountAddress">
+          <img :src="require('./assets/copy.svg')" alt="logout" height="14" width="14" />
+          {{ getAddress() }}
+        </button>
+        <div class="dashboard-action-badge">
+          <img :src="require('./assets/wifi.svg')" alt="logout" height="14" width="14" />
+          {{ chainIdNetworkMap[chainId] }}
+        </div>
+        <button class="dashboard-action-logout" @click.stop="logout">
+          <img :src="require('./assets/logout.svg')" alt="logout" height="20" width="20" />
+          Logout
+        </button>
+      </div>
+    </div>
+    <!-- Dashboard Action Container -->
+    <div class="dashboard-details-container">
+      <div class="dashboard-details-btn-container">
+        <h1 class="details-heading">Torus Specific Info</h1>
+        <div class="mb-6">
+          <label for="default-toggle" class="inline-flex relative items-center cursor-pointer">
+            <input type="checkbox" id="default-toggle" class="sr-only peer" checked @click="toggleButton" />
+            <div
+              class="w-11 h-6 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+            ></div>
+            <span class="ml-3 text-sm font-normal text-gray-400">Show Torus Button</span>
+          </label>
+        </div>
+        <div class="details-container">
+          <div class="flex-row bottom-gutter">
+            <div class="btn-block">
+              <p class="btn-label">Wallet connect</p>
+              <button class="custom-btn cursor-pointer" @click="showWalletConnect">Show wallet connect</button>
+            </div>
+            <div class="btn-block">
+              <p class="btn-label">Payment Transaction</p>
+              <button class="custom-btn cursor-pointer" @click="createPaymentTx">Create</button>
+            </div>
           </div>
-          <span>OR</span>
-          <div>
-            <input :style="{ marginLeft: '20px' }" v-model="privateKey" :placeholder="`Enter private key to login`" />
-            <button @click="loginWithPrivateKey">Login With Private Key</button>
+          <div class="flex-row bottom-gutter">
+            <div class="btn-block">
+              <p class="btn-label">User info</p>
+              <button class="custom-btn cursor-pointer" @click="getUserInfo">Get User Info</button>
+            </div>
+            <div class="btn-block">
+              <p class="btn-label">Provider</p>
+              <button class="custom-btn cursor-pointer" @click="changeProvider">Change Provider</button>
+            </div>
+          </div>
+          <p class="btn-label">Public address</p>
+          <div class="flex items-center justify-start gap-4 mb-4">
+            <div
+              v-for="item in publicAddressList"
+              :key="item"
+              :class="['p-2 rounded-full items-center justify-center border shadow-lg', { 'border-blue-600': selectedVerifier === item }]"
+              @click="onSelectedVerifierChanged(item)"
+            >
+              <img
+                class="cursor-pointer items-center justify-center flex self-center"
+                :src="`https://images.web3auth.io/login-${item}-active.svg`"
+                :alt="`${item} Icon`"
+              />
+            </div>
+          </div>
+          <div class="flex-row bottom-gutter">
+            <input v-model="verifierId" :placeholder="placeholder" class="login-input select-input md-bottom-gutter" style="width: 273px" />
+            <button class="custom-btn" @click="getPublicAddress">Get Public Address</button>
+          </div>
+          <h1 class="details-heading">Blockchain APIs</h1>
+          <p class="btn-label">Signing</p>
+          <div class="flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer" @click="signMessageWithoutPopup">ETH without popup</button>
+          </div>
+          <div class="flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer" @click="signPersonalMsg">Personal Sign</button>
+            <button class="custom-btn cursor-pointer" @click="signMessage">ETH Sign</button>
+          </div>
+          <div class="flex-row bottom-gutter !gap-4">
+            <button class="custom-btn cursor-pointer" @click="signTypedData_v1">Typed data v1</button>
+            <button class="custom-btn cursor-pointer" @click="signTypedData_v3">Typed data v3</button>
+            <button class="custom-btn cursor-pointer" @click="signTypedData_v4">Typed data v4</button>
+          </div>
+          <p class="btn-label">Transactions</p>
+          <div class="flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointe" @click="sendEth">Send ETH</button>
+            <button class="custom-btn cursor-pointe" @click="sendDai">Send DAI</button>
+            <button class="custom-btn cursor-pointe" @click="approveKnc">Approve Knc</button>
+          </div>
+          <p class="btn-label">Encrypt / Decrypt</p>
+          <div class="flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer" @click="getEncryptionKey">Get Encryption Key</button>
+          </div>
+          <div class="bottom-gutter">
+            <textarea
+              class="login-input select-input md-bottom-gutter !w-full"
+              v-model="messageToEncrypt"
+              placeholder="Message to encrypt"
+              rows="6"
+            />
+            <div class="flex-row bottom-gutter">
+              <button
+                class="custom-btn cursor-pointer disabled:!text-gray-200 disabled:border-gray-200 disabled:cursor-not-allowed"
+                :disabled="!encryptionKey"
+                @click="encryptMessage"
+              >
+                Encrypt
+              </button>
+              <button
+                class="custom-btn cursor-pointer disabled:!text-gray-200 disabled:border-gray-200 disabled:cursor-not-allowed"
+                :disabled="!messageEncrypted"
+                @click="decryptMessage"
+              >
+                Decrypt
+              </button>
+            </div>
+          </div>
+          <p class="btn-label">Add Asset</p>
+          <div class="flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointe" @click="addErc20Token">Add Erc20 Token</button>
+            <button class="custom-btn cursor-pointe" @click="addCollectible">Add NFT</button>
           </div>
         </div>
       </div>
-      <button v-else @click="logout">Logout</button>
-    </section>
-    <section
-      :style="{
-        fontSize: '12px',
-      }"
-      v-if="publicAddress !== ''"
-    >
-      <section>
-        <div>
-          Public Address:
-          <i>{{ publicAddress }}</i>
+      <!-- Dashboard Console Container -->
+      <div id="console" class="dashboard-details-console-container">
+        <pre ref="consoleDiv" class="console-container"></pre>
+        <div class="clear-console-btn">
+          <button class="custom-btn cursor-pointer console-btn" @click="clearConsole">Clear console</button>
         </div>
-        <div>
-          Network:
-          <i>{{ chainIdNetworkMap[chainId] }}</i>
-        </div>
-      </section>
-      <section :style="{ marginTop: '20px' }">
-        <h4>Torus Specific Info</h4>
-        <button @click="showWalletConnect">Show Wallet Connect</button>
-        <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
-        <button @click="getUserInfo">Get User Info</button>
-        <button @click="createPaymentTx">Create Payment Tx</button>
-        <button @click="changeProvider">Change Provider</button>
-        <button @click="addChain">Add Chain with provider</button>
-        <button @click="switchChain">Switch Chain with provider</button>
-        <div :style="{ marginTop: '20px' }">
-          <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
-            <option selected value="google">Google</option>
-            <option value="reddit">Reddit</option>
-            <option value="discord">Discord</option>
-            <option value="torus-auth0-email-passwordless">Email Passwordless</option>
-          </select>
-          <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
-        </div>
-        <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
-      </section>
-      <section :style="{ marginTop: '20px' }">
-        <h4>Blockchain Apis</h4>
-        <section>
-          <h5>Signing</h5>
-          <button @click="signMessageWithoutPopup">sign_eth_no_popup</button>
-          <button @click="signPersonalMsg">personal_sign</button>
-          <button @click="signMessage">sign_eth</button>
-          <button @click="signTypedData_v1">sign typed data v1</button>
-          <button @click="signTypedData_v3">sign typed data v3</button>
-          <button @click="signTypedData_v4">sign typed data v4</button>
-        </section>
-        <section>
-          <h5>Transactions</h5>
-          <button @click="sendEth">Send Eth</button>
-          <button @click="sendDai">Send DAI</button>
-          <button @click="approveKnc">Approve Knc</button>
-        </section>
-        <section>
-          <h5>Encrypt / Decrypt</h5>
-          <button @click="getEncryptionKey">Get Encryption Key</button>
-          <div>
-            <input :style="{ marginLeft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
-            <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
-          </div>
-          <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
-        </section>
-        <section>
-          <h5>Add Asset</h5>
-          <button @click="addErc20Token">Add Erc20 Token</button>
-          <button @click="addCollectible">Add NFT</button>
-        </section>
-      </section>
-    </section>
-    <div id="console" style="white-space: pre-line">
-      <p style="white-space: pre-line"></p>
+      </div>
     </div>
+    <!-- <section>
+      <div>
+        Public Address:
+        <i>{{ publicAddress }}</i>
+      </div>
+      <div>
+        Network:
+        <i>{{ chainIdNetworkMap[chainId] }}</i>
+      </div>
+    </section>
+    <section :style="{ marginTop: '20px' }">
+      <h4>Torus Specific Info</h4>
+      <button @click="showWalletConnect">Show Wallet Connect</button>
+      <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
+      <button @click="getUserInfo">Get User Info</button>
+      <button @click="createPaymentTx">Create Payment Tx</button>
+      <button @click="changeProvider">Change Provider</button>
+      <button @click="addChain">Add Chain with provider</button>
+      <button @click="switchChain">Switch Chain with provider</button>
+      <div :style="{ marginTop: '20px' }">
+        <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
+          <option selected value="google">Google</option>
+          <option value="reddit">Reddit</option>
+          <option value="discord">Discord</option>
+          <option value="torus-auth0-email-passwordless">Email Passwordless</option>
+        </select>
+        <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
+      </div>
+      <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
+    </section>
+    <section :style="{ marginTop: '20px' }">
+      <h4>Blockchain Apis</h4>
+      <section>
+        <h5>Signing</h5>
+        <button @click="signMessageWithoutPopup">sign_eth_no_popup</button>
+        <button @click="signPersonalMsg">personal_sign</button>
+        <button @click="signMessage">sign_eth</button>
+        <button @click="signTypedData_v1">sign typed data v1</button>
+        <button @click="signTypedData_v3">sign typed data v3</button>
+        <button @click="signTypedData_v4">sign typed data v4</button>
+      </section>
+      <section>
+        <h5>Transactions</h5>
+        <button @click="sendEth">Send Eth</button>
+        <button @click="sendDai">Send DAI</button>
+        <button @click="approveKnc">Approve Knc</button>
+      </section>
+      <section>
+        <h5>Encrypt / Decrypt</h5>
+        <button @click="getEncryptionKey">Get Encryption Key</button>
+        <div>
+          <input :style="{ marginLeft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
+          <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
+        </div>
+        <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
+      </section>
+      <section>
+        <h5>Add Asset</h5>
+        <button @click="addErc20Token">Add Erc20 Token</button>
+        <button @click="addCollectible">Add NFT</button>
+      </section>
+    </section> -->
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
 import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from "@toruslabs/torus-embed";
-import { getV3TypedData, getV4TypedData, loginConfig, whiteLabelData } from "./data";
 import { encrypt, recoverTypedMessage } from "eth-sig-util";
 import { ethers } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
-import web3Obj from "./helpers";
 import tokenAbi from "human-standard-token-abi";
+import { defineComponent } from "vue";
 
-export default Vue.extend({
-  name: "app",
+import { getV3TypedData, getV4TypedData, loginConfig, whiteLabelData } from "./data";
+import web3Obj from "./helpers";
+
+export default defineComponent({
+  name: "App",
   data() {
     return {
       privateKey: "",
@@ -137,6 +263,7 @@ export default Vue.extend({
       encryptionKey: "",
       messageEncrypted: "",
       buildEnv: "lrc" as TORUS_BUILD_ENV_TYPE,
+      publicAddressList: ["google", "discord", "reddit"],
     };
   },
   mounted() {
@@ -147,8 +274,8 @@ export default Vue.extend({
     web3Obj.torus = torus;
   },
   methods: {
-    onSelectedVerifierChanged(e: Event) {
-      this.selectedVerifier = (e.target as HTMLSelectElement).value;
+    onSelectedVerifierChanged(verifier: string) {
+      this.selectedVerifier = verifier;
       switch (this.selectedVerifier) {
         case "google":
           this.placeholder = "Enter google email";
@@ -162,6 +289,7 @@ export default Vue.extend({
         default:
           break;
       }
+      this.verifierId = "";
     },
     async loginWithPrivateKey() {
       try {
@@ -274,9 +402,23 @@ export default Vue.extend({
       await torus.showWalletConnectScanner();
     },
     console(...args: any[]): void {
-      const el = document.querySelector("#console>p");
+      const el = document.querySelector("#console>pre");
+      const consoleBtn = document.querySelector<HTMLElement>("#console>div.clear-console-btn");
       if (el) {
         el.innerHTML = JSON.stringify(args || {}, null, 2);
+      }
+      if (consoleBtn) {
+        consoleBtn.style.display = "block";
+      }
+    },
+    clearConsole() {
+      const el = document.querySelector("#console>pre");
+      const consoleBtn = document.querySelector<HTMLElement>("#console>div.clear-console-btn");
+      if (el) {
+        el.innerHTML = "";
+      }
+      if (consoleBtn) {
+        consoleBtn.style.display = "none";
       }
     },
     createPaymentTx() {
@@ -559,7 +701,7 @@ export default Vue.extend({
         {
           method: "wallet_switchEthereumChain",
           params: {
-            chainId: "0x5"
+            chainId: "0x5",
           },
         },
         (err: Error, result: any) => {
@@ -681,36 +823,32 @@ export default Vue.extend({
     stringifiableToHex(value: any): string {
       return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)));
     },
+    copyAccountAddress() {
+      navigator.clipboard.writeText(this.publicAddress);
+    },
+    getAddress() {
+      if (this.publicAddress.length < 11) {
+        return this.publicAddress;
+      }
+      if (typeof this.publicAddress !== "string") return "";
+      return `${this.publicAddress.slice(0, 5)}...${this.publicAddress.slice(-5)}`;
+    },
+    async toggleButton() {
+      const { torus } = web3Obj;
+      const toggleChecked = (document.getElementById("default-toggle") as HTMLInputElement)?.checked;
+      if (!toggleChecked) {
+        await torus?.hideTorusButton();
+        // showButton.value = false;
+      } else {
+        await torus?.showTorusButton();
+        // showButton.value = true;
+      }
+      // debugConsole(toggleChecked ? "show button" : "hide button");
+    },
   },
 });
 </script>
 
-<style>
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-#console {
-  border: 0px solid black;
-  height: 40px;
-  padding: 2px;
-  text-align: left;
-  width: calc(100% - 20px);
-  border-radius: 5px;
-  margin-top: 20px;
-  margin-bottom: 80px;
-}
-#console > p {
-  margin: 0.5em;
-}
-button {
-  height: 25px;
-  margin: 5px;
-  background: none;
-  border-radius: 5px;
-}
+<style scoped>
+@import "./App.css";
 </style>
