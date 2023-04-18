@@ -4,7 +4,7 @@
     <p class="login-subheading">Build Environment : {{ buildEnv }}</p>
     <div class="align-left md-bottom-gutter">
       <label class="btn-label">Select build environment</label>
-      <select v-model="buildEnv" name="buildEnv" class="login-input select-input">
+      <select v-model="buildEnv" name="buildEnv" class="login-input select-input bg-dropdown">
         <option value="production">Production</option>
         <option value="binance">Binance</option>
         <option selected value="testing">Testing</option>
@@ -82,6 +82,16 @@
               <button class="custom-btn cursor-pointer" @click="changeProvider">Change Provider</button>
             </div>
           </div>
+          <div class="flex-row bottom-gutter">
+            <div class="btn-block">
+              <p class="btn-label">Add Provider</p>
+              <button class="custom-btn cursor-pointer" @click="addChain">Add Chain with provider</button>
+            </div>
+            <div class="btn-block">
+              <p class="btn-label">Switch Provider</p>
+              <button class="custom-btn cursor-pointer" @click="switchChain">Switch Chain with provider</button>
+            </div>
+          </div>
           <p class="btn-label">Public address</p>
           <div class="flex items-center justify-start gap-4 mb-4">
             <div
@@ -91,15 +101,23 @@
               @click="onSelectedVerifierChanged(item)"
             >
               <img
+                v-if="item !== 'email_passwordless'"
                 class="cursor-pointer items-center justify-center flex self-center"
                 :src="`https://images.web3auth.io/login-${item}-active.svg`"
                 :alt="`${item} Icon`"
               />
+              <img v-else :src="require('./assets/mail.svg')" alt="Email Passwordless" width="30" height="30" />
             </div>
           </div>
           <div class="flex-row bottom-gutter">
             <input v-model="verifierId" :placeholder="placeholder" class="login-input select-input md-bottom-gutter" style="width: 273px" />
-            <button class="custom-btn" @click="getPublicAddress">Get Public Address</button>
+            <button
+              class="custom-btn cursor-pointer disabled:!text-gray-200 disabled:border-gray-200 disabled:cursor-not-allowed"
+              :disabled="verifierId === ''"
+              @click="getPublicAddress"
+            >
+              Get Public Address
+            </button>
           </div>
           <h1 class="details-heading">Blockchain APIs</h1>
           <p class="btn-label">Signing</p>
@@ -263,7 +281,7 @@ export default defineComponent({
       encryptionKey: "",
       messageEncrypted: "",
       buildEnv: "lrc" as TORUS_BUILD_ENV_TYPE,
-      publicAddressList: ["google", "discord", "reddit"],
+      publicAddressList: ["google", "discord", "reddit", "email_passwordless"],
     };
   },
   mounted() {
@@ -278,15 +296,16 @@ export default defineComponent({
       this.selectedVerifier = verifier;
       switch (this.selectedVerifier) {
         case "google":
-          this.placeholder = "Enter google email";
+          this.placeholder = "Enter Google Email";
           break;
         case "reddit":
-          this.placeholder = "Enter reddit username";
+          this.placeholder = "Enter Reddit Username";
           break;
         case "discord":
           this.placeholder = "Enter Discord ID";
           break;
         default:
+          this.placeholder = "Enter Email ID";
           break;
       }
       this.verifierId = "";

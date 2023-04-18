@@ -180,7 +180,7 @@ body,
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  width: 586px;
+  width: 604px;
 }
 
 .dashboard-details-console-container {
@@ -319,6 +319,13 @@ body,
   box-sizing: border-box;
   font-size: 14px;
   font-weight: 400;
+  background-repeat: no-repeat;
+  appearance: none;
+  background-position: right 16px top 50%;
+}
+
+.bg-dropdown {
+  background-image: url("./assets/down.svg");
 }
 
 .align-left {
