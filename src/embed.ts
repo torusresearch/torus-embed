@@ -415,14 +415,16 @@ class Torus {
     const showWalletHandler = (chunk) => {
       if (chunk.name === "show_wallet_instance") {
         // Let the error propogate up (hence, no try catch)
-        const { instanceId, target } = chunk.data;
+        const { instanceId, target, ...extraParams } = chunk.data;
         const finalUrl = new URL(`${this.torusUrl}/wallet${finalPath}`);
         // Using URL constructor to prevent js injection and allow parameter validation.!
         finalUrl.searchParams.append("integrity", "true");
         finalUrl.searchParams.append("instanceId", instanceId);
-        Object.keys(params).forEach((x) => {
+
+        Object.keys({ ...extraParams, ...params }).forEach((x) => {
           finalUrl.searchParams.append(x, params[x]);
         });
+
         finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
         const walletWindow = new PopupHandler({
