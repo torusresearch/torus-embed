@@ -116,8 +116,6 @@ class Torus {
 
   private useWalletConnect: boolean;
 
-  private isCustomLogin = false;
-
   private popupMode: PopupMode = "popup";
 
   constructor({
@@ -177,7 +175,6 @@ class Torus {
     this.torusUrl = torusUrl;
     this.whiteLabel = whiteLabel;
     this.useWalletConnect = useWalletConnect;
-    this.isCustomLogin = !!(loginConfig && Object.keys(loginConfig).length > 0) || !!(whiteLabel && Object.keys(whiteLabel).length > 0);
 
     log.setDefaultLevel(logLevel);
     if (enableLogging) log.enableAll();
@@ -186,8 +183,6 @@ class Torus {
     const torusIframeUrl = new URL(torusUrl);
     if (torusIframeUrl.pathname.endsWith("/")) torusIframeUrl.pathname += "popup";
     else torusIframeUrl.pathname += "/popup";
-
-    torusIframeUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
     if (popupMode) {
       this.popupMode = popupMode;
@@ -417,15 +412,10 @@ class Torus {
         // Let the error propogate up (hence, no try catch)
         const { instanceId, target, ...extraParams } = chunk.data;
         const finalUrl = new URL(`${this.torusUrl}/wallet${finalPath}`);
-        // Using URL constructor to prevent js injection and allow parameter validation.!
-        finalUrl.searchParams.append("integrity", "true");
-        finalUrl.searchParams.append("instanceId", instanceId);
 
-        Object.keys({ ...extraParams, ...params }).forEach((x) => {
-          finalUrl.searchParams.append(x, params[x]);
+        Object.entries({ ...extraParams, ...params, instanceId }).forEach(([name, value]) => {
+          finalUrl.searchParams.append(name, value as string);
         });
-
-        finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
         const walletWindow = new PopupHandler({
           target: options.target || target,
@@ -600,9 +590,6 @@ class Torus {
 
     if (popupMode === "popup") {
       const finalUrl = new URL(url || `${this.torusUrl}/redirect?preopenInstanceId=${preopenInstanceId}`);
-
-      if (finalUrl.hash) finalUrl.hash += `&isCustomLogin=${this.isCustomLogin}`;
-      else finalUrl.hash = `#isCustomLogin=${this.isCustomLogin}`;
 
       const handledWindow = new PopupHandler({ url: finalUrl, target, features });
 
