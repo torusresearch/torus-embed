@@ -712,6 +712,11 @@ export interface TorusParams {
   sessionId?: string;
 
   /**
+   * [Cere wallet] Holds current Open Login session namespace
+   */
+  sessionNamespace?: string;
+
+  /**
    * [Cere wallet] Transaction popups mode. Overrides the constructor option.
    */
   popupMode?: PopupMode;

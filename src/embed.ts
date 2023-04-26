@@ -168,6 +168,7 @@ class Torus {
     mfaLevel = "default",
     context,
     sessionId,
+    sessionNamespace,
     popupMode,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
@@ -190,6 +191,10 @@ class Torus {
 
     if (popupMode) {
       this.popupMode = popupMode;
+    }
+
+    if (sessionNamespace) {
+      torusIframeUrl.searchParams.append("sessionNamespace", sessionNamespace);
     }
 
     // Iframe code
