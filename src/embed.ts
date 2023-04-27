@@ -696,6 +696,10 @@ class Torus {
           style.right = "auto";
           break;
       }
+
+      try {
+        window.focus();
+      } catch {}
     } else {
       style.display = "block";
       style.width = "100%";
@@ -704,6 +708,10 @@ class Torus {
       style.right = "0px";
       style.left = "0px";
       style.bottom = "0px";
+
+      try {
+        this.torusIframe.contentWindow.focus();
+      } catch {}
     }
     Object.assign(this.torusIframe.style, style);
     this.isIframeFullScreen = isFull;
