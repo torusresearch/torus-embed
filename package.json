@@ -29,7 +29,7 @@
   "dependencies": {
     "@metamask/obs-store": "^8.1.0",
     "@toruslabs/http-helpers": "^4.0.0",
-    "@toruslabs/openlogin-jrpc": "^4.3.0",
+    "@toruslabs/openlogin-jrpc": "^4.4.0",
     "create-hash": "^1.2.0",
     "end-of-stream": "^1.4.4",
     "eth-rpc-errors": "^4.0.3",
