@@ -5,7 +5,6 @@ import deepmerge from "lodash.merge";
 import configuration from "./config";
 import { documentReady, handleStream, htmlToElement, runOnLoad } from "./embedUtils";
 import TorusInpageProvider from "./inpage-provider";
-import generateIntegrity from "./integrity";
 import {
   BUTTON_POSITION,
   BUTTON_POSITION_TYPE,
@@ -47,10 +46,6 @@ const defaultVerifiers = {
   [LOGIN_PROVIDER.DISCORD]: true,
 };
 
-const iframeIntegrity = "sha384-5wfQNApq4YIunQu3JVyIfoWQHdz5824c+mHr1WOMddVX9N+d6ErcA25MCuLSLeQH";
-
-const expectedCacheControlHeader = "max-age=3600";
-
 const UNSAFE_METHODS = [
   "eth_sendTransaction",
   "eth_signTypedData",
@@ -68,7 +63,7 @@ const UNSAFE_METHODS = [
   try {
     if (typeof document === "undefined") return;
     const torusIframeHtml = document.createElement("link");
-    const { torusUrl } = await getTorusUrl("production", { check: false, hash: iframeIntegrity, version: "" });
+    const { torusUrl } = await getTorusUrl("production", { version: "" });
     torusIframeHtml.href = `${torusUrl}/popup`;
     torusIframeHtml.crossOrigin = "anonymous";
     torusIframeHtml.type = "text/html";
@@ -174,8 +169,6 @@ class Torus {
     loginConfig = {},
     showTorusButton = true,
     integrity = {
-      check: false,
-      hash: iframeIntegrity,
       version: "",
     },
     whiteLabel,
@@ -268,30 +261,7 @@ class Torus {
       });
     };
 
-    if (buildEnv === "production" && integrity.check) {
-      // hacky solution to check for iframe integrity
-      const fetchUrl = `${torusUrl}/popup`;
-      const resp = await fetch(fetchUrl, { cache: "reload" });
-      if (resp.headers.get("Cache-Control") !== expectedCacheControlHeader) {
-        throw new Error(`Unexpected Cache-Control headers, got ${resp.headers.get("Cache-Control")}`);
-      }
-      const response = await resp.text();
-      const calculatedIntegrity = generateIntegrity(
-        {
-          algorithms: ["sha384"],
-        },
-        response
-      );
-      log.info(calculatedIntegrity, "integrity");
-      if (calculatedIntegrity === integrity.hash) {
-        await handleSetup();
-      } else {
-        this.clearInit();
-        throw new Error("Integrity check failed");
-      }
-    } else {
-      await handleSetup();
-    }
+    await handleSetup();
     return undefined;
   }
 
