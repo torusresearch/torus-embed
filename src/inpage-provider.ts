@@ -1,4 +1,3 @@
-import { ObservableStore, storeAsStream } from "@metamask/obs-store";
 import {
   createIdRemapMiddleware,
   createStreamMiddleware,
@@ -29,6 +28,8 @@ import {
 } from "./interfaces";
 import log from "./loglevel";
 import messages from "./messages";
+import { ObservableStore } from "./ObservableStore";
+import { storeAsStream } from "./ObservableStoreStream";
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from "./utils";
 
 SafeEventEmitter.defaultMaxListeners = 100;
