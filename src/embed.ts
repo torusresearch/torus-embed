@@ -3,7 +3,7 @@ import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Su
 import deepmerge from "lodash.merge";
 
 import configuration from "./config";
-import { documentReady, handleStream, htmlToElement, runOnLoad } from "./embedUtils";
+import { handleStream, htmlToElement, runOnLoad } from "./embedUtils";
 import TorusInpageProvider from "./inpage-provider";
 import {
   BUTTON_POSITION,
@@ -210,47 +210,41 @@ class Torus {
     const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()];
     this.embedTranslations = languageTranslations.embed;
 
-    const handleSetup = async () => {
-      await documentReady();
-      return new Promise((resolve, reject) => {
-        this.torusIframe.onload = async () => {
-          // only do this if iframe is not full screen
-          this._setupWeb3();
-          const initStream = this.communicationMux.getStream("init_stream") as Substream;
-          initStream.on("data", (chunk) => {
-            const { name, data, error } = chunk;
-            if (name === "init_complete" && data.success) {
-              // resolve promise
-              this.isInitialized = true;
-              this._displayIframe(this.isIframeFullScreen);
-              resolve(undefined);
-            } else if (error) {
-              reject(new Error(error));
-            }
-          });
-          initStream.write({
-            name: "init_stream",
-            data: {
-              loginConfig,
-              whiteLabel: this.whiteLabel,
-              buttonPosition: this.buttonPosition,
-              buttonSize: this.buttonSize,
-              torusWidgetVisibility: this.torusWidgetVisibility,
-              apiKey: this.apiKey,
-              skipTKey,
-              network,
-              mfaLevel,
-            },
-          });
-        };
-        window.document.head.appendChild(this.styleLink);
-        window.document.body.appendChild(this.torusIframe);
-        window.document.body.appendChild(this.torusAlertContainer);
-      });
-    };
-
-    await handleSetup();
-    return undefined;
+    return new Promise((resolve, reject) => {
+      this.torusIframe.onload = async () => {
+        // only do this if iframe is not full screen
+        this._setupWeb3();
+        const initStream = this.communicationMux.getStream("init_stream") as Substream;
+        initStream.on("data", (chunk) => {
+          const { name, data, error } = chunk;
+          if (name === "init_complete" && data.success) {
+            // resolve promise
+            this.isInitialized = true;
+            this._displayIframe(this.isIframeFullScreen);
+            resolve(undefined);
+          } else if (error) {
+            reject(new Error(error));
+          }
+        });
+        initStream.write({
+          name: "init_stream",
+          data: {
+            loginConfig,
+            whiteLabel: this.whiteLabel,
+            buttonPosition: this.buttonPosition,
+            buttonSize: this.buttonSize,
+            torusWidgetVisibility: this.torusWidgetVisibility,
+            apiKey: this.apiKey,
+            skipTKey,
+            network,
+            mfaLevel,
+          },
+        });
+      };
+      window.document.head.appendChild(this.styleLink);
+      window.document.body.appendChild(this.torusIframe);
+      window.document.body.appendChild(this.torusAlertContainer);
+    });
   }
 
   login({ verifier = "", login_hint: loginHint = "" }: TorusLoginParams = {}): Promise<string[]> {
