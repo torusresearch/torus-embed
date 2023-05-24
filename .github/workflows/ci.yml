@@ -66,7 +66,7 @@ jobs:
       - name: invalidate
         if: github.ref == 'refs/heads/master'
         uses: chaitanyapotti/cloudfront-update-distribution@v2
-        env:
+        with:
           cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
           cloudfront-invalidation-required: true
           cloudfront-invalidation-path: "/*"
