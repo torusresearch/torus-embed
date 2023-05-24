@@ -1,14 +1,5 @@
 import { JRPCId, JRPCMiddleware, JRPCRequest, JRPCVersion, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
-import createHash from "create-hash";
 import type { Duplex } from "readable-stream";
-
-export const LOGIN_PROVIDER = {
-  GOOGLE: "google",
-  FACEBOOK: "facebook",
-  TWITCH: "twitch",
-  REDDIT: "reddit",
-  DISCORD: "discord",
-} as const;
 
 export const WALLET_VERIFIERS = {
   GOOGLE: "google",
@@ -75,17 +66,6 @@ export interface IPaymentProvider {
   includeFees: boolean;
   enforceMax: boolean;
   sell?: boolean;
-}
-
-export interface IHashAlgorithmOptions {
-  algorithms?: createHash.algorithm[];
-  delimiter?: string;
-  full?: boolean;
-}
-
-export interface SRI {
-  hashes: Record<createHash.algorithm, string>;
-  integrity?: string;
 }
 
 export const BUTTON_POSITION = {
@@ -492,17 +472,6 @@ export interface ThemeParams {
 }
 
 export interface IntegrityParams {
-  /**
-   * Whether to check for integrity.
-   * Defaults to false
-   * @defaultValue false
-   */
-  check: boolean;
-  /**
-   * if check is true, hash must be provided. The SRI sha-384 integrity hash
-   * {@link https://www.srihash.org/ | SRI Hash}
-   */
-  hash?: string;
   /**
    * Version of torus-website to load
    */
