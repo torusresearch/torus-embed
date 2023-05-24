@@ -9,7 +9,6 @@ import {
   BUTTON_POSITION,
   BUTTON_POSITION_TYPE,
   EMBED_TRANSLATION_ITEM,
-  LOGIN_PROVIDER,
   NetworkInterface,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
@@ -37,14 +36,6 @@ import {
   getUserLanguage,
   validatePaymentProvider,
 } from "./utils";
-
-const defaultVerifiers = {
-  [LOGIN_PROVIDER.GOOGLE]: true,
-  [LOGIN_PROVIDER.FACEBOOK]: true,
-  [LOGIN_PROVIDER.REDDIT]: true,
-  [LOGIN_PROVIDER.TWITCH]: true,
-  [LOGIN_PROVIDER.DISCORD]: true,
-};
 
 const UNSAFE_METHODS = [
   "eth_sendTransaction",
@@ -156,8 +147,6 @@ class Torus {
   async init({
     buildEnv = TORUS_BUILD_ENV.PRODUCTION,
     enableLogging = false,
-    // deprecated: use loginConfig instead
-    enabledVerifiers = defaultVerifiers,
     network = {
       host: "mainnet",
       chainId: null,
@@ -242,7 +231,6 @@ class Torus {
           initStream.write({
             name: "init_stream",
             data: {
-              enabledVerifiers,
               loginConfig,
               whiteLabel: this.whiteLabel,
               buttonPosition: this.buttonPosition,
