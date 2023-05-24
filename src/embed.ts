@@ -3,7 +3,7 @@ import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Su
 import deepmerge from "lodash.merge";
 
 import configuration from "./config";
-import { handleStream, htmlToElement, runOnLoad } from "./embedUtils";
+import { handleStream, htmlToElement } from "./embedUtils";
 import TorusInpageProvider from "./inpage-provider";
 import {
   BUTTON_POSITION,
@@ -812,28 +812,21 @@ class Torus {
     const btnContainer = htmlToElement('<div id="torusAlert__btn-container"></div>');
     btnContainer.appendChild(successAlert);
     torusAlert.appendChild(btnContainer);
-    const bindOnLoad = () => {
-      successAlert.addEventListener("click", () => {
-        this._handleWindow(preopenInstanceId, {
-          url,
-          target: "_blank",
-          features: FEATURES_CONFIRM_WINDOW,
-        });
-        torusAlert.remove();
-
-        if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = "none";
-      });
-    };
-
     this._setEmbedWhiteLabel(torusAlert);
 
-    const attachOnLoad = () => {
-      this.torusAlertContainer.style.display = "block";
-      this.torusAlertContainer.appendChild(torusAlert);
-    };
+    this.torusAlertContainer.style.display = "block";
+    this.torusAlertContainer.appendChild(torusAlert);
 
-    runOnLoad(attachOnLoad);
-    runOnLoad(bindOnLoad);
+    successAlert.addEventListener("click", () => {
+      this._handleWindow(preopenInstanceId, {
+        url,
+        target: "_blank",
+        features: FEATURES_CONFIRM_WINDOW,
+      });
+      torusAlert.remove();
+
+      if (this.torusAlertContainer.children.length === 0) this.torusAlertContainer.style.display = "none";
+    });
   }
 }
 
