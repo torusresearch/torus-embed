@@ -33,7 +33,7 @@ import Web3 from "web3";
 const torus = new Torus();
 await torus.init();
 await torus.login(); // await torus.ethereum.enable()
-const web3 = new Web3(torus.provider); 
+const web3 = new Web3(torus.provider);
 ```
 
 ## 🩹 Examples
@@ -135,7 +135,7 @@ entry-point: `index.js`
 ## Requirements
 
 - This package requires a peer dependency of `@babel/runtime`
-- Node 14+
+- Node 16+
 
 ## License
 
