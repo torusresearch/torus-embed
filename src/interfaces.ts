@@ -1,14 +1,6 @@
 import { JRPCId, JRPCMiddleware, JRPCRequest, JRPCVersion, SafeEventEmitter } from "@toruslabs/openlogin-jrpc";
 import type { Duplex } from "readable-stream";
 
-export const LOGIN_PROVIDER = {
-  GOOGLE: "google",
-  FACEBOOK: "facebook",
-  TWITCH: "twitch",
-  REDDIT: "reddit",
-  DISCORD: "discord",
-} as const;
-
 export const WALLET_VERIFIERS = {
   GOOGLE: "google",
   FACEBOOK: "facebook",
