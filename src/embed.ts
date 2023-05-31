@@ -131,12 +131,6 @@ class Torus {
     this.torusWidgetVisibility = true;
     this.requestedVerifier = "";
     this.currentVerifier = "";
-    // this.nodeDetailManager = new NodeDetailManager();
-    // this.torusJs = new TorusJs({
-    //   metadataHost: "https://metadata.tor.us",
-    //   allowHost: "https://signer.tor.us/api/allow",
-    //   network: "mainnet",
-    // });
     this.apiKey = apiKey;
     setAPIKey(apiKey);
     this.modalZIndex = modalZIndex;
@@ -161,7 +155,6 @@ class Torus {
       version: "",
     },
     whiteLabel,
-    skipTKey = false,
     useWalletConnect = false,
     mfaLevel = "default",
   }: TorusParams = {}): Promise<void> {
@@ -235,7 +228,6 @@ class Torus {
             buttonSize: this.buttonSize,
             torusWidgetVisibility: this.torusWidgetVisibility,
             apiKey: this.apiKey,
-            skipTKey,
             network,
             mfaLevel,
           },
