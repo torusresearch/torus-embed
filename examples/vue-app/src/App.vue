@@ -16,6 +16,7 @@
               <option value="development">Development</option>
               <option value="lrc">LRC</option>
               <option value="beta">Beta</option>
+              <option value="alpha">Alpha</option>
             </select>
             <button @click="login(true)">Login</button>
             <button @click="login(false)">Login without whitelabel</button>
@@ -559,7 +560,7 @@ export default Vue.extend({
         {
           method: "wallet_switchEthereumChain",
           params: {
-            chainId: "0x5"
+            chainId: "0x5",
           },
         },
         (err: Error, result: any) => {
