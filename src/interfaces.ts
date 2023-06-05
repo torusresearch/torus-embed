@@ -46,6 +46,7 @@ export const TORUS_BUILD_ENV = {
   BETA: "beta",
   BNB: "bnb",
   POLYGON: "polygon",
+  ALPHA: "alpha",
 } as const;
 
 export type PAYMENT_PROVIDER_TYPE = (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
@@ -601,12 +602,6 @@ export interface TorusParams {
    */
   showTorusButton?: boolean;
   /**
-   * setting false, hides those verifiers from login modal
-   * @deprecated
-   * Please use loginConfig instead
-   */
-  enabledVerifiers?: VerifierStatus;
-  /**
    * Array of login config items. Used to modify the default logins/ add new logins
    */
   loginConfig?: LoginConfig;
@@ -618,13 +613,6 @@ export interface TorusParams {
    * Params to enable whitelabelling of torus website and widget
    */
   whiteLabel?: WhiteLabelParams;
-  /**
-   * Skips TKey onboarding for new users
-   *
-   * Defaults to false
-   * @defaultValue false
-   */
-  skipTKey?: boolean;
 
   /**
    * Setting `useWalletConnect` to true allows to display wallet connect qr scanner from torus-embed.
