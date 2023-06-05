@@ -55,6 +55,7 @@ export const TORUS_BUILD_ENV = {
   BETA: "beta",
   BNB: "bnb",
   POLYGON: "polygon",
+  ALPHA: "alpha",
 } as const;
 
 export type PAYMENT_PROVIDER_TYPE = (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];

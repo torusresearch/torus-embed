@@ -177,6 +177,10 @@ export const getTorusUrl = async (
       torusUrl = "http://localhost:4050";
       logLevel = "debug";
       break;
+    case "alpha":
+      torusUrl = "https://alpha.tor.us";
+      logLevel = "debug";
+      break;
     default:
       torusUrl = `https://app.tor.us/v${versionUsed}`;
       logLevel = "error";
