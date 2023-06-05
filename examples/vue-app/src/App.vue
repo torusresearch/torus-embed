@@ -169,7 +169,7 @@ export default Vue.extend({
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
         await torus?.init({
-          // useWalletConnect: true,
+          useWalletConnect: true,
           buildEnv: this.buildEnv,
           enabledVerifiers: {
             reddit: false,
