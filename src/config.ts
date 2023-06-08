@@ -19,18 +19,32 @@ const paymentProviders = {
         { value: "mkr", display: "MKR" },
         { value: "matic", display: "MATIC" },
         { value: "usdt", display: "USDT" },
+        { value: "uni", display: "UNI" },
         { value: "usdc", display: "USDC" },
+        { value: "weth", display: "WETH" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.MATIC]: [
         { value: "eth_polygon", display: "ETH" },
         { value: "matic_polygon", display: "MATIC" },
         { value: "usdc_polygon", display: "USDC" },
+        { value: "usdt_polygon", display: "USDT" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [
         { value: "bnb_bsc", display: "BNB" },
         { value: "busd_bsc", display: "BUSD" },
       ],
-      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "avax_cchain", display: "AVAX" }],
+      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [
+        { value: "avax_cchain", display: "AVAX" },
+        { value: "usdc_cchain", display: "USDC" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.ARBITRUM_MAINNET]: [
+        { value: "eth_arbitrum", display: "ETH" },
+        { value: "usdc_arbitrum", display: "USDC" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.OPTIMISM_MAINNET]: [
+        { value: "eth_optimism", display: "ETH" },
+        { value: "usdc_optimism", display: "USDC" },
+      ],
     },
     includeFees: true,
     api: true,
@@ -47,18 +61,31 @@ const paymentProviders = {
     validCryptoCurrenciesByChain: {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
         { value: "AAVE", display: "AAVE" },
+        { value: "COMP", display: "COMP" },
         { value: "BAT", display: "BAT" },
         { value: "BUSD", display: "BUSD" },
         { value: "DAI", display: "DAI" },
         { value: "ETH", display: "ETH" },
+        { value: "WBTC", display: "WBTC" },
         { value: "MKR", display: "MKR" },
         { value: "UNI", display: "UNI" },
+        { value: "WETH", display: "WETH" },
         { value: "USDC", display: "USDC" },
         { value: "USDT", display: "USDT" },
       ],
-      [SUPPORTED_PAYMENT_NETWORK.MATIC]: [{ value: "MUSDC", display: "USDC" }],
-      // AVAXC? or AVAX?
-      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "AVAXC", display: "AVAXC" }],
+      [SUPPORTED_PAYMENT_NETWORK.MATIC]: [
+        { value: "mUSDC", display: "USDC" },
+        { value: "MATIC", display: "MATIC" },
+        { value: "MWETH", display: "WETH" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [
+        { value: "AVAXC", display: "AVAX" },
+        { value: "AVAXCUSDC", display: "USDC" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [
+        { value: "BNB", display: "BNB" },
+        { value: "BBUSD", display: "BUSD" },
+      ],
     },
     includeFees: false,
     api: true,
@@ -76,18 +103,37 @@ const paymentProviders = {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
         { value: "ETH", display: "ETH" },
         { value: "DAI", display: "DAI" },
+        { value: "BAT", display: "BAT" },
         { value: "USDC", display: "USDC" },
         { value: "USDT", display: "USDT" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.MATIC]: [
+        { value: "MATIC_BAT", display: "BAT" },
         { value: "MATIC_DAI", display: "DAI" },
         { value: "MATIC_MATIC", display: "MATIC" },
         { value: "MATIC_USDC", display: "USDC" },
+        { value: "MATIC_USDT", display: "USDT" },
       ],
-      // what about AVAXC?
-      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "AVAX", display: "AVAX" }],
-      // Temporary unavailable
-      // [SUPPORTED_PAYMENT_NETWORK.XDAI]: [{ value: 'XDAI_XDAI', display: 'XDAI' }],
+      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [
+        { value: "AVAX_AVAX", display: "AVAX" },
+        { value: "AVAX_USDC", display: "USDC" },
+        { value: "AVAX_USDT", display: "USDT" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.ARBITRUM_MAINNET]: [
+        { value: "ARBITRUM_ETH", display: "ETH" },
+        { value: "ARBITRUM_USDC.e	", display: "USDC" },
+        { value: "ARBITRUM_USDT", display: "USDT" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.OPTIMISM_MAINNET]: [
+        { value: "OPTIMISM_DAI", display: "DAI" },
+        { value: "OPTIMISM_OPTIMISM", display: "OPTIMISM" },
+        { value: "OPTIMISM_USDC", display: "USDC" },
+        { value: "OPTIMISM_USDT", display: "USDT" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [
+        { value: "BSC_BNB", display: "BNB" },
+        { value: "BSC_BUSD", display: "BUSD" },
+      ],
     },
     includeFees: true,
     api: true,
@@ -106,6 +152,7 @@ const paymentProviders = {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
         { value: "ETH", display: "ETH" },
         { value: "USDT", display: "USDT" },
+        { value: "USDC", display: "USDC" },
       ],
     },
     includeFees: true,
@@ -133,6 +180,8 @@ const paymentProviders = {
         { value: "BUSD", display: "BUSD" },
         { value: "1INCH", display: "1INCH" },
       ],
+      [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "AVAX", display: "AVAX" }],
+      [SUPPORTED_PAYMENT_NETWORK.MATIC]: [{ value: "MATIC", display: "MATIC" }],
     },
     includeFees: true,
     api: true,
@@ -148,6 +197,8 @@ const paymentProviders = {
     validCurrencies: supportedFiatCurrencies(PAYMENT_PROVIDER.TRANSAK),
     validCryptoCurrenciesByChain: {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
+        { value: "1INCH", display: "1INCH" },
+        { value: "BAT", display: "BAT" },
         { value: "AAVE", display: "AAVE" },
         { value: "DAI", display: "DAI" },
         { value: "ETH", display: "ETH" },
@@ -155,6 +206,7 @@ const paymentProviders = {
         { value: "USDT", display: "USDT" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.MATIC]: [
+        { value: "BAT", display: "BAT" },
         { value: "AAVE", display: "AAVE" },
         { value: "DAI", display: "DAI" },
         { value: "MATIC", display: "MATIC" },
@@ -163,10 +215,19 @@ const paymentProviders = {
         { value: "WETH", display: "WETH" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [
+        { value: "BAT", display: "BAT" },
         { value: "BNB", display: "BNB" },
         { value: "BUSD", display: "BUSD" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.AVALANCHE_MAINNET]: [{ value: "AVAX", display: "AVAX" }],
+      [SUPPORTED_PAYMENT_NETWORK.OPTIMISM_MAINNET]: [
+        { value: "ETH", display: "ETH" },
+        { value: "USDC", display: "USDC" },
+      ],
+      [SUPPORTED_PAYMENT_NETWORK.ARBITRUM_MAINNET]: [
+        { value: "USDC", display: "USDC" },
+        { value: "ETH", display: "ETH" },
+      ],
     },
     includeFees: true,
     enforceMax: true,
@@ -182,19 +243,18 @@ const paymentProviders = {
     validCryptoCurrenciesByChain: {
       [SUPPORTED_PAYMENT_NETWORK.MAINNET]: [
         { value: "ETH", display: "ETH" },
+        { value: "DAI", display: "DAI" },
+        { value: "MKR", display: "MKR" },
         { value: "USDT", display: "USDT" },
         { value: "BUSD", display: "BUSD" },
-        { value: "LINK", display: "LINK" },
         { value: "USDC", display: "USDC" },
-        { value: "CHZ", display: "CHZ" },
         { value: "BAT", display: "BAT" },
-        { value: "MANA", display: "MANA" },
         { value: "AAVE", display: "AAVE" },
         { value: "COMP", display: "COMP" },
-        { value: "ENJ", display: "ENJ" },
+        { value: "UNI", display: "UNI" },
       ],
       [SUPPORTED_PAYMENT_NETWORK.MATIC]: [{ value: "MATIC", display: "MATIC" }],
-      // [SUPPORTED_PAYMENT_NETWORK.BSC_MAINNET]: [{ value: "BNB", display: "BNB" }],
+      // [BSC_MAINNET]: [{ value: 'BNB', display: 'BNB' }],
     },
     includeFees: true,
     enforceMax: true,
