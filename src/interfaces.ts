@@ -104,7 +104,9 @@ export type LOGIN_TYPE =
   | "line"
   | "jwt"
   | "email_password"
-  | "passwordless";
+  | "passwordless"
+  | "wechat"
+  | "kakao";
 
 export interface TorusCtorArgs {
   /**

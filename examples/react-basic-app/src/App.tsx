@@ -43,9 +43,6 @@ class App extends React.Component {
       const { buildEnv, chainIdNetworkMap, chainId } = this.state;
       await torus.init({
         buildEnv,
-        enabledVerifiers: {
-          reddit: false,
-        },
         enableLogging: true,
         network: {
           host: chainIdNetworkMap[chainId.toString()], // mandatory
@@ -70,7 +67,6 @@ class App extends React.Component {
           },
         } : undefined,
         whiteLabel: whiteLabelData,
-        skipTKey: true,
       });
       const acc = await torus.login(); // await torus.ethereum.enable()
       console.log('acc', acc);
