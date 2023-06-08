@@ -171,9 +171,6 @@ export default Vue.extend({
         await torus?.init({
           useWalletConnect: true,
           buildEnv: this.buildEnv,
-          enabledVerifiers: {
-            reddit: false,
-          },
           enableLogging: true,
           network: {
             host: this.chainIdNetworkMap[this.chainId], // mandatory
@@ -220,9 +217,6 @@ export default Vue.extend({
         (window as any).torus = torus;
         await torus?.init({
           buildEnv: this.buildEnv,
-          enabledVerifiers: {
-            reddit: false,
-          },
           enableLogging: true,
           network: {
             host: this.chainIdNetworkMap[this.chainId], // mandatory
@@ -242,7 +236,6 @@ export default Vue.extend({
           // },
           loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
-          skipTKey: true,
           mfaLevel: "optional",
         });
         await torus?.login(); // await torus.ethereum.enable()

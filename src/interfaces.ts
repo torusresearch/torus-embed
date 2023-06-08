@@ -35,6 +35,8 @@ export const SUPPORTED_PAYMENT_NETWORK = {
   BSC_MAINNET: "bsc_mainnet",
   AVALANCHE_MAINNET: "avalanche_mainnet",
   XDAI: "xdai",
+  ARBITRUM_MAINNET: "arbitrum_mainnet",
+  OPTIMISM_MAINNET: "optimism_mainnet",
 } as const;
 
 export const TORUS_BUILD_ENV = {
@@ -104,7 +106,9 @@ export type LOGIN_TYPE =
   | "line"
   | "jwt"
   | "email_password"
-  | "passwordless";
+  | "passwordless"
+  | "wechat"
+  | "kakao";
 
 export interface TorusCtorArgs {
   /**

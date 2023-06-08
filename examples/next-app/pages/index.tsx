@@ -59,9 +59,6 @@ export default function Home() {
       const { torus, web3 } = web3Obj;
       await torus.init({
         buildEnv,
-        enabledVerifiers: {
-          reddit: false,
-        },
         enableLogging: true,
         network: {
           host: chainIdNetworkMap[chainId.toString()], // mandatory
@@ -89,7 +86,6 @@ export default function Home() {
               }
             : undefined,
         whiteLabel: whiteLabelData,
-        skipTKey: true,
       });
       await torus.login(); // await torus.ethereum.enable()
       sessionStorage.setItem("pageUsingTorus", buildEnv);
