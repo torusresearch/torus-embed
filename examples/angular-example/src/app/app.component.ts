@@ -91,9 +91,6 @@ export class AppComponent {
       const { buildEnv, chainIdNetworkMap, chainId } = this;
       await torus.init({
         buildEnv,
-        enabledVerifiers: {
-          reddit: false,
-        },
         enableLogging: true,
         network: {
           host: chainIdNetworkMap[chainId.toString()], // mandatory
@@ -121,7 +118,6 @@ export class AppComponent {
               }
             : undefined,
         whiteLabel: whiteLabelData,
-        skipTKey: true,
       });
       await torus.login(); // await torus.ethereum.enable()
       sessionStorage.setItem("pageUsingTorus", buildEnv);

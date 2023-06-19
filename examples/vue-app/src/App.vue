@@ -315,11 +315,8 @@ export default defineComponent({
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
         await torus?.init({
-          // useWalletConnect: true,
+          useWalletConnect: true,
           buildEnv: this.buildEnv,
-          enabledVerifiers: {
-            reddit: false,
-          },
           enableLogging: true,
           network: {
             host: this.chainIdNetworkMap[this.chainId], // mandatory
@@ -366,9 +363,6 @@ export default defineComponent({
         (window as any).torus = torus;
         await torus?.init({
           buildEnv: this.buildEnv,
-          enabledVerifiers: {
-            reddit: false,
-          },
           enableLogging: true,
           network: {
             host: this.chainIdNetworkMap[this.chainId], // mandatory
@@ -388,7 +382,6 @@ export default defineComponent({
           // },
           loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
-          skipTKey: true,
           mfaLevel: "optional",
         });
         await torus?.login(); // await torus.ethereum.enable()

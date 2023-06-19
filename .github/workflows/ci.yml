@@ -6,33 +6,20 @@ jobs:
   build:
     strategy:
       matrix:
-        node: ["16.x"]
+        node: ["18.x"]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Get npm cache directory
-        id: npm-cache
-        run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-
-      - name: Node dependency cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: ${{ matrix.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ matrix.os }}-node-
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
@@ -42,7 +29,7 @@ jobs:
 
       - name: Deploy to npm
         if: startsWith(github.ref, 'refs/tags/v')
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}" > ~/.npmrc && npm publish
+        run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc && npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -57,7 +44,7 @@ jobs:
       # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
         if: github.ref == 'refs/heads/master'
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -78,10 +65,9 @@ jobs:
       # Invalidate Cloudfront (this action)
       - name: invalidate
         if: github.ref == 'refs/heads/master'
-        uses: chetan/invalidate-cloudfront-action@master
-        env:
-          DISTRIBUTION: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
-          PATHS: "/*"
-          AWS_REGION: ${{ secrets.AWS_REGION_US }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        uses: chaitanyapotti/cloudfront-update-distribution@v2
+        with:
+          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          cloudfront-invalidation-required: true
+          cloudfront-invalidation-path: "/*"
+          cloudfront-wait-for-service-update: false
