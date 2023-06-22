@@ -1,7 +1,10 @@
 <template>
   <div v-if="!publicAddress" class="login-container h-screen">
     <h3 class="login-heading">Login With Torus</h3>
-    <p class="login-subheading">Build Environment : {{ buildEnv }}</p>
+    <p class="login-subheading">
+      Build Environment :
+      <span class="uppercase">{{ buildEnv }}</span>
+    </p>
     <div class="align-left md-bottom-gutter">
       <label class="btn-label">Select build environment</label>
       <select v-model="buildEnv" name="buildEnv" class="login-input select-input bg-dropdown">
@@ -29,14 +32,17 @@
   <div v-else class="dashboard-container p-0">
     <!-- Dashboard Header -->
     <div class="dashboard-header">
-      <div>
+      <div class="max-md:flex max-md:items-center max-md:justify-between max-md:w-full">
         <h1 class="dashboard-heading">demo-eth.tor.us</h1>
-        <p class="dashboard-subheading">Build environment : {{ buildEnv }}</p>
+        <p class="dashboard-subheading !font-bold sm:!font-normal">
+          Build environment :
+          <span class="uppercase">{{ buildEnv }}</span>
+        </p>
       </div>
-      <div class="dashboard-action-container">
-        <button class="dashboard-action-address" :title="publicAddress" @click.stop="copyAccountAddress">
+      <div class="dashboard-action-container flex items-end justify-end">
+        <button :class="['dashboard-action-address', { '!text-green-500': isCopied }]" :title="publicAddress" @click.stop="copyAccountAddress">
           <img :src="require('./assets/copy.svg')" alt="logout" height="14" width="14" />
-          {{ getAddress() }}
+          {{ isCopied ? "Copied" : getAddress() }}
         </button>
         <div class="dashboard-action-badge">
           <img :src="require('./assets/wifi.svg')" alt="logout" height="14" width="14" />
@@ -44,15 +50,18 @@
         </div>
         <button class="dashboard-action-logout" @click.stop="logout">
           <img :src="require('./assets/logout.svg')" alt="logout" height="20" width="20" />
-          Logout
+          <span class="hidden sm:block">Logout</span>
         </button>
       </div>
     </div>
     <!-- Dashboard Action Container -->
     <div class="dashboard-details-container">
       <div class="dashboard-details-btn-container">
-        <h1 class="details-heading">Torus Specific Info</h1>
-        <div class="mb-6">
+        <h1 class="details-heading px-6 pt-6 flex justify-between items-center">
+          <span>Torus Specific Info</span>
+          <span><img alt="down" class="cursor-pointer" src="./assets/down.svg" @click="isExpanded = !isExpanded" /></span>
+        </h1>
+        <div :class="['px-6', { 'pb-6': !isExpanded }]">
           <label for="default-toggle" class="inline-flex relative items-center cursor-pointer">
             <input type="checkbox" id="default-toggle" class="sr-only peer" checked @click="toggleButton" />
             <div
@@ -61,8 +70,8 @@
             <span class="ml-3 text-sm font-normal text-gray-400">Show Torus Button</span>
           </label>
         </div>
-        <div class="details-container">
-          <div class="flex-row bottom-gutter">
+        <div v-show="isExpanded" class="details-container">
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
             <div class="btn-block">
               <p class="btn-label">Wallet connect</p>
               <button class="custom-btn cursor-pointer" @click="showWalletConnect">Show wallet connect</button>
@@ -72,7 +81,7 @@
               <button class="custom-btn cursor-pointer" @click="createPaymentTx">Create</button>
             </div>
           </div>
-          <div class="flex-row bottom-gutter">
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
             <div class="btn-block">
               <p class="btn-label">User info</p>
               <button class="custom-btn cursor-pointer" @click="getUserInfo">Get User Info</button>
@@ -82,7 +91,7 @@
               <button class="custom-btn cursor-pointer" @click="changeProvider">Change Provider</button>
             </div>
           </div>
-          <div class="flex-row bottom-gutter">
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
             <div class="btn-block">
               <p class="btn-label">Add Provider</p>
               <button class="custom-btn cursor-pointer" @click="addChain">Add Chain with provider</button>
@@ -109,10 +118,10 @@
               <img v-else :src="require('./assets/mail.svg')" alt="Email Passwordless" width="30" height="30" />
             </div>
           </div>
-          <div class="flex-row bottom-gutter">
-            <input v-model="verifierId" :placeholder="placeholder" class="login-input select-input md-bottom-gutter" style="width: 273px" />
+          <div class="flex flex-col sm:!flex-row gap-2 items-center bottom-gutter w-full">
+            <input v-model="verifierId" :placeholder="placeholder" class="login-input select-input !w-full sm:!w-[272px]" />
             <button
-              class="custom-btn cursor-pointer disabled:!text-gray-200 disabled:border-gray-200 disabled:cursor-not-allowed"
+              class="custom-btn cursor-pointer disabled:!text-gray-200 disabled:border-gray-200 disabled:cursor-not-allowed w-full"
               :disabled="verifierId === ''"
               @click="getPublicAddress"
             >
@@ -124,20 +133,20 @@
           <div class="flex-row bottom-gutter">
             <button class="custom-btn cursor-pointer" @click="signMessageWithoutPopup">ETH without popup</button>
           </div>
-          <div class="flex-row bottom-gutter">
-            <button class="custom-btn cursor-pointer" @click="signPersonalMsg">Personal Sign</button>
-            <button class="custom-btn cursor-pointer" @click="signMessage">ETH Sign</button>
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer w-full" @click="signPersonalMsg">Personal Sign</button>
+            <button class="custom-btn cursor-pointer w-full" @click="signMessage">ETH Sign</button>
           </div>
-          <div class="flex-row bottom-gutter !gap-4">
-            <button class="custom-btn cursor-pointer" @click="signTypedData_v1">Typed data v1</button>
-            <button class="custom-btn cursor-pointer" @click="signTypedData_v3">Typed data v3</button>
-            <button class="custom-btn cursor-pointer" @click="signTypedData_v4">Typed data v4</button>
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer w-full" @click="signTypedData_v1">Typed data v1</button>
+            <button class="custom-btn cursor-pointer w-full" @click="signTypedData_v3">Typed data v3</button>
+            <button class="custom-btn cursor-pointer w-full" @click="signTypedData_v4">Typed data v4</button>
           </div>
           <p class="btn-label">Transactions</p>
-          <div class="flex-row bottom-gutter">
-            <button class="custom-btn cursor-pointe" @click="sendEth">Send ETH</button>
-            <button class="custom-btn cursor-pointe" @click="sendDai">Send DAI</button>
-            <button class="custom-btn cursor-pointe" @click="approveKnc">Approve Knc</button>
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer w-full" @click="sendEth">Send ETH</button>
+            <button class="custom-btn cursor-pointer w-full" @click="sendDai">Send DAI</button>
+            <button class="custom-btn cursor-pointer w-full" @click="approveKnc">Approve KNC</button>
           </div>
           <p class="btn-label">Encrypt / Decrypt</p>
           <div class="flex-row bottom-gutter">
@@ -168,9 +177,9 @@
             </div>
           </div>
           <p class="btn-label">Add Asset</p>
-          <div class="flex-row bottom-gutter">
-            <button class="custom-btn cursor-pointe" @click="addErc20Token">Add Erc20 Token</button>
-            <button class="custom-btn cursor-pointe" @click="addCollectible">Add NFT</button>
+          <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
+            <button class="custom-btn cursor-pointer w-full" @click="addErc20Token">Add Erc20 Token</button>
+            <button class="custom-btn cursor-pointer w-full" @click="addCollectible">Add NFT</button>
           </div>
         </div>
       </div>
@@ -182,68 +191,6 @@
         </div>
       </div>
     </div>
-    <!-- <section>
-      <div>
-        Public Address:
-        <i>{{ publicAddress }}</i>
-      </div>
-      <div>
-        Network:
-        <i>{{ chainIdNetworkMap[chainId] }}</i>
-      </div>
-    </section>
-    <section :style="{ marginTop: '20px' }">
-      <h4>Torus Specific Info</h4>
-      <button @click="showWalletConnect">Show Wallet Connect</button>
-      <button @click="toggleTorusWidget">Show/Hide Torus Button</button>
-      <button @click="getUserInfo">Get User Info</button>
-      <button @click="createPaymentTx">Create Payment Tx</button>
-      <button @click="changeProvider">Change Provider</button>
-      <button @click="addChain">Add Chain with provider</button>
-      <button @click="switchChain">Switch Chain with provider</button>
-      <div :style="{ marginTop: '20px' }">
-        <select name="verifier" :value="selectedVerifier" @change="onSelectedVerifierChanged">
-          <option selected value="google">Google</option>
-          <option value="reddit">Reddit</option>
-          <option value="discord">Discord</option>
-          <option value="torus-auth0-email-passwordless">Email Passwordless</option>
-        </select>
-        <input :style="{ marginLeft: '20px' }" v-model="verifierId" :placeholder="placeholder" />
-      </div>
-      <button :disabled="!verifierId" :style="{ marginTop: '20px' }" @click="getPublicAddress">Get Public Address</button>
-    </section>
-    <section :style="{ marginTop: '20px' }">
-      <h4>Blockchain Apis</h4>
-      <section>
-        <h5>Signing</h5>
-        <button @click="signMessageWithoutPopup">sign_eth_no_popup</button>
-        <button @click="signPersonalMsg">personal_sign</button>
-        <button @click="signMessage">sign_eth</button>
-        <button @click="signTypedData_v1">sign typed data v1</button>
-        <button @click="signTypedData_v3">sign typed data v3</button>
-        <button @click="signTypedData_v4">sign typed data v4</button>
-      </section>
-      <section>
-        <h5>Transactions</h5>
-        <button @click="sendEth">Send Eth</button>
-        <button @click="sendDai">Send DAI</button>
-        <button @click="approveKnc">Approve Knc</button>
-      </section>
-      <section>
-        <h5>Encrypt / Decrypt</h5>
-        <button @click="getEncryptionKey">Get Encryption Key</button>
-        <div>
-          <input :style="{ marginLeft: '20px' }" v-model="messageToEncrypt" placeholder="Message to encrypt" />
-          <button :disabled="!encryptionKey" @click="encryptMessage">Encrypt</button>
-        </div>
-        <button :disabled="!messageEncrypted" @click="decryptMessage">Decrypt</button>
-      </section>
-      <section>
-        <h5>Add Asset</h5>
-        <button @click="addErc20Token">Add Erc20 Token</button>
-        <button @click="addCollectible">Add NFT</button>
-      </section>
-    </section> -->
   </div>
 </template>
 
@@ -280,6 +227,8 @@ export default defineComponent({
       messageEncrypted: "",
       buildEnv: "lrc" as TORUS_BUILD_ENV_TYPE,
       publicAddressList: ["google", "discord", "reddit", "email_passwordless"],
+      isExpanded: true,
+      isCopied: false,
     };
   },
   mounted() {
@@ -776,6 +725,7 @@ export default defineComponent({
     async getUserInfo() {
       const { torus } = web3Obj;
       torus?.getUserInfo("").then(this.console).catch(this.console);
+      this.getScroll();
     },
     getPublicAddress() {
       const { torus } = web3Obj;
@@ -784,6 +734,7 @@ export default defineComponent({
         ?.getPublicAddress({ verifier: this.selectedVerifier, verifierId: this.verifierId } as VerifierArgs)
         .then(this.console)
         .catch(console.error);
+      this.getScroll();
     },
     getEncryptionKey() {
       const { web3 } = web3Obj;
@@ -801,12 +752,14 @@ export default defineComponent({
           return self.console(`encryption public key => ${result.result}`);
         }
       );
+      this.getScroll();
     },
     encryptMessage() {
       try {
         const messageEncrypted = encrypt({ publicKey: this.encryptionKey, data: this.messageToEncrypt, version: "x25519-xsalsa20-poly1305" });
         this.messageEncrypted = Buffer.from(JSON.stringify(messageEncrypted)).toString("hex");
         this.console(`encrypted message => ${this.messageEncrypted}`);
+        this.getScroll();
       } catch (error) {}
     },
     decryptMessage() {
@@ -824,9 +777,14 @@ export default defineComponent({
           return self.console(`decrypted message => ${result.result}`);
         }
       );
+      this.getScroll();
     },
     copyAccountAddress() {
+      this.isCopied = true;
       navigator.clipboard.writeText(this.publicAddress);
+      setTimeout(() => {
+        this.isCopied = false;
+      }, 1000);
     },
     getAddress() {
       if (this.publicAddress.length < 11) {
@@ -846,6 +804,15 @@ export default defineComponent({
         // showButton.value = true;
       }
       // debugConsole(toggleChecked ? "show button" : "hide button");
+    },
+    getScroll() {
+      var console = document.getElementById("console");
+
+      console.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
     },
   },
 });
