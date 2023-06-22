@@ -15,10 +15,6 @@ module.exports = {
   },
 
   configureWebpack: (config) => {
-    if (process.env.NODE_ENV !== "production") {
-      config.devtool = "source-map";
-    }
-
     // console.log(config);
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -36,13 +32,21 @@ module.exports = {
     );
     config.resolve.fallback = {
       ...(config.resolve.fallback || {}),
-      http: require.resolve("stream-http"),
-      https: require.resolve("https-browserify"),
-      os: require.resolve("os-browserify/browser"),
-      crypto: require.resolve("crypto-browserify"),
-      assert: require.resolve("assert/"),
-      stream: require.resolve("stream-browserify"),
-      url: require.resolve("url/"),
+      // http: require.resolve("stream-http"),
+      // https: require.resolve("https-browserify"),
+      // os: require.resolve("os-browserify/browser"),
+      // crypto: require.resolve("crypto-browserify"),
+      // assert: require.resolve("assert/"),
+      // stream: require.resolve("stream-browserify"),
+      // url: require.resolve("url/"),
+      http: false,
+      https: false,
+      os: false,
+      crypto: false,
+      assert: false,
+      stream: false,
+      url: false,
+      zlib: false,
     };
   },
   crossorigin: "anonymous",

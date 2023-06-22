@@ -249,9 +249,7 @@
 
 <script lang="ts">
 import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from "@toruslabs/torus-embed";
-import { encrypt, recoverTypedMessage } from "eth-sig-util";
-import { ethers } from "ethers";
-import { keccak256 } from "ethers/lib/utils";
+import { SignTypedDataVersion, encrypt, recoverPersonalSignature, recoverTypedSignature } from "@metamask/eth-sig-util";
 import tokenAbi from "human-standard-token-abi";
 import { defineComponent } from "vue";
 
@@ -357,7 +355,7 @@ export default defineComponent({
         console.error(error, "caught in vue-app");
       }
     },
-    async login(useWhitelabel) {
+    async login(useWhitelabel: boolean) {
       try {
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
@@ -383,6 +381,7 @@ export default defineComponent({
           loginConfig: this.buildEnv === "lrc" || this.buildEnv === "development" ? loginConfig : undefined,
           whiteLabel: useWhitelabel ? whiteLabelData : undefined,
           mfaLevel: "optional",
+          useWalletConnect: true,
         });
         await torus?.login(); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);
@@ -468,7 +467,7 @@ export default defineComponent({
       const message = "Hello world";
       const customPrefix = `\u0019${window.location.hostname} Signed Message:\n`;
       const prefixWithLength = Buffer.from(`${customPrefix}${message.length.toString()}`, "utf-8");
-      const hashedMsg = keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]));
+      const hashedMsg = web3Obj.web3.utils.keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]).toString());
       (web3.currentProvider as any)?.send(
         {
           method: "eth_sign",
@@ -479,7 +478,7 @@ export default defineComponent({
           if (err) {
             return console.error(err);
           }
-          const signerAddress = ethers.utils.recoverAddress(hashedMsg, result.result);
+          const signerAddress = recoverPersonalSignature({ data: hashedMsg, signature: result.result });
           return self.console(
             "sign message => true",
             `message: ${prefixWithLength + message}`,
@@ -535,13 +534,11 @@ export default defineComponent({
             return console.error(err);
           }
 
-          const recovered = recoverTypedMessage(
-            {
-              data: typedData,
-              sig: result.result,
-            },
-            "V1"
-          );
+          const recovered = recoverTypedSignature({
+            data: typedData,
+            signature: result.result,
+            version: SignTypedDataVersion.V1,
+          });
 
           if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
             return self.console(`sign typed message v1 => true`, result, `Recovered signer: ${this.publicAddress}`);
@@ -565,13 +562,11 @@ export default defineComponent({
           if (err) {
             return console.error(err);
           }
-          const recovered = recoverTypedMessage(
-            {
-              data: typedData as any,
-              sig: result.result,
-            },
-            "V3"
-          );
+          const recovered = recoverTypedSignature({
+            data: typedData as any,
+            signature: result.result,
+            version: SignTypedDataVersion.V3,
+          });
 
           if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
             return self.console(`sign typed message v3 => true`, result, `Recovered signer: ${this.publicAddress}`);
@@ -594,13 +589,11 @@ export default defineComponent({
           if (err) {
             return console.error(err);
           }
-          const recovered = recoverTypedMessage(
-            {
-              data: typedData as any,
-              sig: result.result,
-            },
-            "V4"
-          );
+          const recovered = recoverTypedSignature({
+            data: typedData as any,
+            signature: result.result,
+            version: SignTypedDataVersion.V4,
+          });
 
           if (recovered.toLowerCase() === this.publicAddress.toLowerCase()) {
             return self.console(`sign typed message v4 => true`, result, `Recovered signer: ${this.publicAddress}`);
@@ -811,8 +804,8 @@ export default defineComponent({
     },
     encryptMessage() {
       try {
-        const messageEncrypted = encrypt(this.encryptionKey, { data: this.messageToEncrypt }, "x25519-xsalsa20-poly1305");
-        this.messageEncrypted = this.stringifiableToHex(messageEncrypted);
+        const messageEncrypted = encrypt({ publicKey: this.encryptionKey, data: this.messageToEncrypt, version: "x25519-xsalsa20-poly1305" });
+        this.messageEncrypted = Buffer.from(JSON.stringify(messageEncrypted)).toString("hex");
         this.console(`encrypted message => ${this.messageEncrypted}`);
       } catch (error) {}
     },
@@ -831,9 +824,6 @@ export default defineComponent({
           return self.console(`decrypted message => ${result.result}`);
         }
       );
-    },
-    stringifiableToHex(value: any): string {
-      return ethers.utils.hexlify(Buffer.from(JSON.stringify(value)));
     },
     copyAccountAddress() {
       navigator.clipboard.writeText(this.publicAddress);
