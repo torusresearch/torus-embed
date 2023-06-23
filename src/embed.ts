@@ -317,7 +317,7 @@ class Torus {
           reject(err);
         } else if (success) {
           resolve();
-        } else reject(new Error("some error occured"));
+        } else reject(new Error("some error occurred"));
       };
       handleStream(providerChangeStream, "data", handler);
       const preopenInstanceId = getPreopenInstanceId();
