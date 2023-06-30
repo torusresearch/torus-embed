@@ -1,5 +1,5 @@
 import { LoginConfigItem } from "@toruslabs/torus-embed";
-import { AbiFragment, AbiFunctionFragment, AbiParameter, ContractAbi } from "web3";
+// import { AbiFragment, AbiFunctionFragment, AbiParameter, ContractAbi } from "web3";
 
 export const whiteLabelData = {
   name: "HelloDemo",
