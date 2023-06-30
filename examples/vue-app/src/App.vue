@@ -668,7 +668,7 @@ export default defineComponent({
           await torus?.setProvider({ host: "mainnet" });
         }
         const instance = new web3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f");
-        const balance = await instance.methods.balanceOf(this.publicAddress);
+        const balance = await instance.methods.balanceOf(this.publicAddress).call();
         console.log(balance, "dai balance");
         const value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
         if (Number(balance) < Number(value)) {
