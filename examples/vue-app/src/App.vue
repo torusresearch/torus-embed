@@ -83,6 +83,10 @@
           </div>
           <div class="flex gap-4 flex-col sm:!flex-row bottom-gutter">
             <div class="btn-block">
+              <p class="btn-label">Balance</p>
+              <button class="custom-btn cursor-pointer" @click="getBalance">Get Balance</button>
+            </div>
+            <div class="btn-block">
               <p class="btn-label">User info</p>
               <button class="custom-btn cursor-pointer" @click="getUserInfo">Get User Info</button>
             </div>
@@ -197,10 +201,9 @@
 <script lang="ts">
 import Torus, { TORUS_BUILD_ENV_TYPE, VerifierArgs } from "@toruslabs/torus-embed";
 import { SignTypedDataVersion, encrypt, recoverPersonalSignature, recoverTypedSignature } from "@metamask/eth-sig-util";
-import tokenAbi from "human-standard-token-abi";
 import { defineComponent } from "vue";
 
-import { getV3TypedData, getV4TypedData, loginConfig, whiteLabelData } from "./data";
+import { getV3TypedData, getV4TypedData, loginConfig, whiteLabelData, tokenAbi } from "./data";
 import web3Obj from "./helpers";
 import Personal from "web3-eth-personal";
 
@@ -397,18 +400,6 @@ export default defineComponent({
         .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei("0.01", "ether") })
         .then((resp) => this.console(resp))
         .catch(console.error);
-      // window.web3.eth
-      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.02') })
-      //   .then((resp) => this.console(resp))
-      //   .catch(console.error)
-      // window.web3.eth
-      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.03') })
-      //   .then((resp) => this.console(resp))
-      //   .catch(console.error)
-      // window.web3.eth
-      //   .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: window.web3.utils.toWei('0.04') })
-      //   .then((resp) => this.console(resp))
-      //   .catch(console.error)
     },
     signMessageWithoutPopup() {
       const { web3 } = web3Obj;
@@ -555,12 +546,12 @@ export default defineComponent({
     async signPersonalMsg() {
       try {
         const { web3 } = web3Obj;
-        const personal = new Personal();
+        const personal = new Personal(web3.provider);
         const message = "Some string";
-        const hash = web3.utils.sha3(message) as string;
+        const hash = web3.utils.sha3(message);
         const sig = await personal.sign(hash, this.publicAddress, "");
-        const hostnamealAddress = await personal.ecRecover(hash, sig);
-        if (this.publicAddress.toLowerCase() === hostnamealAddress.toLowerCase()) this.console("Success");
+        const hostnameAddress = await personal.ecRecover(hash, sig);
+        if (this.publicAddress.toLowerCase() === hostnameAddress.toLowerCase()) this.console("Success");
         else this.console("Failed");
       } catch (error) {
         console.error(error);
@@ -677,7 +668,7 @@ export default defineComponent({
         }
         const instance = new web3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f");
         console.log(instance, "WEB3 INSTANCE");
-        const balance = await instance.methods.balanceOf(this.publicAddress);
+        const balance = await instance.methods.balanceOf(this.publicAddress).call();
         console.log(balance, "dai balance");
         const value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
         if (Number(balance) < Number(value)) {
@@ -685,17 +676,13 @@ export default defineComponent({
           window.alert("You do not have enough dai tokens for transfer");
           return;
         }
-        instance.methods.transfer().send(
-          {
-            from: this.publicAddress,
-          }
-          // (err: Error, hash: string) => {
-          //   if (err) this.console(err);
-          //   else this.console(hash);
-          // }
-        );
+        const receipt = await instance.methods.transfer(this.publicAddress, value).send({
+          from: this.publicAddress,
+        });
+        this.console(receipt);
       } catch (error) {
         console.error(error);
+        this.console(error);
       }
     },
     async approveKnc() {
@@ -707,26 +694,32 @@ export default defineComponent({
         }
         const instance = new web3.eth.Contract(tokenAbi, "0xdd974D5C2e2928deA5F71b9825b8b646686BD200");
         let value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
-        const allowance = await instance.methods.allowance(this.publicAddress, "0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3");
+        const allowance = await instance.methods.allowance(this.publicAddress, "0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3").call();
         console.log(allowance, "current allowance");
         if (Number(allowance) > 0) value = "0";
-        instance.methods.approve("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", value).send(
-          {
-            from: this.publicAddress,
-          },
-          (err: Error, hash: string) => {
-            if (err) this.console(err);
-            else this.console(hash);
-          }
-        );
+        const receipt = await instance.methods.approve("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", value).send({
+          from: this.publicAddress,
+        });
+        this.console(receipt);
       } catch (error) {
         console.error(error);
+        this.console(error);
       }
     },
     async getUserInfo() {
       const { torus } = web3Obj;
       torus?.getUserInfo("").then(this.console).catch(this.console);
       this.getScroll();
+    },
+    async getBalance() {
+      try {
+        const { web3 } = web3Obj;
+        const bal = await web3?.eth.getBalance(this.publicAddress);
+        this.console(`balance: ${web3.utils.fromWei(bal, "ether")} ETH`);
+      } catch (error) {
+        console.error(error);
+        this.console(error);
+      }
     },
     getPublicAddress() {
       const { torus } = web3Obj;
@@ -798,10 +791,10 @@ export default defineComponent({
       const { torus } = web3Obj;
       const toggleChecked = (document.getElementById("default-toggle") as HTMLInputElement)?.checked;
       if (!toggleChecked) {
-        await torus?.hideTorusButton();
+        torus?.hideTorusButton();
         // showButton.value = false;
       } else {
-        await torus?.showTorusButton();
+        torus?.showTorusButton();
         // showButton.value = true;
       }
       // debugConsole(toggleChecked ? "show button" : "hide button");
