@@ -668,7 +668,6 @@ export default defineComponent({
           await torus?.setProvider({ host: "mainnet" });
         }
         const instance = new web3.eth.Contract(tokenAbi, "0x6b175474e89094c44da98b954eedeac495271d0f");
-        console.log(instance, "WEB3 INSTANCE");
         const balance = await instance.methods.balanceOf(this.publicAddress);
         console.log(balance, "dai balance");
         const value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
@@ -700,7 +699,7 @@ export default defineComponent({
         }
         const instance = new web3.eth.Contract(tokenAbi, "0xdd974D5C2e2928deA5F71b9825b8b646686BD200");
         let value = Math.floor(parseFloat("0.01") * 10 ** parseFloat("18")).toString();
-        const allowance = await instance.methods.allowance(this.publicAddress, "0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3");
+        const allowance = await instance.methods.allowance(this.publicAddress, "0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3").call();
         console.log(allowance, "current allowance");
         if (Number(allowance) > 0) value = "0";
         instance.methods.approve("0x3E2a1F4f6b6b5d281Ee9a9B36Bb33F7FBf0614C3", value).send(
