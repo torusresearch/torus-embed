@@ -16,6 +16,7 @@
         <option value="beta">Beta</option>
       </select>
     </div>
+    <button class="custom-btn cursor-pointer block md-bottom-gutter" @click="login(true, 'google')">Login with Google</button>
     <button class="custom-btn cursor-pointer block md-bottom-gutter" @click="login(true)">Login</button>
     <button class="custom-btn cursor-pointer block md-bottom-gutter" @click="login(false)">Login without whitelabel</button>
     <h6 class="or">or</h6>
@@ -238,10 +239,7 @@ export default defineComponent({
     };
   },
   mounted() {
-    const torus = new Torus({
-      apiKey: "torus-default",
-      buttonPosition: "bottom-left",
-    });
+    const torus = new Torus();
     web3Obj.torus = torus;
   },
   methods: {
@@ -310,7 +308,7 @@ export default defineComponent({
         console.error(error, "caught in vue-app");
       }
     },
-    async login(useWhitelabel: boolean) {
+    async login(useWhitelabel: boolean, verifier?: string) {
       try {
         const { torus, web3 } = web3Obj;
         (window as any).torus = torus;
@@ -338,7 +336,7 @@ export default defineComponent({
           mfaLevel: "optional",
           useWalletConnect: true,
         });
-        await torus?.login(); // await torus.ethereum.enable()
+        await torus?.login({ verifier }); // await torus.ethereum.enable()
         web3Obj.setweb3(torus?.provider);
         torus?.provider.on("chainChanged", (resp) => {
           console.log(resp, "chainchanged");
