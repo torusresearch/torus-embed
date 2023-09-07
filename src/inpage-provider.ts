@@ -10,7 +10,6 @@ import {
   SafeEventEmitter,
 } from "@toruslabs/openlogin-jrpc";
 import dequal from "fast-deep-equal";
-import { duplex as isDuplexStream } from "is-stream";
 import pump from "pump";
 import type { Duplex } from "readable-stream";
 
@@ -19,25 +18,22 @@ import {
   JsonRpcConnection,
   Maybe,
   ProviderOptions,
-  PublicConfigState,
   RequestArguments,
   SendSyncJsonRpcRequest,
-  SentWarningsState,
   UnvalidatedJsonRpcRequest,
   WalletProviderState,
 } from "./interfaces";
+import { isDuplexStream } from "./isStream";
 import log from "./loglevel";
 import messages from "./messages";
-import { ObservableStore } from "./ObservableStore";
-import { storeAsStream } from "./ObservableStoreStream";
 import { createErrorMiddleware, EMITTED_NOTIFICATIONS, logStreamDisconnectWarning, NOOP } from "./utils";
 
 SafeEventEmitter.defaultMaxListeners = 100;
 
 // resolve response.result, reject errors
 const getRpcPromiseCallback =
-  (resolve, reject, unwrapResult = true) =>
-  (error, response) => {
+  (resolve: (value: Partial<unknown> | PromiseLike<Partial<unknown>>) => void, reject: (reason?: unknown) => void, unwrapResult = true) =>
+  (error: Error, response: { result?: unknown; error?: unknown }) => {
     if (error || response.error) {
       return reject(error || response.error);
     }
@@ -78,8 +74,6 @@ class TorusInpageProvider extends SafeEventEmitter {
    */
   public readonly isTorus: true;
 
-  _publicConfigStore: ObservableStore<PublicConfigState>;
-
   tryPreopenHandle: (payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], cb: (...args: unknown[]) => void) => void;
 
   enable: () => Promise<string[]>;
@@ -87,21 +81,6 @@ class TorusInpageProvider extends SafeEventEmitter {
   protected _state: BaseProviderState;
 
   protected _jsonRpcConnection: JsonRpcConnection;
-
-  protected _sentWarnings: SentWarningsState = {
-    // methods
-    enable: false,
-    experimentalMethods: false,
-    send: false,
-    publicConfigStore: false,
-    // events
-    events: {
-      close: false,
-      data: false,
-      networkChanged: false,
-      notification: false,
-    },
-  };
 
   constructor(
     connectionStream: Duplex,
@@ -134,7 +113,6 @@ class TorusInpageProvider extends SafeEventEmitter {
     this._handleStreamDisconnect = this._handleStreamDisconnect.bind(this);
     this._sendSync = this._sendSync.bind(this);
     this._rpcRequest = this._rpcRequest.bind(this);
-    this._warnOfDeprecation = this._warnOfDeprecation.bind(this);
     this._initializeState = this._initializeState.bind(this);
 
     this.request = this.request.bind(this);
@@ -146,70 +124,6 @@ class TorusInpageProvider extends SafeEventEmitter {
     const mux = new ObjectMultiplex();
     pump(connectionStream, mux, connectionStream, this._handleStreamDisconnect.bind(this, "MetaMask"));
 
-    // subscribe to metamask public config (one-way)
-    this._publicConfigStore = new ObservableStore({ storageKey: "Metamask-Config" });
-
-    // handle isUnlocked changes, and chainChanged and networkChanged events
-    // this._publicConfigStore.subscribe((stringifiedState) => {
-    //   // This is because we are using store as string
-    //   const state = JSON.parse(stringifiedState as unknown as string);
-    //   if ("isUnlocked" in state && state.isUnlocked !== this._state.isUnlocked) {
-    //     this._state.isUnlocked = state.isUnlocked;
-    //     if (!this._state.isUnlocked) {
-    //       // accounts are never exposed when the extension is locked
-    //       this._handleAccountsChanged([]);
-    //     } else {
-    //       // this will get the exposed accounts, if any
-    //       try {
-    //         this._rpcRequest(
-    //           { method: "eth_accounts", params: [] },
-    //           NOOP,
-    //           true // indicating that eth_accounts _should_ update accounts
-    //         );
-    //       } catch (_) {
-    //         // Swallow error
-    //       }
-    //     }
-    //   }
-
-    //   if ("selectedAddress" in state && this.selectedAddress !== state.selectedAddress) {
-    //     try {
-    //       this._rpcRequest(
-    //         { method: "eth_accounts", params: [] },
-    //         NOOP,
-    //         true // indicating that eth_accounts _should_ update accounts
-    //       );
-    //     } catch (_) {
-    //       // Swallow error
-    //     }
-    //   }
-
-    //   // Emit chainChanged event on chain change
-    //   if ("chainId" in state && state.chainId !== this.chainId) {
-    //     this.chainId = state.chainId || null;
-    //     this.emit("chainChanged", this.chainId);
-
-    //     // indicate that we've connected, for EIP-1193 compliance
-    //     // we do this here so that iframe can initialize
-    //     if (!this._state.hasEmittedConnection) {
-    //       this._handleConnect(this.chainId);
-    //       this._state.hasEmittedConnection = true;
-    //     }
-    //   }
-
-    //   // Emit networkChanged event on network change
-    //   if ("networkVersion" in state && state.networkVersion !== this.networkVersion) {
-    //     this.networkVersion = state.networkVersion || null;
-    //     this.emit("networkChanged", this.networkVersion);
-    //   }
-    // });
-
-    pump(
-      mux.createStream("publicConfig") as unknown as Duplex,
-      storeAsStream(this._publicConfigStore),
-      // RPC requests should still work if only this stream fails
-      logStreamDisconnectWarning.bind(this, "MetaMask PublicConfigStore")
-    );
     // ignore phishing warning message (handled elsewhere)
     mux.ignoreStream("phishing");
 
@@ -261,14 +175,6 @@ class TorusInpageProvider extends SafeEventEmitter {
     });
   }
 
-  get publicConfigStore(): ObservableStore<PublicConfigState> {
-    if (!this._sentWarnings.publicConfigStore) {
-      log.warn(messages.warnings.publicConfigStore);
-      this._sentWarnings.publicConfigStore = true;
-    }
-    return this._publicConfigStore;
-  }
-
   /**
    * Returns whether the inpage provider is connected to Torus.
    */
@@ -309,7 +215,7 @@ class TorusInpageProvider extends SafeEventEmitter {
     }
 
     return new Promise((resolve, reject) => {
-      this._rpcRequest({ method, params }, getRpcPromiseCallback(resolve, reject));
+      this._rpcRequest({ method, params }, getRpcPromiseCallback(resolve, reject) as (...args: unknown[]) => void);
     });
   }
 
@@ -320,38 +226,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param cb - The callback function.
    */
   sendAsync(payload: JRPCRequest<unknown>, callback: (error: Error | null, result?: JRPCResponse<unknown>) => void): void {
-    this._rpcRequest(payload, callback);
-  }
-
-  /**
-   * We override the following event methods so that we can warn consumers
-   * about deprecated events:
-   *   addListener, on, once, prependListener, prependOnceListener
-   */
-
-  addListener(eventName: string, listener: (...args: unknown[]) => void): this {
-    this._warnOfDeprecation(eventName);
-    return super.addListener(eventName, listener);
-  }
-
-  on(eventName: string, listener: (...args: unknown[]) => void): this {
-    this._warnOfDeprecation(eventName);
-    return super.on(eventName, listener);
-  }
-
-  once(eventName: string, listener: (...args: unknown[]) => void): this {
-    this._warnOfDeprecation(eventName);
-    return super.once(eventName, listener);
-  }
-
-  prependListener(eventName: string, listener: (...args: unknown[]) => void): this {
-    this._warnOfDeprecation(eventName);
-    return super.prependListener(eventName, listener);
-  }
-
-  prependOnceListener(eventName: string, listener: (...args: unknown[]) => void): this {
-    this._warnOfDeprecation(eventName);
-    return super.prependOnceListener(eventName, listener);
+    this._rpcRequest(payload, callback as (...args: unknown[]) => void);
   }
 
   // Private Methods
@@ -390,7 +265,7 @@ class TorusInpageProvider extends SafeEventEmitter {
    * @param callback - The consumer's callback.
    * @param isInternal - false - Whether the request is internal.
    */
-  _rpcRequest(payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], callback: (...args: any[]) => void, isInternal = false): void {
+  _rpcRequest(payload: UnvalidatedJsonRpcRequest | UnvalidatedJsonRpcRequest[], callback: (...args: unknown[]) => void, isInternal = false): void {
     let cb = callback;
     const _payload = payload;
     if (!Array.isArray(_payload)) {
@@ -400,10 +275,10 @@ class TorusInpageProvider extends SafeEventEmitter {
 
       if (_payload.method === "eth_accounts" || _payload.method === "eth_requestAccounts") {
         // handle accounts changing
-        cb = (err: Error, res: JRPCSuccess<string[]>) => {
+        cb = ((err: Error, res: JRPCSuccess<string[]>) => {
           this._handleAccountsChanged(res.result || [], _payload.method === "eth_accounts", isInternal);
           callback(err, res);
-        };
+        }) as (...args: unknown[]) => void;
       } else if (_payload.method === "wallet_getProviderState") {
         this._rpcEngine.handle(payload as JRPCRequest<unknown>, cb);
         return;
@@ -444,14 +319,13 @@ class TorusInpageProvider extends SafeEventEmitter {
   send<T>(payload: SendSyncJsonRpcRequest): JRPCResponse<T>;
 
   send(methodOrPayload: unknown, callbackOrArgs?: unknown): unknown {
-    if (!this._sentWarnings.send) {
-      log.warn(messages.warnings.sendDeprecation);
-      this._sentWarnings.send = true;
-    }
     if (typeof methodOrPayload === "string" && (!callbackOrArgs || Array.isArray(callbackOrArgs))) {
       return new Promise((resolve, reject) => {
         try {
-          this._rpcRequest({ method: methodOrPayload, params: callbackOrArgs }, getRpcPromiseCallback(resolve, reject, false));
+          this._rpcRequest(
+            { method: methodOrPayload, params: callbackOrArgs },
+            getRpcPromiseCallback(resolve, reject, false) as (...args: unknown[]) => void
+          );
         } catch (error) {
           reject(error);
         }
@@ -647,16 +521,6 @@ class TorusInpageProvider extends SafeEventEmitter {
     if (isUnlocked !== this._state.isUnlocked) {
       this._state.isUnlocked = isUnlocked;
       this._handleAccountsChanged(accounts || []);
-    }
-  }
-
-  /**
-   * Warns of deprecation for the given event, if applicable.
-   */
-  protected _warnOfDeprecation(eventName: string): void {
-    if (this._sentWarnings.events[eventName] === false) {
-      log.warn(messages.warnings.events[eventName]);
-      this._sentWarnings.events[eventName] = true;
     }
   }
 }

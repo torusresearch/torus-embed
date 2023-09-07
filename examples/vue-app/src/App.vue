@@ -399,23 +399,22 @@ export default defineComponent({
     sendEth() {
       const { web3 } = web3Obj;
       web3.eth
-        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei("0.01") })
+        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei("0.01", "ether") })
         .then((resp) => this.console(resp))
         .catch(console.error);
     },
     signMessageWithoutPopup() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
       // hex message
       const message = "Hello world";
       const customPrefix = `\u0019${window.location.hostname} Signed Message:\n`;
       const prefixWithLength = Buffer.from(`${customPrefix}${message.length.toString()}`, "utf-8");
       const hashedMsg = web3Obj.web3.utils.keccak256(Buffer.concat([prefixWithLength, Buffer.from(message)]).toString());
-      (web3.currentProvider as any)?.send(
+      torus.provider?.sendAsync(
         {
           method: "eth_sign",
           params: [this.publicAddress, hashedMsg, { customPrefix, customMessage: message }],
-          from: this.publicAddress,
         },
         (err: Error, result: any) => {
           if (err) {
@@ -427,32 +426,31 @@ export default defineComponent({
             `message: ${prefixWithLength + message}`,
             `msgHash: ${hashedMsg}`,
             `sig: ${result.result}`,
-            `signer: ${signerAddress}`
+            `signer: ${signerAddress}`,
           );
-        }
+        },
       );
     },
     signMessage() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
       // hex message
       const message = "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad";
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_sign",
           params: [this.publicAddress, message],
-          from: this.publicAddress,
         },
         (err: Error, result: any) => {
           if (err) {
             return console.error(err);
           }
           return self.console("sign message => true", result);
-        }
+        },
       );
     },
     signTypedData_v1() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const typedData = [
         {
           type: "string",
@@ -466,11 +464,10 @@ export default defineComponent({
         },
       ];
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_signTypedData",
           params: [typedData, this.publicAddress],
-          from: this.publicAddress,
         },
         (err: Error, result: any) => {
           if (err) {
@@ -487,19 +484,18 @@ export default defineComponent({
             return self.console(`sign typed message v1 => true`, result, `Recovered signer: ${this.publicAddress}`);
           }
           return self.console(`Failed to verify signer, got: ${recovered}`);
-        }
+        },
       );
     },
 
     signTypedData_v3() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const typedData = getV3TypedData(this.chainId.toString());
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_signTypedData_v3",
           params: [this.publicAddress, JSON.stringify(typedData)],
-          from: this.publicAddress,
         },
         (err: Error, result: any) => {
           if (err) {
@@ -515,18 +511,17 @@ export default defineComponent({
             return self.console(`sign typed message v3 => true`, result, `Recovered signer: ${this.publicAddress}`);
           }
           return self.console(`Failed to verify signer, got: ${recovered}`);
-        }
+        },
       );
     },
     signTypedData_v4() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const typedData = getV4TypedData(this.chainId.toString());
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_signTypedData_v4",
           params: [this.publicAddress, JSON.stringify(typedData)],
-          from: this.publicAddress,
         },
         (err: Error, result: any) => {
           if (err) {
@@ -542,7 +537,7 @@ export default defineComponent({
             return self.console(`sign typed message v4 => true`, result, `Recovered signer: ${this.publicAddress}`);
           }
           return self.console(`Failed to verify signer, got: ${recovered}`);
-        }
+        },
       );
     },
     async signPersonalMsg() {
@@ -560,9 +555,9 @@ export default defineComponent({
       }
     },
     async addErc20Token() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       try {
-        const res = await (web3.currentProvider as any)?.request({
+        const res = await torus.provider?.request({
           method: "wallet_watchAsset",
           params: {
             type: "ERC20",
@@ -581,9 +576,9 @@ export default defineComponent({
       }
     },
     async addCollectible() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       try {
-        const res = await (web3.currentProvider as any)?.request({
+        const res = await torus.provider?.request({
           method: "wallet_watchAsset",
           params: {
             type: "ERC721",
@@ -617,9 +612,9 @@ export default defineComponent({
     },
 
     addChain() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider?.sendAsync(
         {
           method: "wallet_addEthereumChain",
           params: {
@@ -639,13 +634,13 @@ export default defineComponent({
           }
           self.encryptionKey = result.result;
           return self.console(`add chain result => ${result.result}`);
-        }
+        },
       );
     },
     switchChain() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "wallet_switchEthereumChain",
           params: {
@@ -658,7 +653,7 @@ export default defineComponent({
           }
           self.encryptionKey = result.result;
           return self.console(`switch chain result => ${result.result}`);
-        }
+        },
       );
     },
     async sendDai() {
@@ -683,7 +678,7 @@ export default defineComponent({
           (err: Error, hash: string) => {
             if (err) this.console(err);
             else this.console(hash);
-          }
+          },
         );
       } catch (error) {
         console.error(error);
@@ -709,7 +704,7 @@ export default defineComponent({
           (err: Error, hash: string) => {
             if (err) this.console(err);
             else this.console(hash);
-          }
+          },
         );
       } catch (error) {
         console.error(error);
@@ -724,7 +719,7 @@ export default defineComponent({
     async getBalance() {
       try {
         const { web3 } = web3Obj;
-        const bal = await web3?.eth.getBalance(this.publicAddress);
+        const bal = await web3.eth.getBalance(this.publicAddress);
         this.console(`balance: ${web3.utils.fromWei(bal, "ether")} ETH`);
       } catch (error) {
         console.error(error);
@@ -741,9 +736,9 @@ export default defineComponent({
       this.getScroll();
     },
     getEncryptionKey() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_getEncryptionPublicKey",
           params: [this.publicAddress],
@@ -754,7 +749,7 @@ export default defineComponent({
           }
           self.encryptionKey = result.result;
           return self.console(`encryption public key => ${result.result}`);
-        }
+        },
       );
       this.getScroll();
     },
@@ -767,9 +762,9 @@ export default defineComponent({
       } catch (error) {}
     },
     decryptMessage() {
-      const { web3 } = web3Obj;
+      const { torus } = web3Obj;
       const self = this;
-      (web3.currentProvider as any)?.send(
+      torus.provider.sendAsync(
         {
           method: "eth_decrypt",
           params: [this.messageEncrypted, this.publicAddress],
@@ -779,7 +774,7 @@ export default defineComponent({
             return console.error(err);
           }
           return self.console(`decrypted message => ${result.result}`);
-        }
+        },
       );
       this.getScroll();
     },

@@ -24,7 +24,7 @@ export const validatePaymentProvider = (provider: string, params: PaymentParams)
     return { errors, isValid: true };
   }
 
-  if (provider && !paymentProviders[provider]) {
+  if (provider && !paymentProviders[provider as PAYMENT_PROVIDER_TYPE]) {
     errors.provider = "Invalid Provider";
     return { errors, isValid: Object.keys(errors).length === 0 };
   }
@@ -92,7 +92,7 @@ export function createErrorMiddleware(): JRPCMiddleware<unknown, unknown> {
 
 // resolve response.result or response, reject errors
 export const getRpcPromiseCallback =
-  (resolve: (value?: any) => void, reject: (error?: Error) => void, unwrapResult = true) =>
+  (resolve: (value?: unknown) => void, reject: (error?: Error) => void, unwrapResult = true) =>
   (error: Error, response: PendingJRPCResponse<unknown>): void => {
     if (error || response.error) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
