@@ -371,7 +371,7 @@ export default defineComponent({
       const el = document.querySelector("#console>pre");
       const consoleBtn = document.querySelector<HTMLElement>("#console>div.clear-console-btn");
       if (el) {
-        el.innerHTML = JSON.stringify(args || {}, null, 2);
+        el.innerHTML = JSON.stringify(args || {}, (key, value) => (typeof value === "bigint" ? value.toString() : value), 2);
       }
       if (consoleBtn) {
         consoleBtn.style.display = "block";
@@ -399,7 +399,7 @@ export default defineComponent({
     sendEth() {
       const { web3 } = web3Obj;
       web3.eth
-        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei("0.01", "ether") })
+        .sendTransaction({ from: this.publicAddress, to: this.publicAddress, value: web3.utils.toWei("0.01", "ether"), type: "0x2", gasLimit: 21000 })
         .then((resp) => this.console(resp))
         .catch(console.error);
     },

@@ -51,7 +51,7 @@
     }
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions"
+    "supports bigint",
+    "not dead"
   ]
 }
