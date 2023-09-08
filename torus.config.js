@@ -1,3 +1,1 @@
-module.exports = {
-  analyzerMode: "disabled",
-};
+module.exports = require("@toruslabs/config/torus.config");

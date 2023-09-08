@@ -1,21 +1,5 @@
 {
-  "compilerOptions": {
-    "rootDir": ".",
-    "moduleResolution": "node",
-    "strict": false,
-    "module": "es6",
-    "target": "es6",
-    "lib": ["ES2020", "DOM"],
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "noImplicitThis": true,
-    "declaration": true,
-    "declarationDir": "./types",
-    "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  },
+  "extends": "@toruslabs/config/tsconfig.default.json",
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

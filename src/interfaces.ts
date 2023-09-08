@@ -685,31 +685,8 @@ export interface JsonRpcConnection {
   stream: Duplex;
 }
 
-export interface SentWarningsState {
-  // methods
-  enable: boolean;
-  experimentalMethods: boolean;
-  send: boolean;
-  publicConfigStore: boolean;
-  // events
-  events: {
-    close: boolean;
-    data: boolean;
-    networkChanged: boolean;
-    notification: boolean;
-  };
-}
-
 export interface SendSyncJsonRpcRequest extends JRPCRequest<unknown> {
   method: "eth_accounts" | "eth_coinbase" | "eth_uninstallFilter" | "net_version";
-}
-
-export interface PublicConfigState {
-  isUnlocked?: boolean;
-  selectedAddress?: string;
-  chainId?: string;
-  networkVersion?: string;
-  storageKey: string;
 }
 
 export type Maybe<T> = Partial<T> | null | undefined;
