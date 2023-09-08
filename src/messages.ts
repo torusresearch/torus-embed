@@ -25,20 +25,5 @@ export default {
     sendDeprecation:
       'Torus: "ethereum.send(...)" is deprecated and may be removed in the future.' +
       ' Please use "ethereum.sendAsync(...)" or "ethereum.request(...)" instead.\nFor more information, see: https://eips.ethereum.org/EIPS/eip-1193',
-    events: {
-      close:
-        'Torus: The event "close" is deprecated and may be removed in the future. Please use "disconnect" instead.' +
-        "\nFor more information, see: https://eips.ethereum.org/EIPS/eip-1193",
-      data:
-        'Torus: The event "data" is deprecated and will be removed in the future.' +
-        'Use "message" instead.\nFor more information, see: https://eips.ethereum.org/EIPS/eip-1193#message',
-      networkChanged:
-        'Torus: The event "networkChanged" is deprecated and may be removed in the future.' +
-        ' Please use "chainChanged" instead.\nFor more information, see: https://eips.ethereum.org/EIPS/eip-1193',
-      notification:
-        'Torus: The event "notification" is deprecated and may be removed in the future. ' +
-        'Please use "message" instead.\nFor more information, see: https://eips.ethereum.org/EIPS/eip-1193',
-    },
-    publicConfigStore: 'Torus: The property "publicConfigStore" is deprecated and WILL be removed in the future.',
   },
 };

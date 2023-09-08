@@ -1,4 +1,4 @@
-import { PAYMENT_PROVIDER } from "./interfaces";
+import { PAYMENT_PROVIDER, PAYMENT_PROVIDER_TYPE } from "./interfaces";
 /**
  * From https://min-api.cryptocompare.com/data/v2/pair/mapping/fsym?fsym=BTC&extraParams=YourSite
  * GET https://min-api.cryptocompare.com/data/v2/pair/mapping/fsym?fsym=BTC
@@ -510,7 +510,7 @@ const cryptoCompareCurrenciesSet = new Set(CRYPTO_COMPARE_CURRENCIES);
 /**
  * Fiat currencies that we support
  */
-export function supportedFiatCurrencies(provider) {
+export function supportedFiatCurrencies(provider: PAYMENT_PROVIDER_TYPE) {
   const providerSupportedFiatCurrencies = PROVIDER_SUPPORTED_FIAT_CURRENCIES[provider];
   return providerSupportedFiatCurrencies.filter((currency) => cryptoCompareCurrenciesSet.has(currency));
 }

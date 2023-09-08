@@ -27,44 +27,34 @@
     "@babel/runtime": "7.x"
   },
   "dependencies": {
-    "@toruslabs/http-helpers": "^4.0.0",
-    "@toruslabs/openlogin-jrpc": "^4.7.0",
-    "@metamask/rpc-errors": "^5.1.1",
-    "events": "^3.3.0",
+    "@metamask/rpc-errors": "^6.0.0",
+    "@toruslabs/http-helpers": "^5.0.0",
+    "@toruslabs/openlogin-jrpc": "^5.0.2",
     "fast-deep-equal": "^3.1.3",
-    "is-stream": "^2.0.1",
     "lodash.merge": "^4.6.2",
     "loglevel": "^1.8.1",
     "pump": "^3.0.0",
-    "readable-stream": "^4.4.1"
+    "readable-stream": "^4.4.2"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.22.5",
+    "@babel/runtime": "^7.22.15",
     "@rollup/plugin-replace": "^5.0.2",
-    "@toruslabs/eslint-config-typescript": "^2.0.0",
-    "@toruslabs/torus-scripts": "^4.0.0",
-    "@types/create-hash": "^1.2.2",
+    "@toruslabs/config": "^2.0.2",
+    "@toruslabs/eslint-config-typescript": "^3.0.1",
+    "@toruslabs/torus-scripts": "^5.0.4",
     "@types/lodash.merge": "^4.6.7",
-    "@types/node": "^18",
-    "@types/readable-stream": "^2.3.15",
-    "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.1",
+    "@types/node": "^20",
+    "@types/pump": "^1.1.1",
+    "@types/readable-stream": "^4.0.2",
     "cross-env": "^7.0.3",
-    "eslint": "^8.43.0",
-    "eslint-plugin-import": "~2.27.5",
-    "eslint-plugin-mocha": "^10.1.0",
-    "eslint-plugin-n": "^15.7.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-simple-import-sort": "^10.0.0",
-    "eslint-plugin-tsdoc": "^0.2.17",
+    "eslint": "^8.48.0",
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.3",
+    "lint-staged": "^14.0.1",
     "mocha": "^10.2.0",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.3",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.2.2"
   },
   "mocha": {
     "timeout": 0
@@ -95,7 +85,7 @@
     ]
   },
   "engines": {
-    "node": ">=16.18.1",
-    "npm": ">=8.x"
+    "node": ">=18.x",
+    "npm": ">=9.x"
   }
 }

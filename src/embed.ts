@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { get, setAPIKey } from "@toruslabs/http-helpers";
 import { BasePostMessageStream, JRPCRequest, ObjectMultiplex, setupMultiplex, Substream } from "@toruslabs/openlogin-jrpc";
 import deepmerge from "lodash.merge";
@@ -9,6 +11,7 @@ import {
   BUTTON_POSITION,
   BUTTON_POSITION_TYPE,
   EMBED_TRANSLATION_ITEM,
+  LocaleLinks,
   NetworkInterface,
   PAYMENT_PROVIDER_TYPE,
   PaymentParams,
@@ -200,7 +203,9 @@ class Torus {
 
     const { defaultLanguage = getUserLanguage(), customTranslations = {} } = this.whiteLabel || {};
     const mergedTranslations = deepmerge(configuration.translations, customTranslations);
-    const languageTranslations = mergedTranslations[defaultLanguage] || configuration.translations[getUserLanguage()];
+    const languageTranslations =
+      mergedTranslations[defaultLanguage as keyof LocaleLinks<unknown>] ||
+      configuration.translations[getUserLanguage() as keyof LocaleLinks<unknown>];
     this.embedTranslations = languageTranslations.embed;
 
     return new Promise((resolve, reject) => {
@@ -256,7 +261,8 @@ class Torus {
       const logOutStream = this.communicationMux.getStream("logout") as Substream;
       logOutStream.write({ name: "logOut" });
       const statusStream = this.communicationMux.getStream("status") as Substream;
-      const statusStreamHandler = (status) => {
+      const statusStreamHandler = (arg: unknown) => {
+        const status = arg as { loggedIn: boolean };
         if (!status.loggedIn) {
           this.isLoggedIn = false;
           this.currentVerifier = "";
@@ -310,7 +316,8 @@ class Torus {
   setProvider({ host = "mainnet", chainId = null, networkName = "", ...rest }: NetworkInterface): Promise<void> {
     return new Promise((resolve, reject) => {
       const providerChangeStream = this.communicationMux.getStream("provider_change") as Substream;
-      const handler = (chunk) => {
+      const handler = (arg: unknown) => {
+        const chunk = arg as { data: { err: string; success: boolean } };
         const { err, success } = chunk.data;
         log.info(chunk);
         if (err) {
@@ -346,7 +353,8 @@ class Torus {
     const finalPath = path ? `/${path}` : "";
     showWalletStream.write({ name: "show_wallet", data: { path: finalPath } });
 
-    const showWalletHandler = (chunk) => {
+    const showWalletHandler = (arg: unknown) => {
+      const chunk = arg as { name: string; data: { instanceId: string } };
       if (chunk.name === "show_wallet_instance") {
         // Let the error propogate up (hence, no try catch)
         const { instanceId } = chunk.data;
@@ -393,7 +401,8 @@ class Torus {
       if (this.isLoggedIn) {
         const userInfoAccessStream = this.communicationMux.getStream("user_info_access") as Substream;
         userInfoAccessStream.write({ name: "user_info_access_request" });
-        const userInfoAccessHandler = (chunk) => {
+        const userInfoAccessHandler = (arg: unknown) => {
+          const chunk = arg as { name: string; data: { approved: boolean; payload: UserInfo; rejected: boolean; newRequest: boolean } };
           const {
             name,
             data: { approved, payload, rejected, newRequest },
@@ -405,7 +414,8 @@ class Torus {
               reject(new Error("User rejected the request"));
             } else if (newRequest) {
               const userInfoStream = this.communicationMux.getStream("user_info") as Substream;
-              const userInfoHandler = (handlerChunk) => {
+              const userInfoHandler = (arg2: unknown) => {
+                const handlerChunk = arg2 as { name: string; data: { approved: boolean; payload: UserInfo } };
                 if (handlerChunk.name === "user_info_response") {
                   if (handlerChunk.data.approved) {
                     resolve(handlerChunk.data.payload);
@@ -438,7 +448,8 @@ class Torus {
           return;
         }
         const topupStream = this.communicationMux.getStream("topup") as Substream;
-        const topupHandler = (chunk) => {
+        const topupHandler = (arg: unknown) => {
+          const chunk = arg as { name: string; data: { success: boolean; error: string } };
           if (chunk.name === "topup_response") {
             if (chunk.data.success) {
               resolve(chunk.data.success);
@@ -455,7 +466,7 @@ class Torus {
     });
   }
 
-  async loginWithPrivateKey(loginParams: { privateKey: string; userInfo: Omit<UserInfo, "isNewUser"> }): Promise<void> {
+  async loginWithPrivateKey(loginParams: { privateKey: string; userInfo: Omit<UserInfo, "isNewUser"> }): Promise<boolean> {
     const { privateKey, userInfo } = loginParams;
     return new Promise((resolve, reject) => {
       if (this.isInitialized) {
@@ -464,7 +475,8 @@ class Torus {
           return;
         }
         const loginPrivKeyStream = this.communicationMux.getStream("login_with_private_key") as Substream;
-        const loginHandler = (chunk) => {
+        const loginHandler = (arg: unknown) => {
+          const chunk = arg as { name: string; data: { success: boolean; error: string } };
           if (chunk.name === "login_with_private_key_response") {
             if (chunk.data.success) {
               resolve(chunk.data.success);
@@ -479,12 +491,13 @@ class Torus {
     });
   }
 
-  async showWalletConnectScanner(): Promise<void> {
+  async showWalletConnectScanner(): Promise<boolean> {
     if (!this.useWalletConnect) throw new Error("Set `useWalletConnect` as true in init function options to use wallet connect scanner");
     return new Promise((resolve, reject) => {
       if (this.isLoggedIn) {
         const walletConnectStream = this.communicationMux.getStream("wallet_connect_stream") as Substream;
-        const walletConnectHandler = (chunk) => {
+        const walletConnectHandler = (arg: unknown) => {
+          const chunk = arg as { name: string; data: { success: boolean; error: string } };
           if (chunk.name === "wallet_connect_stream_res") {
             if (chunk.data.success) {
               resolve(chunk.data.success);
@@ -520,7 +533,7 @@ class Torus {
           preopenInstanceId,
         },
       });
-      const closeHandler = ({ preopenInstanceId: receivedId, close }) => {
+      const closeHandler = ({ preopenInstanceId: receivedId, close }: { preopenInstanceId: string; close: boolean }) => {
         if (receivedId === preopenInstanceId && close) {
           handledWindow.close();
           windowStream.removeListener("data", closeHandler);
@@ -644,8 +657,10 @@ class Torus {
     const inpageProvider = new TorusInpageProvider(metamaskStream);
 
     // detect eth_requestAccounts and pipe to enable for now
-    const detectAccountRequestPrototypeModifier = (m) => {
+    const detectAccountRequestPrototypeModifier = (m: any) => {
+      // @ts-ignore
       const originalMethod = inpageProvider[m];
+      // @ts-ignore
       inpageProvider[m] = function providerFunc(method, ...args) {
         if (method && method === "eth_requestAccounts") {
           return inpageProvider.enable();
@@ -762,7 +777,8 @@ class Torus {
   }
 
   protected _showLoginPopup(calledFromEmbed: boolean, resolve: (a: string[]) => void, reject: (err: Error) => void): void {
-    const loginHandler = (data) => {
+    const loginHandler = (arg: unknown) => {
+      const data = arg as { err: Error; selectedAddress: string };
       const { err, selectedAddress } = data;
       if (err) {
         log.error(err);
