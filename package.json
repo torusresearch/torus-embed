@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "Embed script for Torus",
   "main": "dist/torus.cjs.js",
   "module": "dist/torus.esm.js",
