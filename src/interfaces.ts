@@ -21,9 +21,7 @@ export const WALLET_OPENLOGIN_VERIFIER_MAP = {
 
 export const PAYMENT_PROVIDER = {
   MOONPAY: "moonpay",
-  WYRE: "wyre",
   RAMPNETWORK: "rampnetwork",
-  XANPOOL: "xanpool",
   MERCURYO: "mercuryo",
   TRANSAK: "transak",
   BANXA: "banxa",
