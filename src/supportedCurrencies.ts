@@ -343,42 +343,6 @@ const PROVIDER_SUPPORTED_FIAT_CURRENCIES = {
     "VND",
     "ZAR",
   ],
-  /**
-   * https://docs.sendwyre.com/docs/supported-currencies#fiat
-   * The ones where credit card is supported
-   */
-  [PAYMENT_PROVIDER.WYRE]: [
-    "USD",
-    "EUR",
-    "GBP",
-    "AUD",
-    "CAD",
-    "NZD",
-    "CNY",
-    "ARS",
-    "BRL",
-    "CHF",
-    "CLP",
-    "COP",
-    "CZK",
-    "DKK",
-    "HKD",
-    "ILS",
-    "INR",
-    "ISK",
-    "JPY",
-    "KRW",
-    "MXN",
-    "MYR",
-    "NOK",
-    "PHP",
-    "PLN",
-    "SEK",
-    "SGD",
-    "THB",
-    "VND",
-    "ZAR",
-  ],
   // https://support.ramp.network/en/articles/471-supported-fiat-currencies
   [PAYMENT_PROVIDER.RAMPNETWORK]: [
     "USD",
@@ -426,8 +390,6 @@ const PROVIDER_SUPPORTED_FIAT_CURRENCIES = {
     "THB",
     "UYU",
   ],
-  // From https://xanpool.com/ fiat select dropdown
-  [PAYMENT_PROVIDER.XANPOOL]: ["SGD", "HKD", "THB", "PHP", "INR", "IDR", "MYR", "AUD", "NZD", "KRW"],
   // https://help.mercuryo.io/en/articles/6121246-which-fiat-currencies-are-supported
   // RUB / UAH currently not supported
   [PAYMENT_PROVIDER.MERCURYO]: [
