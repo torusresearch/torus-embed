@@ -64,6 +64,7 @@ const UNSAFE_METHODS = [
   "ed25519_sign",
   "ed25519_signRaw",
   "eth_transfer",
+  "wallet_requestPermissions",
 ];
 
 class Torus {
