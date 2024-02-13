@@ -61,6 +61,9 @@ const UNSAFE_METHODS = [
   "eth_getEncryptionPublicKey",
   "eth_decrypt",
   "ed25519_transfer",
+  "ed25519_sign",
+  "ed25519_signRaw",
+  "eth_transfer",
 ];
 
 class Torus {
