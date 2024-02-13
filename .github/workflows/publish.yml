@@ -8,7 +8,7 @@ on:
 
 jobs:
   publish_npm:
-    runs-on: [self-hosted, cere-io-large-workers]
+    runs-on: [self-hosted, cere-io-large]
     steps:
       - uses: actions/checkout@v2
       - name: Get Node.js version
