@@ -47,6 +47,8 @@ export const SUPPORTED_PAYMENT_NETWORK = {
 
 export const TORUS_BUILD_ENV = {
   CERE: "cere",
+  CERE_AWS: "cere-aws",
+  CERE_LEGACY: "cere-legacy",
   CERE_DEV: "cere-dev",
   CERE_STAGE: "cere-stage",
   PRODUCTION: "production",
@@ -59,11 +61,11 @@ export const TORUS_BUILD_ENV = {
   POLYGON: "polygon",
 } as const;
 
-export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
-
-export type SUPPORTED_PAYMENT_NETWORK_TYPE = typeof SUPPORTED_PAYMENT_NETWORK[keyof typeof SUPPORTED_PAYMENT_NETWORK];
-
 export type TORUS_BUILD_ENV_TYPE = typeof TORUS_BUILD_ENV[keyof typeof TORUS_BUILD_ENV];
+export const CERE_PROD_ENVS: TORUS_BUILD_ENV_TYPE[] = [TORUS_BUILD_ENV.CERE, TORUS_BUILD_ENV.CERE_AWS, TORUS_BUILD_ENV.CERE_LEGACY];
+
+export type PAYMENT_PROVIDER_TYPE = typeof PAYMENT_PROVIDER[keyof typeof PAYMENT_PROVIDER];
+export type SUPPORTED_PAYMENT_NETWORK_TYPE = typeof SUPPORTED_PAYMENT_NETWORK[keyof typeof SUPPORTED_PAYMENT_NETWORK];
 
 export interface IPaymentProvider {
   line1: string;

@@ -9,6 +9,7 @@ import generateIntegrity from "./integrity";
 import {
   BUTTON_POSITION,
   BUTTON_POSITION_TYPE,
+  CERE_PROD_ENVS,
   EMBED_TRANSLATION_ITEM,
   LOGIN_PROVIDER,
   NetworkInterface,
@@ -152,7 +153,7 @@ class Torus {
   }
 
   async init({
-    buildEnv = TORUS_BUILD_ENV.PRODUCTION,
+    buildEnv = TORUS_BUILD_ENV.CERE,
     enableLogging = false,
     // deprecated: use loginConfig instead
     enabledVerifiers = defaultVerifiers,
@@ -269,7 +270,7 @@ class Torus {
       });
     };
 
-    if (buildEnv === "production" && integrity.check) {
+    if (CERE_PROD_ENVS.includes(buildEnv) && integrity.check) {
       // hacky solution to check for iframe integrity
       const fetchUrl = `${torusUrl}/popup`;
       const resp = await fetch(fetchUrl, { cache: "reload" });

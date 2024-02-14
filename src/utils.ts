@@ -140,6 +140,14 @@ export const getTorusUrl = async (
       torusUrl = `https://wallet.cere.io?v${versionUsed}`;
       logLevel = "error";
       break;
+    case "cere-aws":
+      torusUrl = `https://wallet.core.aws.cere.io?v${versionUsed}`;
+      logLevel = "error";
+      break;
+    case "cere-legacy":
+      torusUrl = `https://wallet.legacy.cere.io?v${versionUsed}`;
+      logLevel = "error";
+      break;
     case "cere-dev":
       torusUrl = `https://wallet.dev.cere.io?v${versionUsed}`;
       logLevel = "debug";
