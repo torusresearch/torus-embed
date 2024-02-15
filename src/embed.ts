@@ -173,6 +173,7 @@ class Torus {
     sessionId,
     sessionNamespace,
     popupMode,
+    biconomy,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -260,6 +261,7 @@ class Torus {
               network,
               mfaLevel,
               context,
+              biconomy,
               sessionId,
             },
           });

@@ -722,6 +722,11 @@ export interface TorusParams {
    * [Cere wallet] Transaction popups mode. Overrides the constructor option.
    */
   popupMode?: PopupMode;
+
+  /**
+   * [Cere wallet] Externaly provided Biconomy configuration
+   */
+  biconomy?: unknown;
 }
 
 export interface UnvalidatedJsonRpcRequest {
