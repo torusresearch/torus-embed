@@ -619,6 +619,13 @@ export interface WhiteLabelParams {
   customTranslations?: LocaleLinks<unknown>;
 }
 
+export type AuthType = "telegram-mini-app" | "other";
+
+export interface AuthMethod {
+  type: AuthType;
+  token: string;
+}
+
 export interface TorusParams {
   /**
    * Torus Network Object
@@ -724,9 +731,14 @@ export interface TorusParams {
   popupMode?: PopupMode;
 
   /**
-   * [Cere wallet] Externaly provided Biconomy configuration
+   * [Cere wallet] Externally provided Biconomy configuration
    */
   biconomy?: unknown;
+
+  /**
+   * [Cere wallet] Externally provided credentials
+   */
+  authMethod?: AuthMethod;
 }
 
 export interface UnvalidatedJsonRpcRequest {
