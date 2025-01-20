@@ -626,6 +626,8 @@ export interface AuthMethod {
   token: string;
 }
 
+export type WalletMode = "default" | "light";
+
 export interface TorusParams {
   /**
    * Torus Network Object
@@ -739,6 +741,11 @@ export interface TorusParams {
    * [Cere wallet] Externally provided credentials
    */
   authMethod?: AuthMethod;
+
+  /**
+   * [Cere wallet] Externally provided wallet mode (light mode has minimal functionality like signing, encryption etc.)
+   */
+  mode?: WalletMode;
 }
 
 export interface UnvalidatedJsonRpcRequest {

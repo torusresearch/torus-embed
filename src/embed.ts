@@ -175,6 +175,7 @@ class Torus {
     popupMode,
     biconomy,
     authMethod,
+    mode,
   }: TorusParams = {}): Promise<void> {
     if (this.isInitialized) throw new Error("Already initialized");
     const { torusUrl, logLevel } = await getTorusUrl(buildEnv, integrity);
@@ -265,6 +266,7 @@ class Torus {
               biconomy,
               sessionId,
               authMethod,
+              mode,
             },
           });
         };
