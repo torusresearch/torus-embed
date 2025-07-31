@@ -1,0 +1,22 @@
+{
+  "name": "demo-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@toruslabs/torus-embed": "file:../../",
+    "@toruslabs/vue-components": "^8.0.6",
+    "vue": "^3.5.17"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "buffer": "^6.0.3",
+    "process": "^0.11.10",
+    "vite": "^7.0.4"
+  }
+}

@@ -1,0 +1,27 @@
+.btn-container {
+  display: flex;
+  flex-direction: column;
+  row-gap: 8px;
+}
+
+.block {
+  width: 100%;
+}
+
+.btn-secondary {
+  font-style: normal !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  line-height: 17px !important;
+  letter-spacing: -0.02em !important;
+  margin-top: 8px;
+}
+
+.btn-label {
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 150%;
+  letter-spacing: 0.002em;
+  color: var(--app-gray-900);
+}
