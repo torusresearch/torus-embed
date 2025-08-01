@@ -16,6 +16,7 @@ let torus = undefined;
 const isLoading = ref(false);
 const selectedBuildEnv = ref('production');
 const account = ref("");
+const isCopied = ref(false);
 
 const formattedAccountAddress = computed(() => {
   return `${account.value.substring(0, 5)}...${account.value.substring(account.value.length - 6)}`;
