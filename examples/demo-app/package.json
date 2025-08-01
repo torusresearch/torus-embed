@@ -9,14 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@toruslabs/base-controllers": "^8.5.2",
+    "@toruslabs/ethereum-controllers": "^8.5.2",
     "@toruslabs/torus-embed": "file:../../",
-    "@toruslabs/vue-components": "^8.0.6",
+    "@toruslabs/vue-components": "^8.0.8",
+    "ethers": "^6.13.5",
     "vue": "^3.5.17"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
     "buffer": "^6.0.3",
     "process": "^0.11.10",
+    "tailwindcss": "^3.4.10",
     "vite": "^7.0.4"
   }
 }
