@@ -13,7 +13,7 @@ class Torus extends Web3Auth {
     await super.init({
       chainId: "0x1",
       chains: [],
-      confirmationStrategy: "popup",
+      confirmationStrategy: "default",
       ...params,
     });
   }
