@@ -703,7 +703,7 @@ const approveTokens = async () => {
       <p class="btn-label">Send Tokens</p>
       <div class="mt-2 flex-row">
         <p class="mr-2 w-max text-sm text-app-gray-900">Token Decimals :</p>
-        <input :model-value="decimalUnitsInput" type="number" placeholder="0.00" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
+        <input v-model="decimalUnitsInput" type="number" placeholder="0.00" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
       </div>
       <div class="flex-row">
         <Button @on-click="createToken">Create Token</Button>
@@ -712,11 +712,8 @@ const approveTokens = async () => {
         <Button :disabled="!hstTokenContractAddress" @on-click="transferTokens">Transfer Token</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField :model-value="approveTokensToInput" disabled pill :classes="{ input: '!text-app-gray-900 !text-sm' }">
-          <template #trailingIconSlot>
-            <p class="mr-2 w-max text-sm text-app-gray-900">Approve to Address :</p>
-          </template>
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Approve to Address :</p>
+        <input v-model="approveTokensToInput" disabled pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
       </div>
       <div class="flex-row">
         <Button :disabled="!hstTokenContractAddress" @on-click="approveTokens">Approve Token</Button>
@@ -729,27 +726,18 @@ const approveTokens = async () => {
         <Button :loading="isDeployingNft" @on-click="deployNft">Deploy</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField v-model="mintAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }">
-          <template #trailingIconSlot>
-            <p class="mr-2 w-max text-sm text-app-gray-900">Amount :</p>
-          </template>
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Amount :</p>
+        <input v-model="mintAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
         <Button :disabled="!nftContractAddress" @on-click="mintNft">Mint</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField v-model="approveNftTokenAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }">
-          <template #trailingIconSlot>
-            <p class="mr-2 w-max text-sm text-app-gray-900">Approve Token :</p>
-          </template>
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Approve Token :</p>
+        <input v-model="approveNftTokenAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
         <Button :disabled="!nftMinted" @on-click="approveNftToken">Approve</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField v-model="transferNftTokenAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }">
-          <template #trailingIconSlot>
-            <p class="mr-2 w-max text-sm text-app-gray-900">Transfer Token :</p>
-          </template>
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Transfer Token :</p>
+        <input v-model="transferNftTokenAmount" placeholder="0" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
         <Button :disabled="!nftMinted" @on-click="transferNftFrom">Transfer From</Button>
       </div>
 
@@ -760,43 +748,19 @@ const approveTokens = async () => {
         <Button :disabled="deployingErc1155" @on-click="deployErc1155">Deploy</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField
-          v-model="erc1155BatchMintTokenIds"
-          label="Batch Mint Token IDs:"
-          placeholder="1, 2, 3"
-          pill
-          :classes="{ input: '!text-app-gray-900 !text-sm', label: '!text-app-gray-500' }"
-        >
-        </TextField>
-        <TextField
-          v-model="erc1155BatchMintTokenAmounts"
-          label="Batch Mint Token ID Amounts"
-          placeholder="1, 1, 10000000"
-          pill
-          :classes="{ input: '!text-app-gray-900 !text-sm', label: '!text-app-gray-500' }"
-        >
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Batch Mint Token IDs:</p>
+        <input v-model="erc1155BatchMintTokenIds" placeholder="1, 2, 3" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
+        <p class="mr-2 w-max text-sm text-app-gray-900">Batch Mint Token ID Amounts</p>
+        <input v-model="erc1155BatchMintTokenAmounts" placeholder="1, 1, 10000000" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
       </div>
       <div class="flex-row">
         <Button :disabled="!erc1155ContractAddress" @on-click="erc1155BatchMint">Batch Mint</Button>
       </div>
       <div class="flex-row">
-        <!-- <TextField
-          v-model="erc1155BatchTransferTokenIds"
-          label="Batch Transfer Token IDs:"
-          placeholder="1, 2, 3"
-          pill
-          :classes="{ input: '!text-app-gray-900 !text-sm' }"
-        >
-        </TextField>
-        <TextField
-          v-model="erc1155BatchTransferTokenAmounts"
-          label="Batch Transfer Amounts"
-          placeholder="1, 1, 1"
-          pill
-          :classes="{ input: '!text-app-gray-900 !text-sm' }"
-        >
-        </TextField> -->
+        <p class="mr-2 w-max text-sm text-app-gray-900">Batch Transfer Token IDs:</p>
+        <input v-model="erc1155BatchTransferTokenIds" placeholder="1, 2, 3" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
+        <p class="mr-2 w-max text-sm text-app-gray-900">Batch Transfer Amounts</p>
+        <input v-model="erc1155BatchTransferTokenAmounts" placeholder="1, 1, 1" pill :classes="{ input: '!text-app-gray-900 !text-sm' }" />
       </div>
       <div class="flex-row">
         <Button :disabled="!erc1155Minted" @on-click="erc1155BatchTransfer">Batch Transfer</Button>

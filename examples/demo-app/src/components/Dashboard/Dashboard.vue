@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
-import { MAINNET_CHAIN_ID, SUPPORTED_NETWORKS } from '@toruslabs/ethereum-controllers';
+import { MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID, SUPPORTED_NETWORKS } from '@toruslabs/ethereum-controllers';
 import Torus from '@toruslabs/torus-embed';
 import { Loader } from "@toruslabs/vue-components/Loader";
 import Button from "../Button";
@@ -55,8 +55,19 @@ const initializeTorus = async () => {
     else return;
   }
 
+  const preferredChain = localStorage.getItem("preferred_chain") || SEPOLIA_CHAIN_ID;
+  const chainConfig = supportedNetworks[preferredChain];
+  preferredChainConfig.value = chainConfig;
+  // const chains = Object.values(supportedNetworks).filter((chain) =>
+  //   [MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID].includes(
+  //     chain.chainId
+  //   )
+  // );
+
   await torus?.init({
     buildEnv: selectedBuildEnv.value,
+    // chains,
+    chainId: chainConfig.chainId,
   });
 
   // Update provider on accountsChanged
@@ -225,7 +236,7 @@ const clearConsole = () => {
       <Button variant="primary" @on-click="login">Login</Button>
     </div>
     <div class="sessionId-input">
-      <TextField v-model="sessionId" placeholder="Enter Session Id..." />
+      <input v-model="sessionId" placeholder="Enter Session Id..." />
       <Button @on-click="loginWithSessionId">Login with Session Id</Button>
     </div>
   </div>
@@ -239,7 +250,6 @@ const clearConsole = () => {
       <div class="dashboard-action-container">
         <div class="header-mb">
           <Button variant="tertiary" small class="network" classes="flex gap-1 items-center">
-            <Icon name="wifi-solid-icon" size="16" />
             <p class="text-xs">{{ currentNetwork }}</p>
           </Button>
           <Button variant="tertiary" classes="flex gap-2 w-fit !text-xs" class="!w-auto" small :title="account" @click.stop="copyAccountAddress">
