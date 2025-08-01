@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
 import Torus from '@toruslabs/torus-embed';
-import { Icon } from "@toruslabs/vue-components/Icon";
 import { Loader } from "@toruslabs/vue-components/Loader";
 import Button from "./Button";
 
@@ -170,8 +169,6 @@ const copyAccountAddress = () => {
             <p class="text-xs">{{ currentNetwork }}</p>
           </Button> -->
           <Button variant="tertiary" classes="flex gap-2 w-fit !text-xs" class="!w-auto" small :title="account" @click.stop="copyAccountAddress">
-            <Icon v-if="isCopied" name="check-circle-solid-icon" size="16" />
-            <Icon v-else name="document-duplicate-solid-icon" size="16" />
             <p class="text-xs">{{ formattedAccountAddress }}</p>
           </Button>
         </div>
