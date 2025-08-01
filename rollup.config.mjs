@@ -1,11 +1,12 @@
 import replace from "@rollup/plugin-replace";
+import dotenv from "dotenv";
 
-import pkg from "./package.json" assert { type: "json" };
+dotenv.config();
 
-export default {
+export const baseConfig = {
   plugins: [
     replace({
-      "process.env.TORUS_EMBED_VERSION": `"${pkg.version}"`,
+      "process.env.WEB3AUTH_CLIENT_ID": `"${process.env.WEB3AUTH_CLIENT_ID}"`,
       preventAssignment: true,
     }),
   ],
