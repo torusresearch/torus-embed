@@ -1,8 +1,10 @@
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
+import { MAINNET_CHAIN_ID, SUPPORTED_NETWORKS } from '@toruslabs/ethereum-controllers';
 import Torus from '@toruslabs/torus-embed';
 import { Loader } from "@toruslabs/vue-components/Loader";
-import Button from "./Button";
+import Button from "../Button";
+import { PROVIDER_JRPC_METHODS } from '@toruslabs/base-controllers';
 
 const WS_EMBED_BUILD_ENV = {
   production: "production",
@@ -13,9 +15,16 @@ const WS_EMBED_BUILD_ENV = {
 
 let torus = undefined;
 
+const supportedNetworks = SUPPORTED_NETWORKS
+
 const isLoading = ref(false);
-const selectedBuildEnv = ref('production');
 const account = ref("");
+const chainId = ref(MAINNET_CHAIN_ID);
+const currentNetwork = ref(supportedNetworks[chainId.value].displayName);
+const selectedBuildEnv = ref('production');
+const preferredChainConfig = ref(null);
+const sessionId = ref("");
+
 const isCopied = ref(false);
 
 const formattedAccountAddress = computed(() => {
@@ -76,7 +85,7 @@ const login = async () => {
     account.value = (loginaccs || [])[0] || "";
     isLoading.value = false;
 
-    // getCurrentChain();
+    getCurrentChain();
 
     sessionStorage.setItem("ws_embed_build_env", selectedBuildEnv.value);
   } catch (error) {
@@ -85,27 +94,27 @@ const login = async () => {
   }
 };
 
-// const loginWithSessionId = async () => {
-//   try {
-//     isLoading.value = true;
+const loginWithSessionId = async () => {
+  try {
+    isLoading.value = true;
 
-//     await initializeWsEmbed();
+    await initializeTorus();
 
-//     // namespace is hostname of current origin
-//     const result = await wsEmbed?.loginWithSessionId({ sessionId: sessionId.value, sessionNamespace: window.location.hostname });
-//     isLoading.value = false;
-//     if (result) {
-//       const loginaccs = await wsEmbed?.login();
-//       console.log("accounts", loginaccs);
-//       account.value = loginaccs?.[0] || "";
-//     }
+    // namespace is hostname of current origin
+    const result = await torus?.loginWithSessionId({ sessionId: sessionId.value, sessionNamespace: window.location.hostname });
+    isLoading.value = false;
+    if (result) {
+      const loginaccs = await torus?.login();
+      console.log("accounts", loginaccs);
+      account.value = loginaccs?.[0] || "";
+    }
 
-//     getCurrentChain();
-//   } catch (error) {
-//     console.error(error);
-//     isLoading.value = false;
-//   }
-// };
+    getCurrentChain();
+  } catch (error) {
+    console.error(error);
+    isLoading.value = false;
+  }
+};
 
 const logout = async () => {
   try {
@@ -122,12 +131,75 @@ const logout = async () => {
   }
 };
 
+const getCurrentChain = async () => {
+  // uiConsole("Getting current chain");
+  const { chainId: currentChainId } = (await torus?.provider.request({
+    method: PROVIDER_JRPC_METHODS.GET_PROVIDER_STATE,
+    params: {},
+  }));
+  chainId.value = currentChainId;
+  currentNetwork.value = supportedNetworks[currentChainId]?.displayName || `Chain Id: ${currentChainId}`;
+  // uiConsole("Current Network", { chainId: currentChainId });
+};
+
+const getUserInfo = async () => {
+  uiConsole("Getting user info");
+  const userInfo = await torus?.getUserInfo();
+  uiConsole("User Info", userInfo);
+};
+
+const showWalletConnect = async () => {
+  await torus?.showWalletConnectScanner();
+};
+
+const showWalletUi = async () => {
+  await torus?.showWalletUi();
+};
+
+const showCheckout = async () => {
+  await torus?.showCheckout();
+};
+
+const showSwap = async () => {
+  await torus?.showSwap({ show: true, fromToken: "ETH" });
+};
+
 const copyAccountAddress = () => {
   navigator.clipboard.writeText(account.value);
   isCopied.value = true;
   setTimeout(() => {
     isCopied.value = false;
   }, 1000);
+};
+
+const uiConsole = (...args) => {
+  const el = document.querySelector("#console>pre");
+  const h1 = document.querySelector("#console>h1");
+  const consoleBtn = document.querySelector("#console>div.clear-console-btn");
+  if (h1) {
+    h1.innerHTML = args[0];
+  }
+  if (el) {
+    el.innerHTML = JSON.stringify(args[1] || {}, null, 2);
+  }
+  if (consoleBtn) {
+    consoleBtn.style.display = "block";
+  }
+};
+
+const clearConsole = () => {
+  const el = document.querySelector("#console>pre");
+  const h1 = document.querySelector("#console>h1");
+  const consoleBtn = document.querySelector("#console>div.clear-console-btn");
+  if (h1) {
+    h1.innerHTML = "";
+  }
+  if (el) {
+    el.innerHTML = "";
+  }
+  if (consoleBtn) {
+    consoleBtn.style.display = "none";
+  }
 };
 
 </script>
@@ -151,10 +223,10 @@ const copyAccountAddress = () => {
     <div class="login-btn">
       <Button variant="primary" @on-click="login">Login</Button>
     </div>
-    <!-- <div class="sessionId-input">
+    <div class="sessionId-input">
       <TextField v-model="sessionId" placeholder="Enter Session Id..." />
       <Button @on-click="loginWithSessionId">Login with Session Id</Button>
-    </div> -->
+    </div>
   </div>
   <div v-else class="dashboard-container">
     <!-- Dashboard Header -->
@@ -165,10 +237,10 @@ const copyAccountAddress = () => {
       </div>
       <div class="dashboard-action-container">
         <div class="header-mb">
-          <!-- <Button variant="tertiary" small class="network" classes="flex gap-1 items-center">
+          <Button variant="tertiary" small class="network" classes="flex gap-1 items-center">
             <Icon name="wifi-solid-icon" size="16" />
             <p class="text-xs">{{ currentNetwork }}</p>
-          </Button> -->
+          </Button>
           <Button variant="tertiary" classes="flex gap-2 w-fit !text-xs" class="!w-auto" small :title="account" @click.stop="copyAccountAddress">
             <p class="text-xs">{{ formattedAccountAddress }}</p>
           </Button>
@@ -179,11 +251,38 @@ const copyAccountAddress = () => {
         </Button>
       </div>
     </div>
+    <!-- Dashboard Action Container -->
+    <div class="dashboard-details-container">
+      <div class="dashboard-details-btn-container">
+        <div class="details-container">
+          <div>
+            <div class="flex-row">
+              <Button @on-click="getUserInfo">Get User Info</Button>
+              <Button @on-click="showWalletConnect">Show Wallet Connect</Button>
+            </div>
+            <div class="flex-row">
+              <Button @on-click="showCheckout">Show Checkout</Button>
+              <Button @on-click="showWalletUi">Show Wallet</Button>
+            </div>
+            <div class="flex-row">
+              <Button @on-click="showSwap">Show Swap</Button>
+            </div>
+          </div>
+          <!-- <Ethereum :ws-embed="wsEmbed" :account="account" :chain-id="chainId" /> -->
+        </div>
+      </div>
+      <!-- Dashboard Console Container -->
+      <div id="console" class="dashboard-details-console-container">
+        <h1 class="console-heading"></h1>
+        <pre class="console-container"></pre>
+        <div class="clear-console-btn">
+          <Button :pill="false" :block="false" small @on-click="clearConsole">Clear console</Button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.read-the-docs {
-  color: #888;
-}
+@import "./Dashboard.css";
 </style>
