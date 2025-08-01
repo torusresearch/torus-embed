@@ -4,6 +4,7 @@ import { MAINNET_CHAIN_ID, SUPPORTED_NETWORKS } from '@toruslabs/ethereum-contro
 import Torus from '@toruslabs/torus-embed';
 import { Loader } from "@toruslabs/vue-components/Loader";
 import Button from "../Button";
+import Ethereum from "./Ethereum.vue";
 import { PROVIDER_JRPC_METHODS } from '@toruslabs/base-controllers';
 
 const WS_EMBED_BUILD_ENV = {
@@ -268,7 +269,7 @@ const clearConsole = () => {
               <Button @on-click="showSwap">Show Swap</Button>
             </div>
           </div>
-          <!-- <Ethereum :ws-embed="wsEmbed" :account="account" :chain-id="chainId" /> -->
+          <Ethereum :torus="torus" :account="account" :chain-id="chainId" />
         </div>
       </div>
       <!-- Dashboard Console Container -->
