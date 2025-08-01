@@ -1,11 +1,16 @@
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
 import Torus from '@toruslabs/torus-embed';
+import { Icon } from "@toruslabs/vue-components/Icon";
+import { Loader } from "@toruslabs/vue-components/Loader";
 import Button from "./Button";
 
-defineProps({
-  msg: String,
-});
+const WS_EMBED_BUILD_ENV = {
+  production: "production",
+  staging: "staging",
+  development: "development",
+  testing: "testing",
+}
 
 let torus = undefined;
 
@@ -60,7 +65,6 @@ const initializeTorus = async () => {
 
 const login = async () => {
   try {
-    console.log(">>> login");
     isLoading.value = true;
     await initializeTorus();
     // Note: can pass authConnection and login_hint as params if you want to preselect a provider and login identifier eg. email
@@ -137,12 +141,12 @@ const copyAccountAddress = () => {
   <div v-else-if="!account" class="login-container">
     <h1 class="login-heading">Demo</h1>
 
-    <!-- <div>
+    <div>
       <div class="select-label">Build Environment</div>
       <select v-model="selectedBuildEnv" class="select">
         <option v-for="login in Object.values(WS_EMBED_BUILD_ENV)" :key="login" :value="login">{{ login }}</option>
       </select>
-    </div> -->
+    </div>
 
     <div class="login-btn">
       <Button variant="primary" @on-click="login">Login</Button>
