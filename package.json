@@ -26,22 +26,22 @@
     "@babel/runtime": "7.x"
   },
   "dependencies": {
-    "@web3auth/ws-embed": "^5.0.17"
+    "@web3auth/ws-embed": "^5.4.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.28.2",
-    "@rollup/plugin-replace": "^6.0.2",
+    "@babel/runtime": "^7.28.6",
+    "@rollup/plugin-replace": "^6.0.3",
     "@toruslabs/config": "^3.1.0",
     "@toruslabs/eslint-config-typescript": "^4.1.4",
     "@toruslabs/torus-scripts": "^7.1.6",
-    "@types/node": "^22",
-    "eslint": "^9.32.0",
+    "@types/node": "^24",
+    "eslint": "^9.39.2",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.8.3",
-    "webpack": "^5.101.0"
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
+    "rimraf": "^6.1.2",
+    "typescript": "^5.9.3",
+    "webpack": "^5.104.1"
   },
   "mocha": {
     "timeout": 0
