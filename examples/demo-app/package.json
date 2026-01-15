@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^8.14.0",
-    "@toruslabs/ethereum-controllers": "^8.14.0",
+    "@toruslabs/base-controllers": "^8.15.0",
+    "@toruslabs/ethereum-controllers": "^8.15.0",
     "@toruslabs/torus-embed": "file:../../",
     "@toruslabs/vue-components": "^8.1.2",
     "ethers": "^6.16.0",
