@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "6.1.1",
+  "version": "6.1.2",
   "description": "Embed script for Torus",
   "unpkg": "dist/torus.umd.min.js",
   "jsdelivr": "dist/torus.umd.min.js",
