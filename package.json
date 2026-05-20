@@ -29,8 +29,8 @@
     "@web3auth/ws-embed": "^6.0.3"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.28.2",
-    "@rollup/plugin-replace": "^6.0.2",
+    "@babel/runtime": "^7.29.2",
+    "@rollup/plugin-replace": "^6.0.3",
     "@toruslabs/config": "^4.0.0",
     "@toruslabs/eslint-config-typescript": "^5.0.1",
     "@toruslabs/torus-scripts": "^8.0.1",

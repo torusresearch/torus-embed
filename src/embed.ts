@@ -23,7 +23,6 @@ class Torus extends Web3Auth {
       confirmationStrategy: "default",
       loginMode: "embed",
       ...params,
-      loginMode: "embed",
     });
   }
 
