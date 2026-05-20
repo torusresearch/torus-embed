@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
-import { MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID, SUPPORTED_NETWORKS } from '@toruslabs/ethereum-controllers';
+import { DEFAULT_SUPPORTED_NETWORKS, MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID } from '@toruslabs/ethereum-controllers';
 import Torus from '@toruslabs/torus-embed';
 import { Loader } from "@toruslabs/vue-components/Loader";
 import Button from "../Button";
@@ -16,7 +16,7 @@ const WS_EMBED_BUILD_ENV = {
 
 let torus = undefined;
 
-const supportedNetworks = SUPPORTED_NETWORKS
+const supportedNetworks = DEFAULT_SUPPORTED_NETWORKS
 
 const isLoading = ref(false);
 const account = ref("");
@@ -35,13 +35,11 @@ const formattedAccountAddress = computed(() => {
 onBeforeMount(async () => {
   try {
     isLoading.value = true;
-    torus = new Torus();
+    torus = new Torus({
+      web3AuthClientId: "BJRZ6qdDTbj6Vd5YXvV994TYCqY42-PxldCetmvGTUdoq6pkCqdpuC1DIehz76zuYdaq1RJkXGHuDraHRhCQHvA",
+    });
 
-    const wsEmbedBuildEnv = sessionStorage.getItem("ws_embed_build_env");
-    if (wsEmbedBuildEnv) {
-      selectedBuildEnv.value = wsEmbedBuildEnv;
-      await initializeTorus();
-    }
+    await initializeTorus();
   } catch (error) {
     console.error(error);
   } finally {
@@ -58,15 +56,17 @@ const initializeTorus = async () => {
   const preferredChain = localStorage.getItem("preferred_chain") || SEPOLIA_CHAIN_ID;
   const chainConfig = supportedNetworks[preferredChain];
   preferredChainConfig.value = chainConfig;
-  // const chains = Object.values(supportedNetworks).filter((chain) =>
-  //   [MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID].includes(
-  //     chain.chainId
-  //   )
-  // );
+  const chains = Object.values(supportedNetworks).filter((chain) =>
+    [MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID].includes(
+      chain.chainId
+    )
+  );
+
+  console.log("selectedBuildEnv", selectedBuildEnv.value);
 
   await torus?.init({
     buildEnv: selectedBuildEnv.value,
-    // chains,
+    chains,
     chainId: chainConfig.chainId,
   });
 
