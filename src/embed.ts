@@ -1,4 +1,4 @@
-import Web3Auth, { CtorArgs, LoginWithSessionIdParams, WsEmbedParams } from "@web3auth/ws-embed";
+import Web3Auth, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 
 class Torus extends Web3Auth {
   /**
@@ -23,10 +23,11 @@ class Torus extends Web3Auth {
       confirmationStrategy: "default",
       loginMode: "embed",
       ...params,
+      loginMode: "embed",
     });
   }
 
-  async loginWithSessionId(_: LoginWithSessionIdParams): Promise<boolean> {
+  async loginWithSessionId(_: never): Promise<boolean> {
     throw new Error("Not implemented");
   }
 }
