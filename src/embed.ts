@@ -9,7 +9,9 @@ class Torus extends Web3Auth {
     });
   }
 
-  async init(params: Partial<Omit<WsEmbedParams, "walletUrls" | "confirmationStrategy" | "accountAbstractionConfig" | "enableKeyExport">> = {}) {
+  async init(
+    params: Partial<Omit<WsEmbedParams, "walletUrls" | "confirmationStrategy" | "accountAbstractionConfig" | "enableKeyExport" | "loginMode">> = {}
+  ) {
     await super.init({
       chainId: "0x1",
       chains: [],
