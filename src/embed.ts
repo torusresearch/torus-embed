@@ -15,7 +15,7 @@ class Torus extends Web3Auth {
       chains: [],
       confirmationStrategy: "default",
       ...params,
-      loginMode: params.loginMode || "embed",
+      loginMode: "embed",
     });
   }
 
