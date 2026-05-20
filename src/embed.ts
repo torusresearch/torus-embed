@@ -3,9 +3,9 @@ import Web3Auth, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 class Torus extends Web3Auth {
   constructor(params: Omit<CtorArgs, "web3AuthClientId" | "web3AuthNetwork"> = {}) {
     super({
-      ...params,
       web3AuthClientId: process.env.WEB3AUTH_CLIENT_ID,
       web3AuthNetwork: "mainnet",
+      ...params,
     });
   }
 
