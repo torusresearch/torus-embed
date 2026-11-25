@@ -50,7 +50,6 @@
   },
   "allowScripts": {
     "fsevents@2.3.3": false,
-    "torus-embed@7.0.0": false,
     "vue-demi@0.13.11": false,
     "vue-demi@0.14.10": false
   }

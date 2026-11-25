@@ -24,17 +24,12 @@
     "prepack": "npm run build",
     "changeset": "changeset",
     "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts",
-    "release-packages": "changeset publish",
-    "prepare": "husky"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "release-packages": "changeset publish"
   },
   "dependencies": {
     "@web3auth/ws-embed": "^6.1.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.29.15",
     "@changesets/cli": "^3.0.3",
     "@lavamoat/harden": "^0.9.0",
     "@toruslabs/config": "^5.0.0",
@@ -42,17 +37,9 @@
     "@toruslabs/torus-scripts": "9.0.1",
     "@types/node": "^26.6.6",
     "@vitest/browser-playwright": "5.1.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.6.1",
     "playwright": "^1.65.1",
-    "rimraf": "^6.1.4",
     "typescript": "^7.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
-    "vite-plus": "1.7.0",
-    "vitest": "5.1.0"
-  },
-  "mocha": {
-    "timeout": 0
+    "vite-plus": "1.7.0"
   },
   "keywords": [
     "torus",
@@ -70,15 +57,6 @@
     "url": "https://github.com/torusresearch/torus-embed/issues"
   },
   "homepage": "https://github.com/torusresearch/torus-embed#readme",
-  "lint-staged": {
-    "*.{js,mjs,cjs,ts,mts,cts}": [
-      "vp lint --fix",
-      "vp fmt"
-    ],
-    "*.{json,md,yml,yaml}": [
-      "vp fmt"
-    ]
-  },
   "engines": {
     "node": ">=24.22.0",
     "npm": ">=12"
