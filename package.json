@@ -34,12 +34,12 @@
     "@lavamoat/harden": "^0.9.0",
     "@toruslabs/config": "^5.0.0",
     "@toruslabs/oxlint-config-typescript": "^1.1.0",
-    "@toruslabs/torus-scripts": "9.0.1",
-    "@types/node": "^26.6.6",
-    "@vitest/browser-playwright": "5.1.0",
+    "@toruslabs/torus-scripts": "9.0.2",
+    "@types/node": "^26.6.7",
+    "@vitest/browser-playwright": "5.1.1",
     "playwright": "^1.65.1",
     "typescript": "^7.0.2",
-    "vite-plus": "1.7.0"
+    "vite-plus": "1.8.0"
   },
   "keywords": [
     "torus",
@@ -69,8 +69,8 @@
     }
   },
   "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
-    "vitest": "5.1.0"
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vitest": "5.1.1"
   },
   "allowScripts": {
     "fsevents@2.3.3": false

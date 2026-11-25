@@ -24,14 +24,14 @@
     "@tailwindcss/vite": "^4.3.5",
     "@toruslabs/config": "^5.0.0",
     "@toruslabs/oxlint-config-vue": "^1.0.0",
-    "@toruslabs/torus-scripts": "9.0.1",
+    "@toruslabs/torus-scripts": "9.0.2",
     "@vitejs/plugin-vue": "^6.0.11",
     "buffer": "^6.0.3",
     "oxlint-plugin-vize": "^0.608.0",
     "oxlint-tailwindcss": "^1.17.2",
     "process": "^0.11.10",
     "typescript": "^7.0.2",
-    "vite-plus": "1.7.0"
+    "vite-plus": "1.8.0"
   },
   "engines": {
     "node": ">=24.22.0",
@@ -45,8 +45,8 @@
     }
   },
   "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
-    "vitest": "5.1.0"
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vitest": "5.1.1"
   },
   "allowScripts": {
     "fsevents@2.3.3": false,
