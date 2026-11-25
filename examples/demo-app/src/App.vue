@@ -1,5 +1,5 @@
 <script setup>
-import Dashboard from './components/Dashboard'
+import Dashboard from "./components/Dashboard";
 </script>
 
 <template>

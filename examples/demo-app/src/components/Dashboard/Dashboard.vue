@@ -1,28 +1,29 @@
 <script setup>
-import { computed, onBeforeMount, ref } from 'vue';
-import { DEFAULT_SUPPORTED_NETWORKS, MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID } from '@toruslabs/ethereum-controllers';
-import Torus from '@toruslabs/torus-embed';
+import { PROVIDER_JRPC_METHODS } from "@toruslabs/base-controllers";
+import { DEFAULT_SUPPORTED_NETWORKS, MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@toruslabs/ethereum-controllers";
+import Torus from "@toruslabs/torus-embed";
 import { Loader } from "@toruslabs/vue-components/Loader";
+import { computed, onBeforeMount, ref } from "vue";
+
 import Button from "../Button";
 import Ethereum from "./Ethereum.vue";
-import { PROVIDER_JRPC_METHODS } from '@toruslabs/base-controllers';
 
 const WS_EMBED_BUILD_ENV = {
   production: "production",
   staging: "staging",
   development: "development",
   testing: "testing",
-}
+};
 
 let torus = undefined;
 
-const supportedNetworks = DEFAULT_SUPPORTED_NETWORKS
+const supportedNetworks = DEFAULT_SUPPORTED_NETWORKS;
 
 const isLoading = ref(false);
 const account = ref("");
 const chainId = ref(MAINNET_CHAIN_ID);
 const currentNetwork = ref(supportedNetworks[chainId.value].displayName);
-const selectedBuildEnv = ref('production');
+const selectedBuildEnv = ref("production");
 const preferredChainConfig = ref(null);
 const sessionId = ref("");
 
@@ -57,9 +58,7 @@ const initializeTorus = async () => {
   const chainConfig = supportedNetworks[preferredChain];
   preferredChainConfig.value = chainConfig;
   const chains = Object.values(supportedNetworks).filter((chain) =>
-    [MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID].includes(
-      chain.chainId
-    )
+    [MAINNET_CHAIN_ID, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID].includes(chain.chainId)
   );
 
   console.log("selectedBuildEnv", selectedBuildEnv.value);
@@ -145,10 +144,10 @@ const logout = async () => {
 
 const getCurrentChain = async () => {
   // uiConsole("Getting current chain");
-  const { chainId: currentChainId } = (await torus?.provider.request({
+  const { chainId: currentChainId } = await torus?.provider.request({
     method: PROVIDER_JRPC_METHODS.GET_PROVIDER_STATE,
     params: {},
-  }));
+  });
   chainId.value = currentChainId;
   currentNetwork.value = supportedNetworks[currentChainId]?.displayName || `Chain Id: ${currentChainId}`;
   // uiConsole("Current Network", { chainId: currentChainId });
@@ -213,7 +212,6 @@ const clearConsole = () => {
     consoleBtn.style.display = "none";
   }
 };
-
 </script>
 
 <template>
