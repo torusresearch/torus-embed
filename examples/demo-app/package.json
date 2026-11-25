@@ -12,20 +12,20 @@
     "fix": "vp check --fix"
   },
   "dependencies": {
-    "@toruslabs/base-controllers": "^9.9.1",
-    "@toruslabs/ethereum-controllers": "^9.9.1",
+    "@toruslabs/base-controllers": "^9.15.0",
+    "@toruslabs/ethereum-controllers": "^9.15.0",
     "@toruslabs/torus-embed": "file:../../",
     "@toruslabs/vue-components": "^9.0.1",
-    "ethers": "^6.13.5",
-    "vue": "^3.5.33"
+    "ethers": "^6.17.0",
+    "vue": "^3.5.46"
   },
   "devDependencies": {
     "@lavamoat/harden": "^0.9.0",
-    "@tailwindcss/vite": "^4.2.4",
+    "@tailwindcss/vite": "^4.3.5",
     "@toruslabs/config": "^5.0.0",
     "@toruslabs/oxlint-config-vue": "^1.0.0",
     "@toruslabs/torus-scripts": "9.0.1",
-    "@vitejs/plugin-vue": "^6.0.6",
+    "@vitejs/plugin-vue": "^6.0.11",
     "buffer": "^6.0.3",
     "oxlint-plugin-vize": "^0.608.0",
     "oxlint-tailwindcss": "^1.17.2",

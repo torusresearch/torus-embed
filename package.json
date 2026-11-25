@@ -34,7 +34,7 @@
     "@web3auth/ws-embed": "^6.1.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.29.2",
+    "@babel/runtime": "^7.29.15",
     "@changesets/cli": "^3.0.3",
     "@lavamoat/harden": "^0.9.0",
     "@toruslabs/config": "^5.0.0",
@@ -43,9 +43,9 @@
     "@types/node": "^26.6.6",
     "@vitest/browser-playwright": "5.1.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.5",
+    "lint-staged": "^17.6.1",
     "playwright": "^1.65.1",
-    "rimraf": "^6.1.3",
+    "rimraf": "^6.1.4",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
     "vite-plus": "1.7.0",
