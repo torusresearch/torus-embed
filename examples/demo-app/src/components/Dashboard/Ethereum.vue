@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { METHOD_TYPES, POLYGON_AMOY_CHAIN_ID, SEPOLIA_CHAIN_ID, TRANSACTION_ENVELOPE_TYPES } from "@toruslabs/ethereum-controllers";
+import Torus from "@toruslabs/torus-embed";
 import { TextField } from "@toruslabs/vue-components/TextField";
 import {
   BrowserProvider,
@@ -14,12 +15,10 @@ import {
   verifyMessage,
 } from "ethers";
 import { ref, watch } from "vue";
-import Torus from '@toruslabs/torus-embed';
 
-import { getV4TypedData } from "./data";
-
-import Constants from "./constants";
 import Button from "../Button";
+import Constants from "./constants";
+import { getV4TypedData } from "./data";
 
 // const currentUrl = new URL(window.location.href);
 // const forwarderOrigin = currentUrl.hostname === "localhost" ? "http://localhost:9010" : undefined;
@@ -512,7 +511,7 @@ const uiConsole = (...args: unknown[]): void => {
 };
 
 const deployPiggyContract = async () => {
-  console.log('>>> trigger deploy')
+  console.log(">>> trigger deploy");
   try {
     uiConsole("Deploying piggy contract");
     if (piggybankFactory) {

@@ -1,12 +1,12 @@
 {
   "name": "@toruslabs/torus-embed",
-  "version": "4.1.3",
+  "version": "7.0.0",
   "description": "Embed script for Torus",
   "unpkg": "dist/torus.umd.min.js",
   "jsdelivr": "dist/torus.umd.min.js",
   "main": "dist/lib.cjs/index.js",
   "module": "dist/lib.esm/index.js",
-  "types": "dist/lib.cjs/types/index.d.ts",
+  "types": "dist/lib.cjs/index.d.ts",
   "files": [
     "dist"
   ],
@@ -15,35 +15,31 @@
     "url": "git+https://github.com/torusresearch/torus-embed.git"
   },
   "scripts": {
-    "start": "torus-scripts start --name=torus",
-    "build": "torus-scripts build --name=torus",
-    "release": "torus-scripts release",
+    "build": "vp pack",
+    "lint": "vp lint",
+    "check": "vp check",
+    "fix": "vp check --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vp test run",
     "prepack": "npm run build",
-    "lint:ts": "eslint --fix 'src/**/*.ts'",
-    "prepare": "husky"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "7.x"
+    "changeset": "changeset",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts",
+    "release-packages": "changeset publish"
   },
   "dependencies": {
-    "@web3auth/ws-embed": "^6.0.3"
+    "@web3auth/ws-embed": "^6.1.0"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.28.2",
-    "@rollup/plugin-replace": "^6.0.2",
-    "@toruslabs/config": "^4.0.0",
-    "@toruslabs/eslint-config-typescript": "^5.0.1",
-    "@toruslabs/torus-scripts": "^8.0.1",
-    "@types/node": "^24",
-    "eslint": "^9.39.2",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.0.5",
-    "prettier": "^3.8.3",
-    "rimraf": "^6.1.3",
-    "typescript": "^5.9.3"
-  },
-  "mocha": {
-    "timeout": 0
+    "@changesets/cli": "^3.0.3",
+    "@lavamoat/harden": "^0.9.0",
+    "@toruslabs/config": "^5.0.0",
+    "@toruslabs/oxlint-config-typescript": "^1.1.0",
+    "@toruslabs/torus-scripts": "9.0.2",
+    "@types/node": "^26.6.7",
+    "@vitest/browser-playwright": "5.1.1",
+    "playwright": "^1.65.1",
+    "typescript": "^7.0.2",
+    "vite-plus": "1.8.0"
   },
   "keywords": [
     "torus",
@@ -61,17 +57,22 @@
     "url": "https://github.com/torusresearch/torus-embed/issues"
   },
   "homepage": "https://github.com/torusresearch/torus-embed#readme",
-  "lint-staged": {
-    "!(*d).{js,ts}": [
-      "eslint --cache --fix",
-      "prettier --write"
-    ],
-    "*.{json, md}": [
-      "prettier --write"
-    ]
-  },
   "engines": {
-    "node": ">=22.x",
-    "npm": ">=10.x"
+    "node": ">=24.22.0",
+    "npm": ">=12"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.17.0",
+      "onFail": "error"
+    }
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8001",
+    "vitest": "5.1.1"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": false
   }
 }

@@ -70,21 +70,18 @@ Please refer to docs for API Reference available [here](https://docs.tor.us/wall
 
 This module is distributed in 3 formats
 
-- `commonjs` build `dist/torus.cjs.js` in es5 format
-- `umd` build `dist/torus.umd.min.js` in es5 format without polyfilling corejs minified
-- `umd` build `dist/torus.polyfill.umd.min.js` in es5 format with polyfilling corejs minified
+- `esm` build `dist/lib.esm/index.js`
+- `commonjs` build `dist/lib.cjs/index.js`
+- `umd` build `dist/torus.umd.min.js`, minified, with `@web3auth/ws-embed` bundled. It exposes the `Torus` global.
 
-By default, the appropriate format is used for your specified usecase
-You can use a different format (if you know what you're doing) by referencing the correct file
-
-The cjs build is not polyfilled with core-js.
-It is upto the user to polyfill based on the browserlist they target
+All builds target ES2020. None of them are polyfilled with core-js.
+It is up to the user to polyfill based on the browserslist they target.
 
 ### Directly in Browser
 
-CDN's serve the non-core-js polyfilled version by default. You can use a different
+CDNs serve the `umd` build.
 
-jsdeliver
+jsdelivr
 
 ```js
 <script src="https://cdn.jsdelivr.net/npm/@toruslabs/torus-embed"></script>
@@ -94,6 +91,10 @@ unpkg
 
 ```js
 <script src="https://unpkg.com/@toruslabs/torus-embed"></script>
+```
+
+```js
+const torus = new Torus.default();
 ```
 
 ### Tips for NUXT
@@ -114,7 +115,7 @@ The samples provided in the [examples](examples) folder illustrate the above cas
 
 ## Build
 
-Ensure you have a `Node.JS` development environment setup:
+Ensure you have a `Node.JS` development environment set up (see `.nvmrc`):
 
 ```
 git clone https://github.com/torusresearch/torus-embed.git
@@ -123,19 +124,25 @@ npm install
 npm run build
 ```
 
-To run tests:
+Lint, format, and type checks use Vite+ (`vp check`, which runs Oxlint and Oxfmt):
 
 ```
-npm run test:e2e:headful
-npm run test:build-embed
+npm run check
+npm run typecheck
 ```
 
-entry-point: `index.js`
+To run tests (Vitest in Chromium through Playwright):
+
+```
+npm exec -- playwright install chromium
+npm test
+```
+
+Releases use Changesets. Add a changeset with `npm run changeset`.
 
 ## Requirements
 
-- This package requires a peer dependency of `@babel/runtime`
-- Node 16+
+- Node 24.22+ and npm 12+
 
 ## License
 

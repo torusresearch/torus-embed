@@ -1,0 +1,9 @@
+{
+  "extends": "@toruslabs/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["vite-plus/client"],
+    "noEmit": true
+  },
+  "include": ["src"]
+}

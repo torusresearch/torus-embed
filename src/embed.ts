@@ -1,7 +1,12 @@
 import Web3Auth, { CtorArgs, WsEmbedParams } from "@web3auth/ws-embed";
 
 class Torus extends Web3Auth {
-  constructor(params: Omit<CtorArgs, "web3AuthClientId" | "web3AuthNetwork"> = {}) {
+  /**
+   * @param params - The parameters for the Web3Auth constructor.
+   * If no parameters are provided, the constructor will use the default values for the wallet.
+   * If using custom authentication, you need to provide the custom clientId and network.
+   */
+  constructor(params: Partial<CtorArgs> = {}) {
     super({
       web3AuthClientId: process.env.WEB3AUTH_CLIENT_ID,
       web3AuthNetwork: "mainnet",
@@ -16,8 +21,8 @@ class Torus extends Web3Auth {
       chainId: "0x1",
       chains: [],
       confirmationStrategy: "default",
-      ...params,
       loginMode: "embed",
+      ...params,
     });
   }
 

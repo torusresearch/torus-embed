@@ -1,0 +1,117 @@
+name: Validate pull request
+
+on:
+  pull_request:
+  push:
+    branches: [develop, master]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["24.22.0", "26"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Install npm 12
+        run: npm install --global npm@12.2.0
+      - name: Install dependencies
+        run: npm ci
+      - name: Check dependency hardening
+        run: npm exec --no -- harden check --package-manager npm
+      - name: Check source
+        run: npm run check
+      - name: Build packages
+        run: npm run build
+        env:
+          WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+      - name: Check TypeScript projects
+        run: npm run typecheck
+      - name: Install Playwright browsers
+        run: npm exec -- playwright install --with-deps chromium
+      - name: Run tests
+        run: npm test
+      - name: Check release notes
+        if: |
+          github.event_name == 'pull_request' &&
+          !startsWith(github.head_ref, 'changeset-release/') &&
+          !startsWith(github.head_ref, 'dependabot/')
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          npm exec -- changeset status --since="origin/${BASE_REF}"
+      - name: Preview package archive
+        run: npm pack --dry-run --json --ignore-scripts
+      - name: Install demo dependencies
+        working-directory: examples/demo-app
+        run: npm ci
+      - name: Check demo dependency hardening
+        working-directory: examples/demo-app
+        run: npm exec --no -- harden check --package-manager npm
+      - name: Check demo source
+        working-directory: examples/demo-app
+        run: npm run check
+      - name: Build demo
+        working-directory: examples/demo-app
+        run: npm run build
+
+  deploy-demo:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: deploy-demo
+      cancel-in-progress: false
+    steps:
+      - name: Wiz sensor
+        uses: Web3Auth/.github/.github/actions/wiz-sensor@545f7c255313f85d38a02dc36c4ad01387d03149 # v1.0.0
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Install npm 12
+        run: npm install --global npm@12.2.0
+      - name: Install dependencies
+        run: npm ci
+      - name: Build package
+        run: npm run build
+        env:
+          WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+      - name: Build demo
+        working-directory: examples/demo-app
+        run: |
+          npm ci
+          npm run build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION_US }}
+      - name: Sync demo to S3
+        run: aws s3 sync ./examples/demo-app/dist s3://demo-eth.tor.us --region us-east-1 --no-progress
+      - name: Invalidate CloudFront
+        uses: chaitanyapotti/cloudfront-update-distribution@b120c0220453e292a43e5563f008f8e9e52858d6 # v5
+        with:
+          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          cloudfront-invalidation-required: true
+          cloudfront-invalidation-path: "/*"
+          cloudfront-wait-for-service-update: false

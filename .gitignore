@@ -26,3 +26,5 @@ secrets.json
 toruslabs-torus-embed*
 .eslintcache
 .env
+.vitest
+coverage

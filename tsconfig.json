@@ -1,5 +1,7 @@
 {
-  "extends": "@toruslabs/config/tsconfig.default.json",
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+  "extends": "@toruslabs/config/tsconfig.library.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src", "test"]
 }
